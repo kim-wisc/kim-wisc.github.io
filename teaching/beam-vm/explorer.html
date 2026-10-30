@@ -94,11 +94,11 @@
         <label>Preset <select id="preset">
           <option value="">— choose —</option>
           <optgroup label="From the Module 7 notes">
-            <option value="midspan">Simply supported, 10,000 lb at midspan (slide 7)</option>
-            <option value="cantw">Cantilever with uniform w (slide 13)</option>
-            <option value="overhang">Overhanging beam, 30 kips + 2 &amp; 5 kips/ft (slide 16)</option>
-            <option value="pure">Two 80-lb overhang loads: pure bending (slide 19)</option>
-            <option value="couch">The couch (slide 11)</option>
+            <option value="midspan">Simply supported, 10,000 lb at midspan</option>
+            <option value="cantw">Cantilever with uniform w</option>
+            <option value="overhang">Overhanging beam, 30 kips + 2 &amp; 5 kips/ft</option>
+            <option value="pure">Two 80-lb overhang loads: pure bending</option>
+            <option value="couch">The couch</option>
           </optgroup>
           <optgroup label="Statically indeterminate">
             <option value="propped">Propped cantilever, uniform w</option>
@@ -382,14 +382,15 @@ function drawDiagram(svg, st, R, which, opts = {}) {
 function renderLists() {
   const u = U(); document.querySelectorAll(".uL").forEach(e => e.textContent = u.L);
   const sl = document.getElementById("supList"); sl.innerHTML = "";
-  S.supports.forEach((s, i) => { const d = document.createElement("div"); d.className = "rowline"; d.innerHTML = `<select data-si="${i}" data-k="type"><option value="pin"${s.type === "pin" ? " selected" : ""}>pin</option><option value="roller"${s.type === "roller" ? " selected" : ""}>roller</option><option value="fixed"${s.type === "fixed" ? " selected" : ""}>fixed</option></select> <label>at x = <input type="number" data-si="${i}" data-k="x" value="${s.x}" step="0.1" min="0" max="${S.L}"> ${u.L}</label> <button class="x" data-sdel="${i}" title="remove">×</button>`; sl.appendChild(d); });
+  S.supports.forEach((s, i) => { const d = document.createElement("div"); d.className = "rowline"; d.innerHTML = `<select data-si="${i}" data-k="type"><option value="pin"${s.type === "pin" ? " selected" : ""}>pin</option><option value="roller"${s.type === "roller" ? " selected" : ""}>roller</option><option value="fixed"${s.type === "fixed" ? " selected" : ""}>fixed</option></select> <label>at <i>x</i> = <input type="number" data-si="${i}" data-k="x" value="${s.x}" step="0.1" min="0" max="${S.L}"> ${u.L}</label> <button class="x" data-sdel="${i}" title="remove">×</button>`; sl.appendChild(d); });
   const ll = document.getElementById("loadList"); ll.innerHTML = "";
   S.loads.forEach((l, i) => { const d = document.createElement("div"); d.className = "rowline"; let h = "";
-    if (l.type === "P") h = `<b>P</b> <label>= <input type="number" data-li="${i}" data-k="val" value="${l.val}" step="1"> ${u.F}</label> <label>at x = <input type="number" data-li="${i}" data-k="x" value="${l.x}" step="0.1" min="0" max="${S.L}"> ${u.L}</label>`;
-    if (l.type === "w") h = `<b>w</b> <label>from x = <input type="number" data-li="${i}" data-k="x1" value="${l.x1}" step="0.1" min="0" max="${S.L}"></label> <label>to <input type="number" data-li="${i}" data-k="x2" value="${l.x2}" step="0.1" min="0" max="${S.L}"> ${u.L}</label> <label>w<sub>1</sub> = <input type="number" data-li="${i}" data-k="w1" value="${l.w1}" step="0.5"></label> <label>w<sub>2</sub> = <input type="number" data-li="${i}" data-k="w2" value="${l.w2}" step="0.5"> ${u.w}</label>`;
-    if (l.type === "M") h = `<b>M<sub>0</sub></b> <label>= <input type="number" data-li="${i}" data-k="val" value="${l.val}" step="1"> ${u.M} (↺ +)</label> <label>at x = <input type="number" data-li="${i}" data-k="x" value="${l.x}" step="0.1" min="0" max="${S.L}"> ${u.L}</label>`;
+    if (l.type === "P") h = `<b><i>P</i></b> <label>= <input type="number" data-li="${i}" data-k="val" value="${l.val}" step="1"> ${u.F}</label> <label>at <i>x</i> = <input type="number" data-li="${i}" data-k="x" value="${l.x}" step="0.1" min="0" max="${S.L}"> ${u.L}</label>`;
+    if (l.type === "w") h = `<b><i>w</i></b> <label>from <i>x</i> = <input type="number" data-li="${i}" data-k="x1" value="${l.x1}" step="0.1" min="0" max="${S.L}"></label> <label>to <input type="number" data-li="${i}" data-k="x2" value="${l.x2}" step="0.1" min="0" max="${S.L}"> ${u.L}</label> <label><i>w</i><sub>1</sub> = <input type="number" data-li="${i}" data-k="w1" value="${l.w1}" step="0.5"></label> <label><i>w</i><sub>2</sub> = <input type="number" data-li="${i}" data-k="w2" value="${l.w2}" step="0.5"> ${u.w}</label>`;
+    if (l.type === "M") h = `<b><i>M</i><sub>0</sub></b> <label>= <input type="number" data-li="${i}" data-k="val" value="${l.val}" step="1"> ${u.M} (↺ +)</label> <label>at <i>x</i> = <input type="number" data-li="${i}" data-k="x" value="${l.x}" step="0.1" min="0" max="${S.L}"> ${u.L}</label>`;
     d.innerHTML = h + ` <button class="x" data-ldel="${i}" title="remove">×</button>`; ll.appendChild(d); });
   document.getElementById("L").value = S.L; document.getElementById("units").value = S.units;
+  if (typeof fixLabels === "function") fixLabels();
   const xc = document.getElementById("xcut"); xc.max = S.L; xc.step = Math.max(S.L / 400, 1e-6); const xn = document.getElementById("xcutN"); xn.max = S.L; xn.step = Math.max(S.L / 100, 1e-6); if (parseFloat(xc.value) > S.L) { xc.value = S.L / 3; xn.value = fmt(S.L / 3); }
 }
 document.getElementById("supList").addEventListener("input", e => { const t = e.target, i = +t.dataset.si; if (isNaN(i)) return; S.supports[i][t.dataset.k] = t.dataset.k === "x" ? (parseFloat(t.value) || 0) : t.value; update(false); });
@@ -526,6 +527,11 @@ document.getElementById("resetCut").onclick = () => { document.getElementById("x
 function keyXs() { const xs = R ? R.keys.map(k => k.x) : [0, S.L]; return Array.from(new Set(xs.map(v => Math.round(v * 1e6) / 1e6))).sort((a, b) => a - b); }
 document.getElementById("nextKey").onclick = () => { const x = cutX(), ks = keyXs(); const nx = ks.find(k => k > x + 1e-6); if (nx !== undefined) { document.getElementById("xcut").value = nx; updateCut(); } };
 document.getElementById("prevKey").onclick = () => { const x = cutX(), ks = keyXs().reverse(); const px = ks.find(k => k < x - 1e-6); if (px !== undefined) { document.getElementById("xcut").value = px; updateCut(); } };
+
+
+/* group label text into single flex items so subscripts stay attached */
+function fixLabels(root = document) { root.querySelectorAll("label").forEach(lab => { if (lab.dataset.grouped) return; lab.dataset.grouped = "1"; const kids = [...lab.childNodes]; let run = []; const flush = () => { if (run.length && run.some(n => (n.textContent || "").trim())) { const sp = document.createElement("span"); run[0].parentNode.insertBefore(sp, run[0]); run.forEach(n => sp.appendChild(n)); } run = []; }; kids.forEach(n => { if (n.nodeType === 1 && /^(INPUT|SELECT|BUTTON|TEXTAREA|SVG)$/.test(n.tagName)) flush(); else run.push(n); }); flush(); }); }
+fixLabels();
 
 /* tabs */
 document.querySelectorAll("#nav button").forEach(b => b.onclick = () => { document.querySelectorAll("#nav button").forEach(x => x.classList.remove("active")); document.querySelectorAll("section.tab").forEach(x => x.classList.remove("active")); b.classList.add("active"); document.getElementById(b.dataset.tab).classList.add("active"); if (typeof gtag === "function") gtag("event", "tab_view", { module: "beam-vm", tab: b.textContent.trim() }); });
