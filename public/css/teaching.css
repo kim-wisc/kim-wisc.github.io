@@ -20,5 +20,5 @@ body:has(.tool-page) .container.content { max-width: 96vw; }
 .tlist-text { flex: 1; order: 1; }
 @media (max-width: 38em) { .tlist-item { flex-direction: column; } .tlist-thumb { order: 0; } .tlist-thumb img { width: 100%; } }
 /* sidebar: course heading, then its modules */
-.sidebar-nav-course { padding-left: 2.2rem !important; font-size: .9rem; opacity: .95; }
-.sidebar-nav-sub { padding-left: 3.2rem !important; font-size: .88rem; opacity: .9; }
+.sidebar-nav-course { padding-left: 2.2rem !important; font-size: inherit; opacity: .95; }   /* same size as Home / Teaching */
+.sidebar-nav-sub { padding-left: 3.2rem !important; font-size: .92em; opacity: .9; }      /* slightly smaller than its course */
