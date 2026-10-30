@@ -1,0 +1,18 @@
+---
+layout: default
+---
+{% comment %} Wide layout for interactive teaching tools: the Lanyon container is ~38rem, far too narrow
+for an interactive page, so the tool gets the full width while the masthead and sidebar stay. {% endcomment %}
+<div class="page tool-page">
+  <p class="tool-breadcrumb"><a href="{{ '/teaching/' | relative_url }}">&larr; Teaching modules</a></p>
+  <h1 class="page-title">{{ page.title }}</h1>
+  {% if page.course %}<p class="tool-meta">{{ page.course }}{% if page.module %} &middot; {{ page.module }}{% endif %}</p>{% endif %}
+  {{ content }}
+  <div class="tool-frame">
+    <iframe src="{{ page.tool | relative_url }}" title="{{ page.title }}" loading="lazy"></iframe>
+  </div>
+  <p class="tool-links">
+    <a href="{{ page.tool | relative_url }}" target="_blank" rel="noopener">Open full screen &#8599;</a>
+    {% if page.report %} &middot; <a href="{{ page.report }}" target="_blank" rel="noopener">Report an error</a>{% endif %}
+  </p>
+</div>

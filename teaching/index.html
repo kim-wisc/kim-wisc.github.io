@@ -1,0 +1,25 @@
+---
+layout: page
+title: Teaching
+---
+<p>Interactive modules developed for the courses at UW–Madison. Each one runs in the browser and needs no installation.</p>
+
+{% assign mods = site.teaching | sort: "order" %}
+{% assign courses = mods | map: "course" | uniq %}
+{% for c in courses %}
+<h3 id="{{ c | slugify }}">{{ c }}</h3>
+<ul class="tlist">
+{% for m in mods %}{% if m.course == c %}
+  <li class="tlist-item">
+    <a class="tlist-thumb" href="{{ m.url | relative_url }}"><img src="{{ m.thumb | relative_url }}" alt="{{ m.title }}"></a>
+    <div class="tlist-text">
+      <a href="{{ m.url | relative_url }}"><strong>{{ m.title }}</strong></a> <span class="tlist-mod">— {{ m.module }}</span><br>
+      {{ m.summary }}<br>
+      <small><a href="{{ m.tool | relative_url }}" target="_blank" rel="noopener">full screen</a>{% if m.report %} · <a href="{{ m.report }}" target="_blank" rel="noopener">report an error</a>{% endif %}</small>
+    </div>
+  </li>
+{% endif %}{% endfor %}
+</ul>
+{% endfor %}
+
+<p><em>More modules will be added as the courses progress.</em></p>
