@@ -21,8 +21,10 @@
   section.tab { display:none; padding:12px 22px 24px; }
   section.tab.active { display:block; }
   .layout { display:flex; gap:18px; flex-wrap:wrap; align-items:flex-start; }
-  .side { flex:0 0 340px; max-width:100%; }
-  .main { flex:1 1 320px; min-width:0; }
+  .side { flex:1 1 300px; max-width:420px; }
+  .main { flex:999 1 min(100%, 520px); min-width:0; }
+  .cols { display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 480px), 1fr)); gap:18px; align-items:start; }
+  .cols > div { min-width:0; }
   .panel { background:var(--panel); border:1px solid #e3e3e3; border-radius:10px; padding:10px 12px; margin-bottom:10px; font-size:14px; }
   .panel h3 { margin:0 0 6px; font-size:14px; color:#444; display:flex; align-items:center; justify-content:space-between; gap:8px; }
   .panel h3 .hint { font-weight:400; color:var(--mut); font-size:12px; }
@@ -41,8 +43,9 @@
   .ctrl { display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; margin:6px 0 10px; font-size:14px; }
   .ctrl input[type=range] { width:min(520px, 60vw); }
   .ctrl .val { font-family: ui-monospace, Menlo, monospace; min-width:90px; }
-  svg { background:#fff; border:1px solid #e6e6e6; border-radius:8px; width:100%; max-width:820px; height:auto; display:block; margin-bottom:8px; }
-  .readout { font-family: ui-monospace, Menlo, Consolas, monospace; font-size:13px; background:var(--panel); border:1px solid #e3e3e3; border-radius:8px; padding:8px 12px; white-space:pre-wrap; line-height:1.5; }
+  svg { background:#fff; border:1px solid #e6e6e6; border-radius:8px; width:100%; max-width:min(100%, 1100px); height:auto; display:block; margin-bottom:8px; }
+  html { font-size: clamp(14px, 0.9vw + 10px, 17px); }
+  .readout { font-family: ui-monospace, Menlo, Consolas, monospace; font-size:0.85rem; background:var(--panel); border:1px solid #e3e3e3; border-radius:8px; padding:8px 12px; white-space:pre-wrap; line-height:1.5; }
   .note { color:var(--mut); font-size:13px; max-width:1100px; line-height:1.45; }
   .flag { color:#c1121f; font-weight:700; }
   .hidden-dia { position:relative; }
@@ -51,8 +54,9 @@
   table.keys td, table.keys th { border-bottom:1px solid #e3e3e3; padding:3px 10px 3px 0; text-align:right; }
   table.keys th { color:#444; font-weight:600; }
   table.keys td:first-child, table.keys th:first-child { text-align:left; }
-  .eq { font-family: "Times New Roman", Times, serif; font-size:16px; line-height:1.6; }
-  .eq i { font-style:italic; }
+  .eq { font-family: "Times New Roman", Times, serif; font-size:1.05rem; line-height:1.7; white-space:normal; }
+  .eq i { font-style:italic; } .eq .c { color:#666; font-size:.88em; font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif; } .eq .h { font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif; font-weight:600; font-size:.9em; color:#444; }
+  .eq .int { font-size:1.25em; vertical-align:-.1em; } .eq sup, .eq sub { font-size:.72em; line-height:0; }
   @media (max-width: 760px) { .ctrl input[type=range] { width:88vw; } .side { flex-basis:100%; } }
 </style>
 </head>
@@ -141,7 +145,7 @@
     <svg id="beamSvg" viewBox="0 0 820 220"></svg>
     <div class="hidden-dia"><svg id="vSvg" viewBox="0 0 820 230"></svg><div class="veil" id="veilV" style="display:none"><span>V diagram hidden — sketch it first.</span><button class="primary" data-reveal="showV">Reveal V</button></div></div>
     <div class="hidden-dia"><svg id="mSvg" viewBox="0 0 820 230"></svg><div class="veil" id="veilM" style="display:none"><span>M diagram hidden — sketch it first.</span><button class="primary" data-reveal="showM">Reveal M</button></div></div>
-    <div class="readout" id="summary"></div>
+    <div class="readout eq" id="summary"></div>
     <div style="margin-top:8px; overflow-x:auto"><table class="keys" id="keyTable"></table></div>
     <p class="note">Reactions and diagrams are computed with Euler–Bernoulli beam theory (stiffness method, uniform <i>EI</i>), so statically indeterminate beams are handled too; for determinate beams the result is identical to the statics in the notes. Values at a jump are listed as left/right of the point. Solid dots on the diagrams mark key points; “pure bending” marks regions where <i>V</i> = 0 and <i>M</i> ≠ 0.</p>
   </div>
@@ -158,16 +162,16 @@
   <label><input type="checkbox" id="fromRight"> cut from the right instead</label>
   <button id="resetCut">Reset</button>
 </div>
-<div class="layout">
-  <div class="main">
+<div class="cols">
+  <div>
     <svg id="cutBeamSvg" viewBox="0 0 820 220"></svg>
     <svg id="fbdSvg" viewBox="0 0 820 250"></svg>
     <div class="readout eq" id="eqBox"></div>
   </div>
-  <div class="main">
+  <div>
     <svg id="cutVSvg" viewBox="0 0 820 230"></svg>
     <svg id="cutMSvg" viewBox="0 0 820 230"></svg>
-    <div class="readout" id="areaBox"></div>
+    <div class="readout eq" id="areaBox"></div>
   </div>
 </div>
 <p class="note"><b>FBD approach</b> (left): the segment to the left of the cut is isolated, with the unknown <i>V</i> and <i>M</i> drawn in their <b>positive</b> directions on the cut face; equilibrium gives their values. <b>Graphical approach</b> (right): the shaded area under <i>w</i> between the left end and the cut is the drop in shear, Δ<i>V</i> = −∫<i>w dx</i>, and the shaded area under <i>V</i> is the change in moment, Δ<i>M</i> = ∫<i>V dx</i>; point loads and couples add jumps. Where <i>V</i> crosses zero, <i>M</i> has a local maximum or minimum.</p>
@@ -325,7 +329,7 @@ function drawBeamFigure(svg, st, R, opts = {}) {
     const nA = Math.max(2, Math.round((X(b) - X(a)) / 26)); for (let i = 0; i <= nA; i++) { const x = a + (b - a) * i / nA, w = wa + (wb - wa) * i / nA; if (Math.abs(w) < 1e-12) continue; const y0 = ytop(w); if (w > 0) arrow(svg, X(x), y0, X(x), yb - hb / 2 - 2, "var(--blue)", 1.8, "b"); else arrow(svg, X(x), yb - hb / 2 - 2, X(x), y0, "var(--blue)", 1.8, "b"); }
     const lab = Math.abs(wa - wb) < 1e-12 ? `w = ${fmt(wa)} ${u.w}` : `w = ${fmt(wa)} → ${fmt(wb)} ${u.w}`; label(svg, (X(a) + X(b)) / 2, Math.min(pa, pb) - 10, lab, "var(--blue)"); });
   // point loads and couples
-  st.loads.forEach((l, i) => { if (l.type === "P") { const x = X(l.x); if (l.val >= 0) arrow(svg, x, yb - hb / 2 - 62, x, yb - hb / 2 - 2, "#222", 2.5, "a"); else arrow(svg, x, yb + hb / 2 + 62, x, yb + hb / 2 + 2, "#222", 2.5, "a"); label(svg, x, l.val >= 0 ? yb - hb / 2 - 72 : yb + hb / 2 + 72, `P = ${fmt(Math.abs(l.val))} ${u.F}${l.val < 0 ? " ↑" : ""}`, "#222"); }
+  st.loads.forEach((l, i) => { if (l.type === "P") { const x = X(l.x); if (l.val >= 0) arrow(svg, x, yb - hb / 2 - 50, x, yb - hb / 2 - 2, "#222", 2.5, "a"); else arrow(svg, x, yb + hb / 2 + 62, x, yb + hb / 2 + 2, "#222", 2.5, "a"); label(svg, x, l.val >= 0 ? yb - hb / 2 - 60 : yb + hb / 2 + 72, `P = ${fmt(Math.abs(l.val))} ${u.F}${l.val < 0 ? " ↑" : ""}`, "#222"); }
     if (l.type === "M") { const x = X(l.x), r = 20, cy = yb; const ccw = l.val >= 0; // arc from right going over the top
       el("path", { d: couplePath(x, cy, r, ccw), fill: "none", stroke: "var(--green)", "stroke-width": 2.5, "marker-end": `url(#${svg.id}_g)` }, svg); label(svg, x, cy - r - 12, `M_{0} = ${fmt(Math.abs(l.val))} ${u.M} ${ccw ? "↺" : "↻"}`, "var(--green)"); } });
   arrowDef(svg, "g", "var(--green)");
@@ -415,16 +419,16 @@ function update(relist) {
   drawDiagram(ms, S, R, "M", { showVals: document.getElementById("showVals").checked, showPure: document.getElementById("showPure").checked });
   // summary
   let s = "";
-  if (R.unstable) s = "Unstable beam — no equilibrium solution. Add a support (e.g. a pin + roller, or a fixed end).";
+  if (R.unstable) s = `<span class="flag">Unstable beam — no equilibrium solution.</span> <span class="c">Add a support (e.g. a pin + roller, or a fixed end).</span>`;
   else {
     const det = (() => { let n = 0; S.supports.forEach(x => n += x.type === "fixed" ? 2 : 1); return n; })();
-    s += `Vertical unknowns: ${det} (reactions and fixed-end moments)  →  ${det <= 2 ? "statically determinate" : "statically indeterminate (degree " + (det - 2) + "; solved with uniform EI)"}\n`;
-    if (showR) { s += "Reactions (↑ and ↺ positive): "; s += R.reactions.map(r => `R(${fmt(r.x)} ${u.L}) = ${fmt(r.Ry)} ${u.F}` + (r.type === "fixed" ? `, M_R = ${fmt(r.Mz)} ${u.M}` : "")).join(";  ") + "\n"; const sumR = R.reactions.reduce((a, r) => a + r.Ry, 0); let sumP = 0; S.loads.forEach(l => { if (l.type === "P") sumP += l.val; if (l.type === "w") { const a = Math.min(l.x1, l.x2), b = Math.max(l.x1, l.x2); sumP += (l.w1 + l.w2) / 2 * (b - a); } }); s += `Check ΣF_y: reactions ${fmt(sumR)} ${u.F} = applied loads ${fmt(sumP)} ${u.F}\n`; } else s += "Reactions hidden.\n";
-    if (showV) s += `|V|_max = ${fmt(Math.abs(R.Vmax))} ${u.F} at x = ${fmt(R.xVmax)} ${u.L}   (V ranges from ${fmt(R.Vmin)} to ${fmt(R.Vmx)} ${u.F})\n`;
-    if (showM) s += `|M|_max = ${fmt(Math.abs(R.Mmax))} ${u.M} at x = ${fmt(R.xMmax)} ${u.L}   (M ranges from ${fmt(R.Mmin)} to ${fmt(R.Mmx)} ${u.M})`;
-    if (R.pure.length && showM) s += `\nPure bending (V = 0, M ≠ 0) on: ` + R.pure.map(([a, b]) => `${fmt(a)}–${fmt(b)} ${u.L}`).join(", ");
+    s += `<span class="h">Unknown reactions:</span> ${det} <span class="c">(forces and fixed-end moments) → ${det <= 2 ? "statically determinate" : "statically indeterminate, degree " + (det - 2) + " (solved with uniform <i>EI</i>)"}</span><br>`;
+    if (showR) { s += `<span class="h">Reactions</span> <span class="c">(↑ and ↺ positive):</span> `; s += R.reactions.map((r, i) => { const nm = String.fromCharCode(65 + i); return `<i>R</i><sub>${nm}</sub> = ${fmt(r.Ry)} ${u.F} <span class="c">(at <i>x</i> = ${fmt(r.x)} ${u.L})</span>` + (r.type === "fixed" ? `, <i>M</i><sub>${nm}</sub> = ${fmt(r.Mz)} ${u.M}` : ""); }).join("; &nbsp;") + "<br>"; const sumR = R.reactions.reduce((a, r) => a + r.Ry, 0); let sumP = 0; S.loads.forEach(l => { if (l.type === "P") sumP += l.val; if (l.type === "w") { const a = Math.min(l.x1, l.x2), b = Math.max(l.x1, l.x2); sumP += (l.w1 + l.w2) / 2 * (b - a); } }); s += `<span class="h">Check</span> Σ<i>F</i><sub>y</sub> = 0: &nbsp;Σ<i>R</i> = ${fmt(sumR)} ${u.F} = Σ(applied loads) = ${fmt(sumP)} ${u.F}<br>`; } else s += `<span class="c">Reactions hidden.</span><br>`;
+    if (showV) s += `|<i>V</i>|<sub>max</sub> = ${fmt(Math.abs(R.Vmax))} ${u.F} <span class="c">at</span> <i>x</i> = ${fmt(R.xVmax)} ${u.L} &nbsp;<span class="c">(${fmt(R.Vmin)} ≤ <i>V</i> ≤ ${fmt(R.Vmx)} ${u.F})</span><br>`;
+    if (showM) s += `|<i>M</i>|<sub>max</sub> = ${fmt(Math.abs(R.Mmax))} ${u.M} <span class="c">at</span> <i>x</i> = ${fmt(R.xMmax)} ${u.L} &nbsp;<span class="c">(${fmt(R.Mmin)} ≤ <i>M</i> ≤ ${fmt(R.Mmx)} ${u.M})</span>`;
+    if (R.pure.length && showM) s += `<br><span class="h">Pure bending</span> <span class="c">(<i>V</i> = 0, <i>M</i> ≠ 0) on</span> ` + R.pure.map(([a, b]) => `${fmt(a)} ≤ <i>x</i> ≤ ${fmt(b)} ${u.L}`).join(", ");
   }
-  document.getElementById("summary").textContent = s;
+  document.getElementById("summary").innerHTML = s;
   // key table
   const t = document.getElementById("keyTable"); t.innerHTML = "";
   if (!R.unstable && (showV || showM)) { t.innerHTML = `<tr><th>x [${u.L}]</th>${showV ? `<th>V⁻ [${u.F}]</th><th>V⁺ [${u.F}]</th>` : ""}${showM ? `<th>M⁻ [${u.M}]</th><th>M⁺ [${u.M}]</th>` : ""}<th></th></tr>`; R.keys.forEach(k => { const tr = document.createElement("tr"); const c = v => v === null || v === undefined ? "" : fmt(v); tr.innerHTML = `<td>${fmt(k.x)}</td>${showV ? `<td>${c(k.VL)}</td><td>${c(k.VR)}</td>` : ""}${showM ? `<td>${c(k.ML)}</td><td>${c(k.MR)}</td>` : ""}<td style="text-align:left;color:#666">${k.zero ? "V = 0 → M extremum" : ""}</td>`; t.appendChild(tr); }); }
@@ -441,7 +445,7 @@ function updateCut() {
   drawDiagram(document.getElementById("cutMSvg"), S, R, "M", { showVals: false, cutX: x, side, shade: !fromRight, showPure: false });
   // FBD of the segment
   const svg = document.getElementById("fbdSvg"); clear(svg); arrowDef(svg, "a", "#222"); arrowDef(svg, "r", "var(--red)"); arrowDef(svg, "b", "var(--blue)"); arrowDef(svg, "g", "var(--green)"); arrowDef(svg, "v", "#6a4c93");
-  if (R.unstable) { label(svg, 410, 115, "no FBD — unstable beam", "#c1121f", 14); document.getElementById("eqBox").textContent = ""; document.getElementById("areaBox").textContent = ""; return; }
+  if (R.unstable) { label(svg, 410, 115, "no FBD — unstable beam", "#c1121f", 14); document.getElementById("eqBox").textContent = ""; document.getElementById("areaBox").innerHTML = ""; return; }
   const W = 820, L = S.L, X = xmap(L, W), yb = 134, hb = 14;
   const a = fromRight ? x : 0, b = fromRight ? L : x; // segment [a,b]
   const tol = 1e-9 * Math.max(L, 1);
@@ -464,12 +468,12 @@ function updateCut() {
   // internal V and M at the cut, positive directions
   const xc = X(x);
   if (!fromRight) { // right face of left segment: V points DOWN (positive), M CCW
-    arrow(svg, xc + 10, yb - 4, xc + 10, yb + 44, "#6a4c93", 3, "v"); label(svg, xc + 24, yb + 46, "V", "#6a4c93", 15);
-    el("path", { d: `M ${xc + 36} ${yb + 4} A 24 24 0 1 0 ${xc + 16} ${yb - 20}`, fill: "none", stroke: "#6a4c93", "stroke-width": 3, "marker-end": `url(#${svg.id}_v)` }, svg); label(svg, xc + 48, yb - 26, "M", "#6a4c93", 15);
+    arrow(svg, xc + 8, yb + 10, xc + 8, yb + 56, "#6a4c93", 3, "v"); label(svg, xc + 22, yb + 56, "V", "#6a4c93", 15);
+    el("path", { d: couplePath(xc + 34, yb, 20, true), fill: "none", stroke: "#6a4c93", "stroke-width": 3, "marker-end": `url(#${svg.id}_v)` }, svg); label(svg, xc + 34, yb, "M", "#6a4c93", 15);
     el("circle", { cx: xc, cy: yb, r: 3, fill: "var(--red)" }, svg); label(svg, xc - 10, yb + 10, "O", "var(--red)", 12);
   } else { // left face of right segment: V points UP (positive), M CW
-    arrow(svg, xc - 10, yb + 4, xc - 10, yb - 44, "#6a4c93", 3, "v"); label(svg, xc - 24, yb - 48, "V", "#6a4c93", 15);
-    el("path", { d: `M ${xc - 36} ${yb + 4} A 24 24 0 1 1 ${xc - 16} ${yb - 20}`, fill: "none", stroke: "#6a4c93", "stroke-width": 3, "marker-end": `url(#${svg.id}_v)` }, svg); label(svg, xc - 48, yb - 26, "M", "#6a4c93", 15);
+    arrow(svg, xc - 8, yb - 10, xc - 8, yb - 56, "#6a4c93", 3, "v"); label(svg, xc - 22, yb - 58, "V", "#6a4c93", 15);
+    el("path", { d: couplePath(xc - 34, yb, 20, false), fill: "none", stroke: "#6a4c93", "stroke-width": 3, "marker-end": `url(#${svg.id}_v)` }, svg); label(svg, xc - 34, yb, "M", "#6a4c93", 15);
     el("circle", { cx: xc, cy: yb, r: 3, fill: "var(--red)" }, svg); label(svg, xc + 10, yb + 10, "O", "var(--red)", 12);
   }
   // dimension line from the far end to the cut
@@ -504,17 +508,16 @@ function updateCut() {
   let mjumps = 0; S.loads.forEach(l => { if (l.type === "M" && l.x > tol && l.x <= x + tol) mjumps -= l.val; }); R.reactions.forEach(r => { if (r.type === "fixed" && r.x > tol && r.x <= x + tol) mjumps -= r.Mz; });
   // ∫0^x V dx numerically from segments
   let vint = 0; R.segs.forEach(s => { if (s.a >= x) return; const xe = Math.min(x, s.b); const pts = s.pts; for (let i = 1; i < pts.length; i++) { const p = pts[i - 1], q = pts[i]; if (p.x >= xe) break; const x2 = Math.min(q.x, xe); const Vq = p.V + (q.V - p.V) * (x2 - p.x) / (q.x - p.x || 1); vint += (p.V + Vq) / 2 * (x2 - p.x); } });
-  area += `Graphical approach from the left end (x = 0):\n`;
-  area += `  V(0⁺) = ${fmt(V0)} ${u.F}   (reaction / load at the left end, if any)\n`;
-  area += `  area under w from 0 to ${fmt(x)}: ∫w dx = ${fmt(wint)} ${u.F}   →   ΔV = −${fmt(wint)} ${u.F}\n`;
-  if (Math.abs(jumps) > 1e-9) area += `  jumps from point forces in (0, ${fmt(x)}]: ${fmtSigned(jumps)} ${u.F}\n`;
-  area += `  V(${fmt(x)}) = ${fmt(V0)} − ${fmt(wint)}${Math.abs(jumps) > 1e-9 ? " " + fmtSigned(jumps) : ""} = ${fmt(Vatcut)} ${u.F}\n\n`;
-  area += `  M(0⁺) = ${fmt(M0)} ${u.M}   (${Math.abs(M0) > 1e-9 ? "fixed-end moment or applied couple at the left end" : "free or simply supported end"})\n`;
-  area += `  area under V from 0 to ${fmt(x)}: ∫V dx = ${fmt(vint)} ${u.M}   →   ΔM = ${fmtSigned(vint)} ${u.M}\n`;
-  if (Math.abs(mjumps) > 1e-9) area += `  jumps from couples in (0, ${fmt(x)}]: ${fmtSigned(mjumps)} ${u.M}\n`;
-  area += `  M(${fmt(x)}) = ${fmt(M0)} ${fmtSigned(vint)}${Math.abs(mjumps) > 1e-9 ? " " + fmtSigned(mjumps) : ""} = ${fmt(R.Mof(x, +1))} ${u.M}`;
-  const zero = R.keys.find(k => k.zero && Math.abs(k.x - x) < Math.max(S.L / 400, 1e-6) * 1.01); if (zero) area += `\n\n  V = 0 here → M has a local ${R.Mof(x) >= 0 ? "maximum" : "minimum"}: ${fmt(R.Mof(x))} ${u.M}`;
-  document.getElementById("areaBox").textContent = area;
+  const X_ = fmt(x), INT = (f) => `<span class="int">∫</span><sub>0</sub><sup>${X_}</sup> <i>${f}</i> d<i>x</i>`;
+  area += `<span class="h">Graphical approach, walking from the left end (<i>x</i> = 0):</span><br>`;
+  area += `<i>V</i>(0<sup>+</sup>) = ${fmt(V0)} ${u.F} <span class="c">(reaction or load at the left end, if any)</span><br>`;
+  area += `Δ<i>V</i> = −${INT("w")} = −(${fmt(wint)}) ${u.F} <span class="c">(area under <i>w</i>)</span>${Math.abs(jumps) > 1e-9 ? `, &nbsp;jumps from point forces in (0, ${X_}]: ${fmtSigned(jumps)} ${u.F}` : ""}<br>`;
+  area += `<i>V</i>(${X_}) = ${fmt(V0)} − ${fmt(wint)}${Math.abs(jumps) > 1e-9 ? " " + fmtSigned(jumps) : ""} = <b>${fmt(Vatcut)} ${u.F}</b><br><br>`;
+  area += `<i>M</i>(0<sup>+</sup>) = ${fmt(M0)} ${u.M} <span class="c">(${Math.abs(M0) > 1e-9 ? "fixed-end moment or applied couple at the left end" : "free or simply supported end"})</span><br>`;
+  area += `Δ<i>M</i> = ${INT("V")} = ${fmtSigned(vint)} ${u.M} <span class="c">(area under <i>V</i>)</span>${Math.abs(mjumps) > 1e-9 ? `, &nbsp;jumps from couples in (0, ${X_}]: ${fmtSigned(mjumps)} ${u.M}` : ""}<br>`;
+  area += `<i>M</i>(${X_}) = ${fmt(M0)} ${fmtSigned(vint)}${Math.abs(mjumps) > 1e-9 ? " " + fmtSigned(mjumps) : ""} = <b>${fmt(R.Mof(x, +1))} ${u.M}</b>`;
+  const zero = R.keys.find(k => k.zero && Math.abs(k.x - x) < Math.max(S.L / 400, 1e-6) * 1.01); if (zero) area += `<br><br><i>V</i> = 0 here → <i>M</i> has a local ${R.Mof(x) >= 0 ? "maximum" : "minimum"}: <i>M</i> = ${fmt(R.Mof(x))} ${u.M}`;
+  document.getElementById("areaBox").innerHTML = area;
 }
 document.getElementById("xcut").addEventListener("input", updateCut);
 document.getElementById("xcutN").addEventListener("change", e => { const v = Math.min(Math.max(parseFloat(e.target.value) || 0, 0), S.L); document.getElementById("xcut").value = v; updateCut(); });
