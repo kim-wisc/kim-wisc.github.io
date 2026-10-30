@@ -22,3 +22,9 @@ body:has(.tool-page) .container.content { max-width: 96vw; }
 /* sidebar: course heading, then its modules */
 .sidebar-nav-course { padding-left: 2.2rem !important; font-size: inherit; opacity: .95; }   /* same size as Home / Teaching */
 .sidebar-nav-sub { padding-left: 3.2rem !important; font-size: .92em; opacity: .9; }      /* slightly smaller than its course */
+
+/* sidebar text at the same size as the page body (Lanyon default is 12px on wide screens) */
+.sidebar { font-size: 1rem; }
+@media (min-width: 30em) { .sidebar { font-size: 1rem; } }
+.sidebar-nav-course { padding-left: 2rem !important; }
+.sidebar-nav-sub    { padding-left: 2.9rem !important; }
