@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Statics Review for Mechanics of Materials</title>
+<style>
+  :root { --red:#ac4142; --blue:#1f77b4; --green:#2a9d8f; --purple:#6a4c93; --ink:#222; --mut:#666; --panel:#f7f7f9; }
+  * { box-sizing:border-box; }
+  html { font-size: clamp(14px, 0.9vw + 10px, 17px); }
+  body { margin:0; font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; color:var(--ink); background:#fff; }
+  header { padding:14px 22px 8px; border-bottom:1px solid #e3e3e3; }
+  header h1 { margin:0 0 4px; font-size:1.4rem; }
+  header p { margin:0; color:var(--mut); font-size:.9rem; }
+  .alpha-banner { display:flex; gap:10px; align-items:flex-start; margin:8px 0 2px; padding:9px 12px; background:#fff3cd; border:1px solid #e6c860; border-left:6px solid #d9a400; border-radius:8px; color:#5c4400; font-size:.9rem; line-height:1.4; }
+  .alpha-banner a { color:#7a5a00; font-weight:600; } .alpha-icon { font-size:18px; line-height:1; color:#b58500; }
+  .alpha { display:inline-block; vertical-align:middle; font-size:.55em; font-weight:600; letter-spacing:.04em; padding:2px 8px; border-radius:999px; background:#fff3cd; color:#7a5a00; border:1px solid #e6c860; }
+  nav { display:flex; gap:6px; padding:10px 22px 0; flex-wrap:wrap; }
+  nav button { border:1px solid #ccc; background:#f2f2f2; padding:7px 12px; border-radius:8px 8px 0 0; cursor:pointer; font-size:.92rem; }
+  nav button.active { background:#fff; border-bottom-color:#fff; font-weight:600; }
+  section.tab { display:none; padding:12px 22px 24px; }
+  section.tab.active { display:block; }
+  .intro { color:#444; font-size:.95rem; max-width:1100px; line-height:1.5; margin:0 0 10px; }
+  .intro b.k { color:var(--red); }
+  .layout { display:flex; gap:18px; flex-wrap:wrap; align-items:flex-start; }
+  .side { flex:1 1 300px; max-width:440px; }
+  .main { flex:999 1 min(100%, 520px); min-width:0; }
+  .cols { display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 460px), 1fr)); gap:18px; align-items:start; }
+  .panel { background:var(--panel); border:1px solid #e3e3e3; border-radius:10px; padding:10px 12px; margin-bottom:10px; font-size:.92rem; }
+  .panel h3 { margin:0 0 6px; font-size:.92rem; color:#444; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .panel h3 .hint { font-weight:400; color:var(--mut); font-size:.8rem; }
+  .rowline { display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; margin:4px 0; }
+  .rowline label { display:inline-flex; align-items:center; gap:4px; max-width:100%; }
+  input[type=number] { width:80px; padding:4px 6px; font-size:.92rem; border:1px solid #bbb; border-radius:6px; }
+  input[type=range] { width:min(260px, 60vw); }
+  select { padding:4px 6px; font-size:.92rem; border:1px solid #bbb; border-radius:6px; background:#fff; max-width:100%; }
+  button { padding:5px 10px; font-size:.92rem; border:1px solid #bbb; background:#fff; border-radius:6px; cursor:pointer; }
+  button:hover { background:#eef; } button.sel { background:var(--red); color:#fff; border-color:var(--red); }
+  button.x { padding:2px 8px; color:#a00; font-weight:700; }
+  svg { background:#fff; border:1px solid #e6e6e6; border-radius:8px; width:100%; max-width:min(100%, 1000px); height:auto; display:block; margin-bottom:8px; }
+  .readout { background:var(--panel); border:1px solid #e3e3e3; border-radius:8px; padding:8px 12px; line-height:1.6; }
+  .eq { font-family:"Times New Roman", Times, serif; font-size:1.05rem; line-height:1.7; }
+  .eq i { font-style:italic; } .eq .c { color:#666; font-size:.88em; font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif; } .eq .h { font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif; font-weight:600; font-size:.9em; color:#444; }
+  .eq sup, .eq sub { font-size:.72em; line-height:0; } .eq .int { font-size:1.25em; vertical-align:-.1em; }
+  .eq table { border-collapse:collapse; } .eq td, .eq th { padding:2px 10px 2px 0; text-align:right; border-bottom:1px solid #e3e3e3; font-size:.95em; } .eq th { font-weight:600; color:#444; } .eq td:first-child, .eq th:first-child { text-align:left; }
+  .flag { color:#c1121f; font-weight:700; } .ok { color:#1b7f3b; font-weight:700; }
+  .note { color:var(--mut); font-size:.85rem; max-width:1100px; line-height:1.45; }
+  .check { border:1px solid #d9c27a; background:#fffbea; border-radius:10px; padding:10px 14px; margin-top:12px; }
+  .check h3 { margin:0 0 6px; font-size:.95rem; color:#5c4400; }
+  .q { margin:8px 0; padding:8px 0; border-top:1px dashed #e0d2a0; }
+  .q .qt { font-size:.95rem; line-height:1.5; }
+  .q .ans { display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; margin-top:6px; }
+  .q .ans input { width:110px; } .q .fb { font-weight:600; } .q .sol { display:none; margin-top:6px; padding:8px 10px; background:#fff; border:1px solid #eee; border-radius:8px; }
+  .q .sol.show { display:block; }
+  @media (max-width: 760px) { .side { flex-basis:100%; max-width:100%; } input[type=range] { width:88vw; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Statics Review for Mechanics of Materials <span class="alpha">ALPHA v0.1</span></h1>
+  <p style="margin:0 0 6px"><b>So Yeon KIM</b>, Assistant Professor, Department of Mechanical Engineering, University of Wisconsin–Madison — developed as part of the <i>Mechanics of Materials</i> course.
+     Found an error or have a suggestion? <a id="reportLink" href="#" target="_blank" rel="noopener">Report it here</a>.</p>
+  <div class="alpha-banner"><span class="alpha-icon">&#9888;</span><div><b>Alpha version (v0.1, Oct 2026) — still being tested and may contain errors.</b> Please double-check results against your own hand calculations and the lecture notes, and <a id="reportLink2" href="#" target="_blank" rel="noopener">report anything that looks wrong</a>.</div></div>
+  <p>Seven short reviews of the statics that Mechanics of Materials builds on, in the order the course needs them. Conventions used throughout (as in the lecture notes): <i>x</i> to the right, <i>y</i> up, <i>z</i> toward you; forces positive along +<i>x</i>, +<i>y</i>; moments and couples positive <b>counter-clockwise</b> (+<i>z</i>, right-hand rule); internal axial force drawn <b>in tension</b> so that tension comes out positive. Each tab ends with a <b>Check yourself</b> box built from the course's own examples.</p>
+</header>
+
+<nav id="nav">
+  <button class="active" data-tab="t1">1 · Supports &amp; FBD</button>
+  <button data-tab="t2">2 · Rigid bars &amp; two-force members</button>
+  <button data-tab="t3">3 · Method of sections (N, T)</button>
+  <button data-tab="t4">4 · Distributed loads</button>
+  <button data-tab="t5">5 · Section properties</button>
+  <button data-tab="t6">6 · 3-D moments at a cut</button>
+  <button data-tab="t7">7 · Units</button>
+</nav>
+
+<!-- ================================================================ TAB 1 -->
+<section class="tab active" id="t1">
+<p class="intro"><b class="k">Why it matters:</b> every problem in this course starts with a free-body diagram (M01), and whether a beam, bar or shaft is <i>statically determinate</i> decides whether statics alone is enough (M03, M11). Each support type removes certain motions and therefore supplies the matching reaction components.</p>
+<div class="layout">
+  <div class="side">
+    <div class="panel"><h3>Supports on the beam <span class="hint">choose a type at each location</span></h3>
+      <div class="rowline"><label>Left end A <select id="s1a"></select></label></div>
+      <div class="rowline"><label>Middle C <select id="s1c"></select></label></div>
+      <div class="rowline"><label>Right end B <select id="s1b"></select></label></div>
+      <div class="rowline"><label><input type="checkbox" id="s1load" checked> <span>show loads (to see which reactions are needed)</span></label></div>
+      <div class="rowline">Presets (M11): <select id="s1preset"><option value="">—</option><option value="ss">(a) simply supported</option><option value="oh">(b) overhanging</option><option value="cant">(c) cantilever</option><option value="cont">(d) continuous</option><option value="fp">(e) fixed + simply supported</option><option value="ff">(f) fixed–fixed</option></select> <button id="s1reset">Reset</button></div>
+    </div>
+    <div class="panel"><h3>Reaction components</h3><div id="s1table" class="eq"></div></div>
+  </div>
+  <div class="main">
+    <svg id="s1svg" viewBox="0 0 820 230"></svg>
+    <div class="readout eq" id="s1out"></div>
+    <p class="note">Rule of thumb for a planar body: 3 independent equilibrium equations (Σ<i>F</i><sub>x</sub> = 0, Σ<i>F</i><sub>y</sub> = 0, Σ<i>M</i> = 0). Fewer than 3 unknown reactions → the body can move (a mechanism); exactly 3, properly arranged → <b>statically determinate</b>; more than 3 → <b>statically indeterminate</b>, and you will need deformation (compatibility) equations from M02–M03 and M11 in addition to statics. Reactions that are all parallel or all concurrent are <i>improperly</i> arranged even if there are three of them.</p>
+  </div>
+</div>
+<div class="check" id="c1"></div>
+</section>
+
+<!-- ================================================================ TAB 2 -->
+<section class="tab" id="t2">
+<p class="intro"><b class="k">Why it matters:</b> the first examples of the course (M01, M02, M03, M05) are rigid bars held by pins and links. You need to (1) pick a moment center that eliminates unknowns, (2) recognize <i>two-force members</i>, whose force acts along the line joining their pins, and (3) resolve that force into components from the geometry.</p>
+<div class="layout">
+  <div class="side">
+    <div class="panel"><h3>Bracket (M01) <span class="hint">bar AB pinned at A, link BC to the wall at C</span></h3>
+      <div class="rowline"><label><i>P</i> [kN] <input type="number" id="b2P" value="30" step="1"></label><label>bar <i>a</i> [m] <input type="number" id="b2a" value="0.8" step="0.1" min="0.1"></label><label>rise <i>h</i> [m] <input type="number" id="b2h" value="0.6" step="0.1" min="0.1"></label></div>
+      <div class="rowline">Take moments about: <button class="sel" data-mc="A">A</button><button data-mc="B">B</button><button data-mc="C">C</button></div>
+      <div class="rowline"><label><input type="checkbox" id="b2comp" checked> show components of <i>F</i><sub>BC</sub></label><label><input type="checkbox" id="b2dis"> dismember (FBD of bar AB)</label> <button id="b2reset">Reset</button></div>
+    </div>
+    <div class="panel"><h3>Two-force member <span class="hint">force along the line of the pins</span></h3>
+      <div class="rowline"><label>angle of link from horizontal <i>α</i> [°] <input type="range" id="b2ang" min="5" max="85" value="37"><input type="number" id="b2angN" value="37" step="1" style="width:70px"></label></div>
+      <div class="rowline"><label>|<i>F</i>| [kN] <input type="number" id="b2F" value="50" step="1"></label></div>
+      <svg id="s2bsvg" viewBox="0 0 400 200"></svg>
+      <div class="eq" id="s2bout"></div>
+    </div>
+  </div>
+  <div class="main">
+    <svg id="s2svg" viewBox="0 0 820 390"></svg>
+    <div class="readout eq" id="s2out"></div>
+    <p class="note">Moment of a force about a point: <i>M</i><sub>O</sub> = ±(force) × (perpendicular distance), counter-clockwise positive; or add the moments of the components, each with its own arm. A good moment center is one through which as many unknown forces as possible pass, so they drop out.</p>
+  </div>
+</div>
+<div class="check" id="c2"></div>
+</section>
+
+<!-- ================================================================ TAB 3 -->
+<section class="tab" id="t3">
+<p class="intro"><b class="k">Why it matters:</b> stresses come from <i>internal</i> forces — the axial force <i>N</i> (M01–M03), the torque <i>T</i> (M06), and the shear and moment <i>V</i>, <i>M</i> (M07–M08). All are found the same way: cut the member, keep one side, draw the unknown internal resultant in its <b>positive</b> direction, and apply equilibrium to the piece you kept.</p>
+<div class="rowline" style="margin-bottom:8px">Demo: <button class="sel" data-sec="axial">Axial rod (M01)</button><button data-sec="torque">Shaft with torques (M06)</button> &nbsp; <span class="note">For <i>V</i> and <i>M</i> use the <a href="../beam-vm/explorer.html" target="_blank" rel="noopener">Shear &amp; Moment Diagram Explorer</a>.</span></div>
+<div class="layout">
+  <div class="side">
+    <div class="panel" id="s3axialPanel"><h3>Loads on the rod <span class="hint">positive = pointing right (+x)</span></h3>
+      <div class="rowline"><label>at A (x = 0): <input type="number" id="a3PA" value="-40" step="5"> kip</label></div>
+      <div class="rowline"><label>at B (x = <input type="number" id="a3xB" value="12" step="1" style="width:60px"> in): <input type="number" id="a3PB" value="60" step="5"> kip</label></div>
+      <div class="rowline"><label>wall at C, x = <input type="number" id="a3xC" value="28" step="1" style="width:60px"> in</label> <span>reaction <span id="a3PC" style="font-weight:600"></span> <span class="hint">(from Σ<i>F</i><sub>x</sub> = 0)</span></span></div>
+      <div class="rowline"><label><input type="checkbox" id="a3fromRight"> keep the right piece instead</label><button id="a3reset">Reset</button></div>
+    </div>
+    <div class="panel" id="s3torquePanel" style="display:none"><h3>Torques on the shaft <span class="hint">positive = counter-clockwise seen from +x (right-hand rule, thumb along +x)</span></h3>
+      <div class="rowline"><label>at A (x = 0): <input type="number" id="t3TA" value="400" step="50"> N·m</label></div>
+      <div class="rowline"><label>at B (x = <input type="number" id="t3xB" value="0.5" step="0.1" style="width:60px"> m): <input type="number" id="t3TB" value="-1200" step="50"> N·m</label></div>
+      <div class="rowline"><label>wall at C, x = <input type="number" id="t3xC" value="1.0" step="0.1" style="width:60px"> m</label> <span>reaction <span id="t3TC" style="font-weight:600"></span> <span class="hint">(from Σ<i>T</i> = 0)</span></span></div>
+      <div class="rowline"><button id="t3reset">Reset</button></div>
+    </div>
+    <div class="panel"><h3>Cut position</h3>
+      <div class="rowline"><input type="range" id="s3x" min="0" max="28" step="0.1" value="6"><input type="number" id="s3xN" value="6" step="0.5" style="width:80px"><span id="s3xu">in</span></div>
+    </div>
+  </div>
+  <div class="main">
+    <svg id="s3svg" viewBox="0 0 820 230"></svg>
+    <svg id="s3fbd" viewBox="0 0 820 200"></svg>
+    <div class="readout eq" id="s3out"></div>
+    <svg id="s3dia" viewBox="0 0 820 180"></svg>
+  </div>
+</div>
+<div class="check" id="c3"></div>
+</section>
+
+<!-- ================================================================ TAB 4 -->
+<section class="tab" id="t4">
+<p class="intro"><b class="k">Why it matters:</b> beams carry distributed loads <i>w</i>(<i>x</i>) [force/length] (M07, M08, M11). For <b>support reactions</b> a distributed load can be replaced by its resultant <i>W</i> = ∫<i>w</i> d<i>x</i> (the area under the load diagram) acting at the centroid <i>x̄</i> of that area — but <b>not</b> for internal <i>V</i> and <i>M</i>, which depend on how the load is spread.</p>
+<div class="layout">
+  <div class="side">
+    <div class="panel"><h3>Load on a simply supported beam</h3>
+      <div class="rowline"><label><i>L</i> [m] <input type="number" id="d4L" value="6" step="0.5" min="0.5"></label></div>
+      <div class="rowline"><label>from <i>x</i> = <input type="number" id="d4a" value="1" step="0.25"></label><label>to <input type="number" id="d4b" value="5" step="0.25"> m</label></div>
+      <div class="rowline"><label><i>w</i><sub>1</sub> [kN/m] <input type="number" id="d4w1" value="2" step="0.5"></label><label><i>w</i><sub>2</sub> [kN/m] <input type="number" id="d4w2" value="8" step="0.5"></label></div>
+      <div class="rowline">Shape: <button data-shape="uni">uniform</button><button data-shape="tri">triangular</button><button data-shape="trap">trapezoidal</button> <button id="d4reset">Reset</button></div>
+      <div class="rowline"><label><input type="checkbox" id="d4show" checked> show the resultant</label><label><input type="checkbox" id="d4M"> <span>compare <i>M</i>(<i>x</i>): real load vs. resultant</span></label></div>
+    </div>
+  </div>
+  <div class="main">
+    <svg id="s4svg" viewBox="0 0 820 252"></svg>
+    <svg id="s4M" viewBox="0 0 820 200" style="display:none"></svg>
+    <div class="readout eq" id="s4out"></div>
+  </div>
+</div>
+<div class="check" id="c4"></div>
+</section>
+
+<!-- ================================================================ TAB 5 -->
+<section class="tab" id="t5">
+<p class="intro"><b class="k">Why it matters:</b> bending stress <i>σ</i> = −<i>My</i>/<i>I</i> (M07), shear stress <i>τ</i> = <i>VQ</i>/(<i>It</i>) (M08), torsion <i>τ</i> = <i>Tρ</i>/<i>J</i> (M06) and buckling <i>P</i><sub>cr</sub> = π²<i>EI</i>/<i>L</i>² (M12) all need section properties: the centroid, the second moment of area <i>I</i> about the centroidal axis (parallel-axis theorem for composite shapes), the first moment <i>Q</i> of the area beyond a level, the polar moment <i>J</i>, and the radius of gyration <i>r</i> = √(<i>I</i>/<i>A</i>).</p>
+<div class="layout">
+  <div class="side">
+    <div class="panel"><h3>Rectangles <span class="hint">b wide, h tall, bottom at y<sub>0</sub>, centered at x<sub>c</sub></span></h3>
+      <div id="r5list"></div>
+      <div class="rowline"><button id="r5add">+ rectangle</button> Presets: <select id="r5preset"><option value="">—</option><option value="tee">T-section (M08)</option><option value="ibeam">I-section (areas 60, 48, 40 as in M07)</option><option value="box">Box (hollow 4×4, t = 0.5 in; M08)</option><option value="rect">Solid rectangle</option></select> <button id="r5reset">Reset</button></div>
+      <div class="rowline"><label>units <select id="r5u"><option>in</option><option>mm</option></select></label><label>level for <i>Q</i>: <i>y</i> = <input type="range" id="r5q" min="0" max="10" step="0.05" value="2"><input type="number" id="r5qN" value="2" step="0.1" style="width:70px"></label></div>
+    </div>
+    <div class="panel"><h3>Circular sections <span class="hint">for torsion (M06) and columns (M12)</span></h3>
+      <div class="rowline"><label>outer radius <i>c</i> <input type="number" id="c5o" value="18" step="1" min="0.1"></label><label>inner radius <i>c</i><sub>i</sub> <input type="number" id="c5i" value="12" step="1" min="0"></label><label>units <select id="c5u"><option>mm</option><option>in</option></select></label></div>
+      <div class="eq" id="s5circ"></div>
+    </div>
+  </div>
+  <div class="main">
+    <svg id="s5svg" viewBox="0 0 820 340"></svg>
+    <div class="readout eq" id="s5out"></div>
+  </div>
+</div>
+<div class="check" id="c5"></div>
+</section>
+
+<!-- ================================================================ TAB 6 -->
+<section class="tab" id="t6">
+<p class="intro"><b class="k">Why it matters:</b> in combined loading (M10) a force applied away from the section produces, at the cut, an axial force, two shears, a torque and two bending moments. The tool is the moment of a force about a point in 3-D, <b>M</b> = <b>r</b> × <b>F</b>, taken component by component with the right-hand rule (M10).</p>
+<div class="layout">
+  <div class="side">
+    <div class="panel"><h3>Bent bar (M10) <span class="hint">wall at A; bar along +x to C, arm along +z to D; load at D</span></h3>
+      <div class="rowline"><label><i>L</i><sub>AC</sub> [in] <input type="number" id="m6L1" value="9" step="1" min="0"></label><label><i>L</i><sub>CD</sub> [in] <input type="number" id="m6L2" value="12" step="1" min="0"></label></div>
+      <div class="rowline"><label><i>F</i><sub>x</sub> [lb] <input type="number" id="m6Fx" value="0" step="50"></label><label><i>F</i><sub>y</sub> [lb] <input type="number" id="m6Fy" value="-250" step="50"></label><label><i>F</i><sub>z</sub> [lb] <input type="number" id="m6Fz" value="0" step="50"></label></div>
+      <div class="rowline">Quick sets: <button data-f6="x">F<sub>x</sub> only</button><button data-f6="y">F<sub>y</sub> only</button><button data-f6="z">F<sub>z</sub> only</button><button data-f6="all">all three</button> <button id="m6reset">Reset</button></div>
+    </div>
+    <div class="panel"><h3>At the section A (the wall) <span class="hint">equal and opposite to the resultant of the applied load about A</span></h3><div class="eq" id="s6tab"></div></div>
+  </div>
+  <div class="main">
+    <svg id="s6svg" viewBox="0 0 820 440"></svg>
+    <div class="readout eq" id="s6out"></div>
+    <p class="note">Internal resultants at A: <i>N</i> = <i>F</i><sub>x</sub> (axial, along the bar), <i>V</i><sub>y</sub> = <i>F</i><sub>y</sub>, <i>V</i><sub>z</sub> = <i>F</i><sub>z</sub>, <i>T</i> = <i>M</i><sub>x</sub> (torque, about the bar axis), <i>M</i><sub>y</sub> and <i>M</i><sub>z</sub> (bending). The sign tells you which side of the section is in tension: with <i>σ</i><sub>x</sub> = −<i>M</i><sub>z</sub><i>y</i>/<i>I</i>, a positive <i>M</i><sub>z</sub> puts the −<i>y</i> (bottom) fibers in tension and the +<i>y</i> fibers in compression; likewise for <i>M</i><sub>y</sub> and <i>z</i>. Deciding zero / non-zero and + / − for each term at each point is exactly the exercise of M10.</p>
+  </div>
+</div>
+<div class="check" id="c6"></div>
+</section>
+
+<!-- ================================================================ TAB 7 -->
+<section class="tab" id="t7">
+<p class="intro"><b class="k">Why it matters:</b> most wrong answers in this course are unit slips: mm vs m, kN vs N, psi vs ksi, degrees instead of radians in <i>φ</i> = <i>TL</i>/(<i>GJ</i>) (M06), or 5.623×10⁸ Pa where 562 MPa is expected (M01).</p>
+<div class="cols">
+  <div>
+    <div class="panel"><h3>Converter</h3>
+      <div class="rowline"><input type="number" id="u7v" value="562.3" step="any" style="width:120px"> <select id="u7from"></select> → <select id="u7to"></select> <span id="u7res" style="font-weight:600"></span></div>
+      <div class="rowline note">Exact factors to memorize: 1 in = 25.4 mm · 1 lb = 4.448 N · 1 psi = 6.895 kPa · 1 ksi = 6.895 MPa · 1 kip = 4.448 kN · 1 rad = 57.30°.</div>
+    </div>
+    <div class="panel"><h3>Consistent sets</h3>
+      <div class="eq">SI: N, m, Pa (N/m²) — or N, mm, MPa (N/mm²): <span class="c">1 MPa = 1 N/mm² exactly, so forces in N and lengths in mm give stresses in MPa directly.</span><br>
+      US: lb, in, psi — or kip, in, ksi: <span class="c">1 ksi = 1 kip/in².</span><br>
+      Angles in <b>radians</b> wherever they multiply or divide a length (arc length, twist, curvature, shear strain γ).</div>
+    </div>
+  </div>
+  <div>
+    <div class="check" id="c7" style="margin-top:0"></div>
+  </div>
+</div>
+</section>
+
+<script>
+/* ===================================================================== config */
+const REPORT_FORM_URL = "https://forms.gle/6EWQRUDerN1ZvfAe8";
+const ANALYTICS_GA4 = "G-5MZ1MTJD64";   // GA4 property "Teaching modules (kim-wisc.github.io)"
+const ANALYTICS_GOATCOUNTER = "";
+if (ANALYTICS_GA4 && window.self === window.top) { const t = document.createElement("script"); t.async = true; t.src = "https://www.googletagmanager.com/gtag/js?id=" + ANALYTICS_GA4; document.head.appendChild(t);
+  window.dataLayer = window.dataLayer || []; function gtag(){ dataLayer.push(arguments); } gtag("js", new Date()); gtag("config", ANALYTICS_GA4); }
+if (ANALYTICS_GOATCOUNTER && window.self === window.top) { const t = document.createElement("script"); t.async = true; t.setAttribute("data-goatcounter", "https://" + ANALYTICS_GOATCOUNTER + ".goatcounter.com/count"); t.src = "//gc.zgo.at/count.js"; document.head.appendChild(t); }
+document.getElementById("reportLink").href = REPORT_FORM_URL; document.getElementById("reportLink2").href = REPORT_FORM_URL;
+
+/* ===================================================================== helpers */
+const NS = "http://www.w3.org/2000/svg";
+const $ = id => document.getElementById(id);
+const num = id => parseFloat($(id).value) || 0;
+function el(tag, attrs = {}, parent = null, txt = null) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (txt !== null) e.textContent = txt; if (parent) parent.appendChild(e); return e; }
+function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+function defs(svg) { return svg.querySelector("defs") || el("defs", {}, svg); }
+function arrowDef(svg, id, color) { const m = el("marker", { id: svg.id + "_" + id, viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: "auto-start-reverse" }, defs(svg)); el("path", { d: "M0,0 L10,5 L0,10 z", fill: color }, m); }
+function line(svg, x1, y1, x2, y2, stroke, w = 2, extra = {}) { return el("line", Object.assign({ x1, y1, x2, y2, stroke, "stroke-width": w }, extra), svg); }
+function arrow(svg, x1, y1, x2, y2, color, w = 2.5, mk = "a", extra = {}) { const root = svg.ownerSVGElement || svg; return line(svg, x1, y1, x2, y2, color, w, Object.assign({ "marker-end": `url(#${root.id}_${mk})`, "stroke-linecap": "round" }, extra)); }
+function text(svg, x, y, s, attrs = {}) {
+  const t = el("text", Object.assign({ x, y, "font-size": 13, "text-anchor": "middle", "dominant-baseline": "middle", fill: "#222" }, attrs), svg);
+  const parts = String(s).split(/(_\{[^}]*\})/);
+  for (const part of parts) { if (!part) continue; const m = part.match(/^_\{([^}]*)\}$/); if (m) el("tspan", { "baseline-shift": "sub", "font-size": "70%" }, t, m[1]); else el("tspan", {}, t, part); }
+  return t;
+}
+function label(svg, x, y, s, color, size = 13, attrs = {}) { return text(svg, x, y, s, Object.assign({ fill: color, "font-size": size, "font-weight": 600, "paint-order": "stroke", stroke: "#fff", "stroke-width": 4, "stroke-linejoin": "round" }, attrs)); }
+function couplePath(x, cy, r, ccw) { const P = th => `${(x + r * Math.cos(th * Math.PI / 180)).toFixed(1)} ${(cy - r * Math.sin(th * Math.PI / 180)).toFixed(1)}`; return ccw ? `M ${P(-60)} A ${r} ${r} 0 1 0 ${P(200)}` : `M ${P(240)} A ${r} ${r} 0 1 1 ${P(-20)}`; }
+function couple(svg, x, y, r, ccw, color, mk, w = 2.5) { return el("path", { d: couplePath(x, y, r, ccw), fill: "none", stroke: color, "stroke-width": w, "marker-end": `url(#${svg.id}_${mk})` }, svg); }
+function fmt(v, d) { if (!isFinite(v)) return "—"; if (Math.abs(v) < 1e-9) return "0"; const a = Math.abs(v); if (d === undefined) d = a >= 1000 ? 0 : a >= 100 ? 1 : a >= 10 ? 2 : 3; let s = v.toFixed(d); if (s.includes(".")) s = s.replace(/0+$/, "").replace(/\.$/, ""); return s.replace(/^-/, "−"); }
+const sgn = v => v >= 0 ? " + " : " − ", ab = v => fmt(Math.abs(v));
+function hatch(svg, x1, x2, y, down = true, color = "#555") { line(svg, x1, y, x2, y, color, 2); for (let x = x1 + 4; x < x2; x += 9) line(svg, x, y, x - 6, y + (down ? 7 : -7), color, 1.2); }
+function drawSupport(svg, X, yb, type, side = "below") {
+  // yb: y of the beam surface the support touches
+  const c = "#333";
+  if (type === "pin" || type === "roller") { const h = 22; el("polygon", { points: `${X},${yb} ${X - 14},${yb + h} ${X + 14},${yb + h}`, fill: type === "pin" ? "#bbb" : "#fff", stroke: c, "stroke-width": 2 }, svg); if (type === "roller") { el("circle", { cx: X - 7, cy: yb + h + 6, r: 5, fill: "#fff", stroke: c, "stroke-width": 2 }, svg); el("circle", { cx: X + 7, cy: yb + h + 6, r: 5, fill: "#fff", stroke: c, "stroke-width": 2 }, svg); } hatch(svg, X - 22, X + 22, yb + h + (type === "roller" ? 12 : 1)); }
+  if (type === "fixed") { const sideL = X < 410; const x0 = sideL ? X - 10 : X; el("rect", { x: x0, y: yb - 40, width: 10, height: 68, fill: "#777" }, svg); for (let i = 0; i < 7; i++) line(svg, sideL ? x0 : x0 + 10, yb - 38 + i * 10, sideL ? x0 - 10 : x0 + 20, yb - 30 + i * 10, "#777", 1.5); }
+  if (type === "smooth") { hatch(svg, X - 24, X + 24, yb + 14); el("circle", { cx: X, cy: yb + 7, r: 6, fill: "#fff", stroke: c, "stroke-width": 2 }, svg); }
+  if (type === "link") { line(svg, X, yb, X, yb + 34, c, 3); el("circle", { cx: X, cy: yb, r: 3.5, fill: "#fff", stroke: c, "stroke-width": 2 }, svg); el("circle", { cx: X, cy: yb + 34, r: 3.5, fill: "#fff", stroke: c, "stroke-width": 2 }, svg); hatch(svg, X - 16, X + 16, yb + 38); }
+  if (type === "cable") { line(svg, X, yb - 14, X + 50, yb - 60, c, 2); hatch(svg, X + 36, X + 70, yb - 60, false); }
+}
+const SUPPORTS = {
+  none:   { name: "free (no support)", r: [] },
+  roller: { name: "roller", r: ["y"] },
+  smooth: { name: "smooth surface", r: ["y"] },
+  link:   { name: "vertical link (two-force member)", r: ["y"] },
+  cable:  { name: "inclined cable", r: ["c"] },
+  pin:    { name: "pin (hinge)", r: ["x", "y"] },
+  fixed:  { name: "fixed (built-in)", r: ["x", "y", "m"] },
+};
+
+/* ===================================================================== check-yourself engine */
+const CHECKS = {};
+function renderChecks(id, items) {
+  const box = $(id); box.innerHTML = `<h3>Check yourself</h3>`;
+  items.forEach((q, i) => { const d = document.createElement("div"); d.className = "q"; const key = id + "_" + i;
+    d.innerHTML = `<div class="qt"><b>${i + 1}.</b> ${q.q}</div><div class="ans"><label>${q.lead || "Answer"}: <input type="number" step="any" id="${key}_in"> ${q.unit || ""}</label><button data-chk="${key}">Check</button><button data-sol="${key}">Show solution</button><span class="fb" id="${key}_fb"></span></div><div class="sol" id="${key}_sol">${q.sol}</div>`;
+    box.appendChild(d); CHECKS[key] = q; });
+}
+document.addEventListener("click", e => {
+  const k = e.target.dataset.chk, s = e.target.dataset.sol;
+  if (k) { const q = CHECKS[k], v = parseFloat($(k + "_in").value); const fb = $(k + "_fb"); if (isNaN(v)) { fb.textContent = "Enter a number."; fb.className = "fb"; return; } const tol = q.tol || 0.02; const ok = Math.abs(v - q.a) <= Math.max(tol * Math.abs(q.a), q.abs || 0); fb.textContent = ok ? "✓ Correct" : (Math.abs(v + q.a) <= Math.max(tol * Math.abs(q.a), q.abs || 0) ? "✗ Magnitude right, sign wrong — check the convention." : "✗ Not quite — try again or show the solution."); fb.className = "fb " + (ok ? "ok" : "flag"); if (typeof gtag === "function") gtag("event", "check_answer", { module: "statics-review", item: k, correct: ok }); }
+  if (s) { $(s + "_sol").classList.toggle("show"); }
+});
+
+/* ===================================================================== TAB 1: supports */
+(function () {
+  const opts = Object.entries(SUPPORTS).map(([k, v]) => `<option value="${k}">${v.name}</option>`).join("");
+  ["s1a", "s1b", "s1c"].forEach(id => { $(id).innerHTML = opts; });
+  $("s1a").value = "pin"; $("s1b").value = "roller"; $("s1c").value = "none";
+  const PRE = { ss: ["pin", "none", "roller"], oh: ["pin", "roller", "none"], cant: ["fixed", "none", "none"], cont: ["pin", "roller", "roller"], fp: ["fixed", "none", "roller"], ff: ["fixed", "none", "fixed"] };
+  function draw() {
+    const svg = $("s1svg"); clear(svg); arrowDef(svg, "r", "var(--red)"); arrowDef(svg, "a", "#222");
+    const ta = $("s1a").value, tc = $("s1c").value, tb = $("s1b").value; const X = { a: 110, c: 410, b: 710 }, yb = 110, hb = 14;
+    [["a", ta], ["c", tc], ["b", tb]].forEach(([k, t]) => { if (t !== "none" && t !== "cable") drawSupport(svg, X[k], yb + hb / 2, t); if (t === "cable") drawSupport(svg, X[k], yb - hb / 2, t); });
+    el("rect", { x: X.a, y: yb - hb / 2, width: X.b - X.a, height: hb, fill: "#cfd6de", stroke: "#333", "stroke-width": 1.5 }, svg);
+    text(svg, X.a - 8, yb - 22, "A", { "font-weight": 600 }); text(svg, X.c, yb - 22, "C", { "font-weight": 600 }); text(svg, X.b + 8, yb - 22, "B", { "font-weight": 600 });
+    if ($("s1load").checked) { arrow(svg, 260, yb - hb / 2 - 60, 260, yb - hb / 2 - 2, "#222", 2.5, "a"); label(svg, 260, yb - hb / 2 - 70, "P", "#222", 14); arrow(svg, 540, yb, 600, yb, "#222", 2.5, "a"); label(svg, 570, yb - 14, "Q (horizontal)", "#222", 12); }
+    // reactions
+    let n = 0; const rows = []; let allParallel = true, hasX = false;
+    [["a", ta, "A"], ["c", tc, "C"], ["b", tb, "B"]].forEach(([k, t, L]) => { const r = SUPPORTS[t].r; const x = X[k];
+      if (r.includes("y")) { arrow(svg, x, yb + hb / 2 + 62, x, yb + hb / 2 + 6, "var(--red)", 2.5, "r"); label(svg, x + 18, yb + hb / 2 + 56, `${L}_{y}`, "var(--red)", 13); rows.push(`<i>${L}</i><sub>y</sub>`); n++; }
+      if (r.includes("x")) { arrow(svg, x - 64, yb + 30, x - 8, yb + 30, "var(--red)", 2.5, "r"); label(svg, x - 40, yb + 44, `${L}_{x}`, "var(--red)", 13); rows.push(`<i>${L}</i><sub>x</sub>`); n++; hasX = true; allParallel = false; }
+      if (r.includes("c")) { arrow(svg, x + 44, yb - 54, x + 4, yb - hb / 2 - 10, "var(--red)", 2.5, "r"); label(svg, x + 60, yb - 60, `T_{${L}} (along cable)`, "var(--red)", 12); rows.push(`<i>T</i><sub>${L}</sub> (one unknown, known direction)`); n++; allParallel = false; hasX = true; }
+      if (r.includes("m")) { couple(svg, x, yb, 28, true, "var(--red)", "r"); label(svg, x + (x < 410 ? 48 : -48), yb - 36, `M_{${L}}`, "var(--red)", 13); rows.push(`<i>M</i><sub>${L}</sub>`); n++; } });
+    $("s1table").innerHTML = rows.length ? rows.join(", ") + ` <span class="c">→ ${n} unknown${n === 1 ? "" : "s"}</span>` : `<span class="c">no reactions</span>`;
+    let verdict;
+    if (n < 3) verdict = `<span class="flag">${n} unknowns &lt; 3 equations: the beam is a mechanism — it can move.</span> ${!hasX && n > 0 ? "<span class='c'>Nothing resists a horizontal force here.</span>" : ""}`;
+    else if (n === 3) verdict = allParallel ? `<span class="flag">3 unknowns but all vertical: improperly constrained — Σ<i>F</i><sub>x</sub> = 0 cannot be satisfied with a horizontal load.</span>` : `<span class="ok">3 unknowns = 3 equations: statically determinate.</span> <span class="c">Σ<i>F</i><sub>x</sub> = 0, Σ<i>F</i><sub>y</sub> = 0, Σ<i>M</i> = 0 give all reactions.</span>`;
+    else verdict = `<span class="flag">${n} unknowns &gt; 3 equations: statically indeterminate to degree ${n - 3}.</span> <span class="c">Statics is not enough — add ${n - 3} compatibility (deformation) condition${n - 3 > 1 ? "s" : ""} (M03, M11).</span>`;
+    $("s1out").innerHTML = `<span class="h">Equilibrium equations available (planar):</span> Σ<i>F</i><sub>x</sub> = 0, Σ<i>F</i><sub>y</sub> = 0, Σ<i>M</i> = 0 → 3<br><span class="h">Unknown reactions:</span> ${n}<br>${verdict}`;
+  }
+  ["s1a", "s1b", "s1c", "s1load"].forEach(id => $(id).addEventListener("change", () => { $("s1preset").value = ""; draw(); }));
+  $("s1preset").addEventListener("change", e => { const p = PRE[e.target.value]; if (!p) return; $("s1a").value = p[0]; $("s1c").value = p[1]; $("s1b").value = p[2]; draw(); });
+  $("s1reset").onclick = () => { $("s1a").value = "pin"; $("s1c").value = "none"; $("s1b").value = "roller"; $("s1load").checked = true; $("s1preset").value = ""; draw(); };
+  draw();
+  renderChecks("c1", [
+    { q: "A beam is fixed at the left end and rests on a roller at the right end (M11, case e). How many unknown reaction components are there?", a: 4, abs: 0.1, sol: "Fixed end: <i>A</i><sub>x</sub>, <i>A</i><sub>y</sub>, <i>M</i><sub>A</sub> (3). Roller: <i>B</i><sub>y</sub> (1). Total <b>4</b> unknowns vs 3 equations → statically indeterminate to degree 1 (M11)." },
+    { q: "Same beam: what is its degree of static indeterminacy?", a: 1, abs: 0.1, sol: "4 unknowns − 3 independent equilibrium equations = <b>1</b>. One compatibility condition (e.g. the deflection at the roller is zero) is needed in addition to statics." },
+    { q: "A bar is pinned at both ends and loaded axially (M03). How many unknown reaction components are there in total?", a: 4, abs: 0.1, sol: "Each pin gives two components (<i>x</i> and <i>y</i>): <b>4</b> unknowns. With only an axial load the <i>y</i> components are zero, but Σ<i>F</i><sub>x</sub> = 0 is a single equation for the two axial reactions → indeterminate; the extra equation is compatibility (total elongation = 0)." },
+  ]);
+})();
+
+/* ===================================================================== TAB 2: rigid bars */
+(function () {
+  let mc = "A";
+  function solve() { const P = num("b2P"), a = num("b2a"), h = num("b2h"); const L = Math.hypot(a, h); const FBC = P * L / h; const FAB = -P * a / h; const Ax = -FBC * a / L; const Ay = 0; const Cx = FBC * a / L, Cy = FBC * h / L; return { P, a, h, L, FBC, FAB, Ax, Ay, Cx, Cy }; }
+  function draw() {
+    const s = solve(), svg = $("s2svg"); clear(svg); arrowDef(svg, "a", "#222"); arrowDef(svg, "r", "var(--red)"); arrowDef(svg, "b", "var(--blue)"); arrowDef(svg, "g", "var(--green)");
+    const sc = Math.min(420 / Math.max(s.a, 0.1), 200 / Math.max(s.h, 0.1)); const Ax = 180, Ay = 270, Bx = Ax + s.a * sc, By = Ay, Cx = Ax, Cy = Ay - s.h * sc;
+    // wall
+    el("rect", { x: Ax - 24, y: Cy - 40, width: 14, height: Ay - Cy + 80, fill: "#777" }, svg);
+    const dis = $("b2dis").checked;
+    if (!dis) { // whole structure
+      line(svg, Ax, Ay, Bx, By, "#333", 10, { "stroke-linecap": "round" }); line(svg, Bx, By, Cx, Cy, "#555", 6, { "stroke-linecap": "round" });
+      [[Ax, Ay], [Bx, By], [Cx, Cy]].forEach(([x, y]) => el("circle", { cx: x, cy: y, r: 5, fill: "#fff", stroke: "#333", "stroke-width": 2 }, svg));
+      arrow(svg, Bx, By + 10, Bx, By + 70, "#222", 3, "a"); label(svg, Bx + 50, By + 62, `P = ${fmt(s.P)} kN`, "#222", 13);
+      // reactions at A and C (components)
+      arrow(svg, Ax - 96, Ay, Ax - 30, Ay, "var(--red)", 2.5, "r"); label(svg, Ax - 64, Ay + 16, `A_{x}`, "var(--red)");
+      arrow(svg, Ax + 30, Ay + 70, Ax + 30, Ay + 14, "var(--red)", 2.5, "r"); label(svg, Ax + 48, Ay + 60, `A_{y}`, "var(--red)");
+      arrow(svg, Cx - 96, Cy, Cx - 30, Cy, "var(--red)", 2.5, "r"); label(svg, Cx - 64, Cy - 16, `C_{x}`, "var(--red)");
+      arrow(svg, Cx + 30, Cy - 70, Cx + 30, Cy - 14, "var(--red)", 2.5, "r"); label(svg, Cx + 48, Cy - 60, `C_{y}`, "var(--red)");
+    } else { // bar AB alone with link force at B
+      line(svg, Ax, Ay, Bx, By, "#333", 10, { "stroke-linecap": "round" }); line(svg, Bx, By, Cx, Cy, "#bbb", 2, { "stroke-dasharray": "5 5" });
+      [[Ax, Ay], [Bx, By]].forEach(([x, y]) => el("circle", { cx: x, cy: y, r: 5, fill: "#fff", stroke: "#333", "stroke-width": 2 }, svg));
+      arrow(svg, Bx, By + 10, Bx, By + 70, "#222", 3, "a"); label(svg, Bx + 50, By + 62, `P = ${fmt(s.P)} kN`, "#222", 13);
+      arrow(svg, Ax - 96, Ay, Ax - 30, Ay, "var(--red)", 2.5, "r"); label(svg, Ax - 64, Ay + 16, `A_{x}`, "var(--red)"); arrow(svg, Ax + 30, Ay + 70, Ax + 30, Ay + 14, "var(--red)", 2.5, "r"); label(svg, Ax + 48, Ay + 60, `A_{y}`, "var(--red)");
+      // F_BC along BC pulling B toward C (tension drawn)
+      const ux = (Cx - Bx) / Math.hypot(Cx - Bx, Cy - By), uy = (Cy - By) / Math.hypot(Cx - Bx, Cy - By);
+      arrow(svg, Bx + ux * 8, By + uy * 8, Bx + ux * 80, By + uy * 80, "var(--green)", 3, "g"); label(svg, Bx + ux * 60 + 40, By + uy * 60, `F_{BC} (drawn in tension)`, "var(--green)", 12);
+    }
+    if ($("b2comp").checked) { // components of F_BC at B (on the bar), tension sense
+      const Fx = -s.FBC * s.a / s.L, Fy = s.FBC * s.h / s.L; const k = 60 / Math.max(Math.abs(s.FBC), 1e-9);
+      arrow(svg, Bx, By, Bx + Fx * k, By, "var(--blue)", 2, "b"); label(svg, Bx + Fx * k / 2, By - 14, `F_{BC}·a/L`, "var(--blue)", 12);
+      arrow(svg, Bx, By, Bx, By - Fy * k, "var(--blue)", 2, "b"); label(svg, Bx + 40, By - Fy * k, `F_{BC}·h/L`, "var(--blue)", 12);
+    }
+    // moment center marker
+    const M = { A: [Ax, Ay], B: [Bx, By], C: [Cx, Cy] }[mc]; el("circle", { cx: M[0], cy: M[1], r: 12, fill: "none", stroke: "var(--red)", "stroke-width": 2.5, "stroke-dasharray": "3 3" }, svg); label(svg, 700, 20, `moment center: ${mc}`, "var(--red)", 13);
+    // dims
+    line(svg, Ax, Ay + 100, Bx, By + 100, "#555", 1); text(svg, (Ax + Bx) / 2, Ay + 112, `a = ${fmt(s.a)} m`, { "font-size": 12, fill: "#555" }); line(svg, Bx + 40, Cy, Bx + 40, Ay, "#555", 1); text(svg, Bx + 60, (Ay + Cy) / 2, `h = ${fmt(s.h)} m`, { "font-size": 12, fill: "#555", "text-anchor": "start" });
+    text(svg, Ax - 8, Ay + 14, "A", { "font-weight": 600 }); text(svg, Bx + 10, By - 14, "B", { "font-weight": 600 }); text(svg, Cx - 8, Cy - 14, "C", { "font-weight": 600 });
+    // equations
+    let eq = `<span class="h">Unknowns on the whole structure:</span> <i>A</i><sub>x</sub>, <i>A</i><sub>y</sub>, <i>C</i><sub>x</sub>, <i>C</i><sub>y</sub> — 4 unknowns, 3 equations: <span class="c">“out of equations” (M01) → dismember.</span><br>`;
+    const L = s.L;
+    if (mc === "C") eq += `Σ<i>M</i><sub>C</sub> = 0 (↺ +): <i>A</i><sub>x</sub>(${fmt(s.h)}) − ${fmt(s.P)}(${fmt(s.a)}) = 0 → <b><i>A</i><sub>x</sub> = ${fmt(s.P * s.a / s.h)} kN</b> (→) <span class="c">— <i>A</i><sub>y</sub>, <i>C</i><sub>x</sub>, <i>C</i><sub>y</sub> pass through C and drop out</span><br>`;
+    if (mc === "A") eq += `Σ<i>M</i><sub>A</sub> = 0 (↺ +): −<i>C</i><sub>x</sub>(${fmt(s.h)}) − ${fmt(s.P)}(${fmt(s.a)}) = 0 → <b><i>C</i><sub>x</sub> = ${fmt(-s.P * s.a / s.h)} kN</b> (←) <span class="c">— <i>A</i><sub>x</sub>, <i>A</i><sub>y</sub>, <i>C</i><sub>y</sub> drop out</span><br>`;
+    if (mc === "B") eq += `Σ<i>M</i><sub>B</sub> = 0 (↺ +): −<i>A</i><sub>y</sub>(${fmt(s.a)}) − <i>C</i><sub>x</sub>(${fmt(s.h)}) − <i>C</i><sub>y</sub>(${fmt(s.a)}) = 0 <span class="c">— three unknowns remain: B is a poor moment center for the whole structure</span><br>`;
+    eq += `Σ<i>F</i><sub>x</sub> = 0: <i>A</i><sub>x</sub> + <i>C</i><sub>x</sub> = 0 → ${fmt(-s.Cx)} + ${fmt(s.Cx)} = 0 ✓ &nbsp; Σ<i>F</i><sub>y</sub> = 0: <i>A</i><sub>y</sub> + <i>C</i><sub>y</sub> = ${fmt(s.P)} <span class="c">(still one equation short)</span><br>`;
+    eq += `<span class="h">Dismember — bar AB alone:</span> Σ<i>M</i><sub>B</sub> = 0 → <i>A</i><sub>y</sub>(${fmt(s.a)}) = 0 → <i>A</i><sub>y</sub> = 0, hence <i>C</i><sub>y</sub> = ${fmt(s.P)} kN.<br>`;
+    eq += `<span class="h">Two-force members:</span> BC is loaded only at its two pins → its force acts along BC: <i>F</i><sub>BC</sub> = √(<i>C</i><sub>x</sub>² + <i>C</i><sub>y</sub>²) = √(${fmt(s.Cx)}² + ${fmt(s.Cy)}²) = <b>${fmt(s.FBC)} kN (tension)</b>, i.e. <i>P</i>·<i>L</i>/<i>h</i> with <i>L</i> = ${fmt(L)} m. &nbsp; Bar AB (pins at A and B only): <i>F</i><sub>AB</sub> = −<i>A</i><sub>x</sub> = <b>${fmt(s.FAB)} kN (compression)</b>.`;
+    $("s2out").innerHTML = eq;
+  }
+  document.querySelectorAll("[data-mc]").forEach(b => b.onclick = () => { document.querySelectorAll("[data-mc]").forEach(x => x.classList.remove("sel")); b.classList.add("sel"); mc = b.dataset.mc; draw(); });
+  ["b2P", "b2a", "b2h", "b2comp", "b2dis"].forEach(id => $(id).addEventListener("input", draw));
+  $("b2reset").onclick = () => { $("b2P").value = 30; $("b2a").value = 0.8; $("b2h").value = 0.6; $("b2comp").checked = true; $("b2dis").checked = false; mc = "A"; document.querySelectorAll("[data-mc]").forEach(x => x.classList.toggle("sel", x.dataset.mc === "A")); draw(); };
+  // two-force member components demo
+  function draw2() { const al = num("b2angN"), F = num("b2F"); const svg = $("s2bsvg"); clear(svg); arrowDef(svg, "g", "var(--green)"); arrowDef(svg, "b", "var(--blue)");
+    const ox = 90, oy = 150, Lp = 150, r = al * Math.PI / 180; const ex = ox + Lp * Math.cos(r), ey = oy - Lp * Math.sin(r);
+    line(svg, ox, oy, ex, ey, "#555", 6, { "stroke-linecap": "round" }); el("circle", { cx: ox, cy: oy, r: 4, fill: "#fff", stroke: "#333", "stroke-width": 2 }, svg); el("circle", { cx: ex, cy: ey, r: 4, fill: "#fff", stroke: "#333", "stroke-width": 2 }, svg);
+    arrow(svg, ex, ey, ex + 70 * Math.cos(r), ey - 70 * Math.sin(r), "var(--green)", 3, "g"); label(svg, ex + 80 * Math.cos(r) + 10, ey - 80 * Math.sin(r), "F", "var(--green)", 14);
+    arrow(svg, ex, ey, ex + 70 * Math.cos(r), ey, "var(--blue)", 2, "b"); label(svg, ex + 35 * Math.cos(r), ey + 14, "F cos α", "var(--blue)", 12);
+    arrow(svg, ex + 70 * Math.cos(r), ey, ex + 70 * Math.cos(r), ey - 70 * Math.sin(r), "var(--blue)", 2, "b"); label(svg, ex + 70 * Math.cos(r) + 30, ey - 35 * Math.sin(r), "F sin α", "var(--blue)", 12);
+    el("path", { d: `M ${ox + 40} ${oy} A 40 40 0 0 0 ${ox + 40 * Math.cos(r)} ${oy - 40 * Math.sin(r)}`, fill: "none", stroke: "#999", "stroke-width": 1.5 }, svg); text(svg, ox + 54 * Math.cos(r / 2), oy - 54 * Math.sin(r / 2), "α", { "font-size": 13, "font-style": "italic" });
+    line(svg, ox, oy, ex, oy, "#bbb", 1, { "stroke-dasharray": "4 4" });
+    $("s2bout").innerHTML = `<i>F</i><sub>x</sub> = <i>F</i> cos α = ${fmt(F)} × ${fmt(Math.cos(r), 3)} = <b>${fmt(F * Math.cos(r))} kN</b>, &nbsp;<i>F</i><sub>y</sub> = <i>F</i> sin α = <b>${fmt(F * Math.sin(r))} kN</b><br><span class="c">With a 3-4-5 (or 6-8-10) geometry you can skip the angle: <i>F</i><sub>x</sub> = (horizontal run / length)·<i>F</i>, <i>F</i><sub>y</sub> = (rise / length)·<i>F</i> (M01).</span>`; }
+  $("b2ang").addEventListener("input", e => { $("b2angN").value = e.target.value; draw2(); }); $("b2angN").addEventListener("input", e => { $("b2ang").value = e.target.value; draw2(); }); $("b2F").addEventListener("input", draw2);
+  draw(); draw2();
+  renderChecks("c2", [
+    { q: "M01 bracket: bar AB is 800 mm long and horizontal, pinned to the wall at A; link BC runs from B up to the wall at C, 600 mm above A; 30 kN acts downward at B. Find the force in link BC (tension positive).", unit: "kN", a: 50, sol: "Σ<i>M</i><sub>C</sub> = 0 on the whole structure: <i>A</i><sub>x</sub>(0.6) − 30(0.8) = 0 → <i>A</i><sub>x</sub> = 40 kN. Bar AB alone: Σ<i>M</i><sub>B</sub> → <i>A</i><sub>y</sub> = 0, so <i>C</i><sub>y</sub> = 30 kN and <i>C</i><sub>x</sub> = −40 kN. BC is a two-force member: <i>F</i><sub>BC</sub> = √(40² + 30²) = <b>+50 kN (tension)</b>. Equivalently <i>F</i><sub>BC</sub> = <i>P</i>·<i>L</i>/<i>h</i> = 30 × 1.0/0.6." },
+    { q: "Same bracket: the force in bar AB (tension positive).", unit: "kN", a: -40, sol: "AB is also a two-force member (pins at A and B only). Σ<i>F</i><sub>x</sub> on the pin at B: <i>F</i><sub>AB</sub> + <i>F</i><sub>BC</sub>(0.8/1.0) = 0 → <i>F</i><sub>AB</sub> = <b>−40 kN (compression)</b>." },
+    { q: "M02: rigid bar ABC is held by two vertical links, BD at B and CE at C, with AB = 125 mm and BC = 225 mm. A load P = 10 kN acts downward at the free end A. Find the force in link CE (tension positive).", unit: "kN", a: -5.556, sol: "Σ<i>M</i><sub>B</sub> = 0 (↺ +), so that <i>F</i><sub>B</sub> drops out: −<i>P</i>(125) + <i>F</i><sub>C</sub>(225) = 0 → <i>F</i><sub>C</sub> = −0.5556 <i>P</i> = <b>−5.56 kN (compression)</b> (the sign depends on how the unknown is drawn; the link pushes). Then Σ<i>F</i><sub>y</sub> = 0: <i>F</i><sub>B</sub> = 1.5556 <i>P</i> = 15.6 kN (tension)." },
+  ]);
+})();
+
+/* ===================================================================== TAB 3: method of sections */
+(function () {
+  let mode = "axial";
+  function setMode(m) { mode = m; document.querySelectorAll("[data-sec]").forEach(b => b.classList.toggle("sel", b.dataset.sec === m)); $("s3axialPanel").style.display = m === "axial" ? "" : "none"; $("s3torquePanel").style.display = m === "torque" ? "" : "none"; const xmax = m === "axial" ? num("a3xC") : num("t3xC"); $("s3x").max = xmax; $("s3x").step = xmax / 200; $("s3xN").step = xmax / 40; $("s3xu").textContent = m === "axial" ? "in" : "m"; if (parseFloat($("s3xN").value) > xmax) { $("s3x").value = xmax / 4; $("s3xN").value = fmt(xmax / 4); } draw(); }
+  document.querySelectorAll("[data-sec]").forEach(b => b.onclick = () => setMode(b.dataset.sec));
+  function draw() {
+    const svg = $("s3svg"), fbd = $("s3fbd"), dia = $("s3dia"); [svg, fbd, dia].forEach(s => { clear(s); arrowDef(s, "a", "#222"); arrowDef(s, "r", "var(--red)"); arrowDef(s, "g", "var(--green)"); arrowDef(s, "v", "var(--purple)"); });
+    const x = Math.min(Math.max(num("s3xN"), 0), parseFloat($("s3x").max)); $("s3x").value = x;
+    if (mode === "axial") {
+      const PA = num("a3PA"), PB = num("a3PB"), xB = num("a3xB"), xC = num("a3xC"); const PC = -(PA + PB); $("a3PC").textContent = `${fmt(PC)} kip`;
+      const X = v => 80 + 620 * v / xC, yb = 110; const fromRight = $("a3fromRight").checked;
+      // rod: segment AB thinner, BC thicker
+      el("rect", { x: X(0), y: yb - 12, width: X(xB) - X(0), height: 24, fill: "#cfd6de", stroke: "#333", "stroke-width": 1.5 }, svg); el("rect", { x: X(xB), y: yb - 18, width: X(xC) - X(xB), height: 36, fill: "#cfd6de", stroke: "#333", "stroke-width": 1.5 }, svg);
+      el("rect", { x: X(xC), y: yb - 50, width: 12, height: 100, fill: "#777" }, svg);
+      const fa = (xx, P, y, lab) => { if (Math.abs(P) < 1e-9) return; const len = 70; if (P > 0) arrow(svg, X(xx), y, X(xx) + len, y, "#222", 3, "a"); else arrow(svg, X(xx), y, X(xx) - len, y, "#222", 3, "a"); label(svg, X(xx) + (P > 0 ? len / 2 : -len / 2), y - 16, lab, "#222", 13); };
+      fa(0, PA, yb, `${fmt(Math.abs(PA))} kip`); fa(xB, PB / 2, yb - 36, `${fmt(Math.abs(PB / 2))} kip`); fa(xB, PB / 2, yb + 36, `${fmt(Math.abs(PB / 2))} kip`);
+      text(svg, X(0), yb + 48, "A", { "font-weight": 600 }); text(svg, X(xB), yb + 60, "B", { "font-weight": 600 }); text(svg, X(xC) + 30, yb, "C", { "font-weight": 600 });
+      // cut
+      line(svg, X(x), 24, X(x), yb + 60, "var(--red)", 2, { "stroke-dasharray": "5 4" }); label(svg, X(x), 14, `cut at x = ${fmt(x)} in`, "var(--red)", 12);
+      line(svg, X(0), 206, X(xC), 206, "#555", 1); [0, xB, xC].forEach(v => { line(svg, X(v), 202, X(v), 210, "#555", 1); text(svg, X(v), 220, fmt(v), { "font-size": 11, fill: "#555" }); }); text(svg, X(xC / 2), 196, "x [in]", { "font-size": 11, fill: "#555" });
+      // internal N(x): keep left piece: N = Σ forces on left piece, pointing... ΣFx: (forces on left) + N = 0 with N drawn in tension (pointing +x on the right face of the left piece) → N = −Σ(left forces)
+      const Nleft = -( (x >= 0 ? PA : 0) + (x > xB ? PB : 0) ); // forces strictly left of cut (loads at the cut taken as left when x > position)
+      const N = Nleft;
+      // FBD
+      const yf = 112; const a = fromRight ? x : 0, b = fromRight ? xC : x;
+      text(fbd, 410, 16, fromRight ? `FBD of the piece to the RIGHT of the cut` : `FBD of the piece to the LEFT of the cut`, { "font-size": 13, "font-weight": 600 });
+      const Xf = v => 120 + 580 * v / xC;
+      el("rect", { x: Xf(a), y: yf - 14, width: Math.max(2, Xf(b) - Xf(a)), height: 28, fill: "#cfd6de", stroke: "#333", "stroke-width": 1.5 }, fbd);
+      const ff = (xx, P, y, lab) => { if (Math.abs(P) < 1e-9) return; const len = 60; if (P > 0) arrow(fbd, Xf(xx), y, Xf(xx) + len, y, "#222", 3, "a"); else arrow(fbd, Xf(xx), y, Xf(xx) - len, y, "#222", 3, "a"); label(fbd, Xf(xx) + (P > 0 ? len / 2 : -len / 2), y - 14, lab, "#222", 12); };
+      let terms = [];
+      if (!fromRight) { if (x > 0) { ff(0, PA, yf, `${fmt(Math.abs(PA))}`); terms.push(PA); } if (x > xB) { ff(xB, PB / 2, yf - 30, `${fmt(Math.abs(PB / 2))}`); ff(xB, PB / 2, yf + 30, `${fmt(Math.abs(PB / 2))}`); terms.push(PB); }
+        // N on right face, drawn in tension (+x)
+        arrow(fbd, Xf(b), yf, Xf(b) + 60, yf, "var(--green)", 3, "g"); label(fbd, Xf(b) + 30, yf - 14, "N (tension)", "var(--green)", 12);
+      } else { if (x < xB) { ff(xB, PB / 2, yf - 30, `${fmt(Math.abs(PB / 2))}`); ff(xB, PB / 2, yf + 30, `${fmt(Math.abs(PB / 2))}`); terms.push(PB); } ff(xC, PC, yf, `${fmt(Math.abs(PC))} (wall)`); terms.push(PC);
+        arrow(fbd, Xf(a), yf, Xf(a) - 60, yf, "var(--green)", 3, "g"); label(fbd, Xf(a) - 30, yf - 14, "N (tension)", "var(--green)", 12); }
+      const Nr = fromRight ? (terms.reduce((s, v) => s + v, 0)) : -terms.reduce((s, v) => s + v, 0);
+      const tstr = terms.map(v => `${sgn(v)}${ab(v)}`).join("");
+      $("s3out").innerHTML = `<span class="h">Wall reaction:</span> Σ<i>F</i><sub>x</sub> = 0 on the whole rod: ${fmt(PA)} + ${fmt(PB)} + <i>C</i> = 0 → <i>C</i> = ${fmt(PC)} kip<br>` +
+        (fromRight ? `<span class="h">Right piece:</span> Σ<i>F</i><sub>x</sub> = 0: −<i>N</i>${tstr} = 0 → <b><i>N</i>(${fmt(x)}) = ${fmt(Nr)} kip</b> ${Nr >= 0 ? "(tension)" : "(compression)"}` : `<span class="h">Left piece:</span> Σ<i>F</i><sub>x</sub> = 0: ${tstr.replace(/^ \+ /, "").replace(/^ − /, "−") || "0"} + <i>N</i> = 0 → <b><i>N</i>(${fmt(x)}) = ${fmt(Nr)} kip</b> ${Nr >= 0 ? "(tension)" : "(compression)"}`) +
+        `<br><span class="c">Tip (M01): draw the unknown internal force pointing <i>away</i> from the cut (tension). Then tension comes out positive and compression negative automatically. Loads applied in pairs (the two 30-kip loads at B) are shown as half-arrows above and below the axis.</span>`;
+      // N diagram
+      const segs = [[0, xB, -PA], [xB, xC, -(PA + PB)]]; const vmax = Math.max(1e-9, ...segs.map(s => Math.abs(s[2]))); const Y = v => 100 - 60 * v / vmax; const Xd = v => 80 + 620 * v / xC;
+      line(dia, Xd(0), Y(0), Xd(xC), Y(0), "#333", 1.5); text(dia, 30, 90, "N [kip]", { "font-size": 12, "font-weight": 600, transform: "rotate(-90 30 90)" });
+      segs.forEach(([a1, b1, v]) => { el("rect", { x: Xd(a1), y: Math.min(Y(0), Y(v)), width: Xd(b1) - Xd(a1), height: Math.abs(Y(v) - Y(0)), fill: "rgba(42,157,143,.25)", stroke: "var(--green)", "stroke-width": 2 }, dia); label(dia, (Xd(a1) + Xd(b1)) / 2, Y(v) + (v >= 0 ? -12 : 12), `${fmt(v)}`, "var(--green)", 12); });
+      line(dia, Xd(x), 20, Xd(x), 160, "var(--red)", 1.5, { "stroke-dasharray": "5 4" }); text(dia, Xd(xC / 2), 172, "x [in]", { "font-size": 11, fill: "#555" }); text(dia, 700, 20, "axial force diagram", { "font-size": 12, "font-weight": 600, fill: "var(--green)" });
+    } else {
+      const TA = num("t3TA"), TB = num("t3TB"), xB = num("t3xB"), xC = num("t3xC"); const TC = -(TA + TB); $("t3TC").textContent = `${fmt(TC)} N·m`;
+      const X = v => 80 + 620 * v / xC, yb = 110;
+      el("rect", { x: X(0), y: yb - 14, width: X(xB) - X(0), height: 28, fill: "#cfd6de", stroke: "#333", "stroke-width": 1.5 }, svg); el("rect", { x: X(xB), y: yb - 19, width: X(xC) - X(xB), height: 38, fill: "#cfd6de", stroke: "#333", "stroke-width": 1.5 }, svg); el("rect", { x: X(xC), y: yb - 50, width: 12, height: 100, fill: "#777" }, svg);
+      const ft = (xx, T, lab) => { if (Math.abs(T) < 1e-9) return; el("ellipse", { cx: X(xx), cy: yb, rx: 9, ry: 30, fill: "#eee", stroke: "#333", "stroke-width": 1.5 }, svg); couple(svg, X(xx), yb - 46, 14, T > 0, "#222", "a", 2.5); label(svg, X(xx), yb - 76, lab, "#222", 12); };
+      ft(0, TA, `${fmt(Math.abs(TA))} N·m ${TA > 0 ? "↺" : "↻"}`); ft(xB, TB, `${fmt(Math.abs(TB))} N·m ${TB > 0 ? "↺" : "↻"}`);
+      text(svg, X(0), yb + 48, "A", { "font-weight": 600 }); text(svg, X(xB), yb + 52, "B", { "font-weight": 600 }); text(svg, X(xC) + 30, yb, "C", { "font-weight": 600 });
+      line(svg, X(x), 24, X(x), yb + 60, "var(--red)", 2, { "stroke-dasharray": "5 4" }); label(svg, X(x), 14, `cut at x = ${fmt(x)} m`, "var(--red)", 12);
+      line(svg, X(0), 212, X(xC), 212, "#555", 1); [0, xB, xC].forEach(v => { line(svg, X(v), 208, X(v), 216, "#555", 1); text(svg, X(v), 224, fmt(v), { "font-size": 11, fill: "#555" }); }); text(svg, X(xC) + 40, 212, "x [m]", { "font-size": 11, fill: "#555" });
+      text(svg, 420, 196, "↺ (as drawn, seen from the free end A) = positive torque about +x by the right-hand rule", { "font-size": 11, fill: "#555" });
+      // internal torque: left piece: ΣT = 0: (left torques) + T = 0 → T = −Σ left torques, with T drawn positive (↺ about +x on the right face)
+      const left = (x > 0 ? TA : 0) + (x > xB ? TB : 0); const T = -left;
+      const Xf = v => 120 + 580 * v / xC, yf = 120; text(fbd, 410, 16, "FBD of the piece to the LEFT of the cut (internal torque T drawn positive)", { "font-size": 13, "font-weight": 600 });
+      el("rect", { x: Xf(0), y: yf - 14, width: Math.max(2, Xf(x) - Xf(0)), height: 28, fill: "#cfd6de", stroke: "#333", "stroke-width": 1.5 }, fbd);
+      const terms = []; if (x > 0 && Math.abs(TA) > 0) { couple(fbd, Xf(0), yf - 42, 14, TA > 0, "#222", "a"); label(fbd, Xf(0), yf - 74, `${fmt(Math.abs(TA))} N·m ${TA > 0 ? "↺" : "↻"}`, "#222", 12); terms.push(TA); } if (x > xB && Math.abs(TB) > 0) { couple(fbd, Xf(xB), yf - 42, 14, TB > 0, "#222", "a"); label(fbd, Xf(xB), yf - 74, `${fmt(Math.abs(TB))} N·m ${TB > 0 ? "↺" : "↻"}`, "#222", 12); terms.push(TB); }
+      couple(fbd, Xf(x) + 30, yf, 18, true, "var(--purple)", "v", 3); label(fbd, Xf(x) + 30, yf + 34, "T (positive sense)", "var(--purple)", 12);
+      const tstr = terms.map(v => `${sgn(v)}${ab(v)}`).join("").replace(/^ \+ /, "").replace(/^ − /, "−");
+      $("s3out").innerHTML = `<span class="h">Wall reaction:</span> Σ<i>T</i> = 0 on the whole shaft: ${fmt(TA)} ${sgn(TB)}${ab(TB)} + <i>T</i><sub>C</sub> = 0 → <i>T</i><sub>C</sub> = ${fmt(TC)} N·m<br><span class="h">Left piece:</span> Σ<i>T</i> = 0: ${tstr || "0"} + <i>T</i> = 0 → <b><i>T</i>(${fmt(x)}) = ${fmt(T)} N·m</b><br><span class="c">M06: cut each segment and sum the torques on one side; the internal torque changes at every applied torque. Stresses use |<i>T</i>|: <i>τ</i><sub>max</sub> = |<i>T</i>|<i>c</i>/<i>J</i>.</span>`;
+      const segs = [[0, xB, -TA], [xB, xC, -(TA + TB)]]; const vmax = Math.max(1e-9, ...segs.map(s => Math.abs(s[2]))); const Y = v => 100 - 60 * v / vmax; const Xd = v => 80 + 620 * v / xC;
+      line(dia, Xd(0), Y(0), Xd(xC), Y(0), "#333", 1.5); text(dia, 30, 90, "T [N·m]", { "font-size": 12, "font-weight": 600, transform: "rotate(-90 30 90)" });
+      segs.forEach(([a1, b1, v]) => { el("rect", { x: Xd(a1), y: Math.min(Y(0), Y(v)), width: Xd(b1) - Xd(a1), height: Math.abs(Y(v) - Y(0)), fill: "rgba(106,76,147,.22)", stroke: "var(--purple)", "stroke-width": 2 }, dia); label(dia, (Xd(a1) + Xd(b1)) / 2, Y(v) + (v >= 0 ? -12 : 12), `${fmt(v)}`, "var(--purple)", 12); });
+      line(dia, Xd(x), 20, Xd(x), 160, "var(--red)", 1.5, { "stroke-dasharray": "5 4" }); text(dia, Xd(xC / 2), 172, "x [m]", { "font-size": 11, fill: "#555" }); text(dia, 700, 20, "torque diagram", { "font-size": 12, "font-weight": 600, fill: "var(--purple)" });
+    }
+  }
+  $("s3x").addEventListener("input", e => { $("s3xN").value = fmt(parseFloat(e.target.value)); draw(); }); $("s3xN").addEventListener("change", draw);
+  ["a3PA", "a3PB", "a3xB", "a3xC", "a3fromRight", "t3TA", "t3TB", "t3xB", "t3xC"].forEach(id => $(id).addEventListener("input", () => setMode(mode)));
+  $("a3reset").onclick = () => { $("a3PA").value = -40; $("a3PB").value = 60; $("a3xB").value = 12; $("a3xC").value = 28; $("a3fromRight").checked = false; $("s3xN").value = 6; setMode("axial"); };
+  $("t3reset").onclick = () => { $("t3TA").value = 400; $("t3TB").value = -1200; $("t3xB").value = 0.5; $("t3xC").value = 1.0; $("s3xN").value = 0.25; setMode("torque"); };
+  setMode("axial");
+  renderChecks("c3", [
+    { q: "M01: rod AB (d = 2 in) and BC (d = 3 in) fixed at C. A 40-kip load pulls to the left at A, and two 30-kip loads act to the right at B. Internal axial force in BC (tension positive)?", unit: "kip", a: -20, sol: "Cut in BC and keep the left piece: −40 + 60 + <i>N</i><sub>BC</sub> = 0 → <b><i>N</i><sub>BC</sub> = −20 kip (compression)</b>. In AB: −40 + <i>N</i><sub>AB</sub> = 0 → +40 kip (tension). Stresses: σ<sub>AB</sub> = 40/(π·1²) = 12.73 ksi, σ<sub>BC</sub> = −20/(π·1.5²) = −2.83 ksi." },
+    { q: "M06: torques of 400 N·m at A, 1200 N·m at B (opposite sense) and 800 N·m at C act on a shaft. Magnitude of the internal torque in segment BC?", unit: "N·m", a: 800, sol: "Cut in BC and keep the left side: 400 − 1200 + <i>T</i><sub>BC</sub> = 0 → <i>T</i><sub>BC</sub> = 800 N·m, i.e. |<i>T</i><sub>BC</sub>| = <b>800 N·m</b> (and |<i>T</i><sub>AB</sub>| = 400 N·m). Check from the right: the 800 N·m at C alone balances it." },
+    { q: "M01: a bar hangs from the ceiling. Measured down from the ceiling, 8 kN acts upward at a, 8 kN downward at 2a, and 32 kN downward at the free end 3a. Internal force in the middle segment (between a and 2a), tension positive?", unit: "kN", a: 40, sol: "Keep the lower piece: the forces on it are 8 kN ↓ at 2a and 32 kN ↓ at 3a, and the unknown <i>N</i> drawn in tension (pulling up on the piece): <i>N</i> − 8 − 32 = 0 → <b><i>N</i> = +40 kN</b>. Check with the upper piece: ceiling reaction <i>R</i> = 32 + 8 − 8 = 32 kN ↑; on the upper piece 32 ↑ + 8 ↑ − <i>N</i> = 0 → <i>N</i> = 40 kN. Whichever piece you keep, include every force on it." },
+  ]);
+})();
+
+/* ===================================================================== TAB 4: distributed loads */
+(function () {
+  function draw() {
+    const L = num("d4L"); let a = Math.min(Math.max(num("d4a"), 0), L), b = Math.min(Math.max(num("d4b"), 0), L); if (b < a) [a, b] = [b, a]; const w1 = num("d4w1"), w2 = num("d4w2");
+    const W = (w1 + w2) / 2 * (b - a); const xbar = Math.abs(w1 + w2) > 1e-12 ? a + (b - a) * (w1 + 2 * w2) / (3 * (w1 + w2)) : (a + b) / 2;
+    const RB = W * xbar / L, RA = W - RB;
+    const svg = $("s4svg"); clear(svg); arrowDef(svg, "a", "#222"); arrowDef(svg, "r", "var(--red)"); arrowDef(svg, "b", "var(--blue)");
+    const X = v => 80 + 660 * v / L, yb = 130, hb = 14;
+    drawSupport(svg, X(0), yb + hb / 2, "pin"); drawSupport(svg, X(L), yb + hb / 2, "roller");
+    el("rect", { x: X(0), y: yb - hb / 2, width: X(L) - X(0), height: hb, fill: "#cfd6de", stroke: "#333", "stroke-width": 1.5 }, svg);
+    const wmax = Math.max(Math.abs(w1), Math.abs(w2), 1e-9); const hg = w => 10 + 50 * Math.abs(w) / wmax; const yt = w => yb - hb / 2 - (w >= 0 ? hg(w) : -hg(w));
+    el("polygon", { points: `${X(a)},${yb - hb / 2} ${X(a)},${yt(w1)} ${X(b)},${yt(w2)} ${X(b)},${yb - hb / 2}`, fill: "rgba(31,119,180,.12)", stroke: "var(--blue)", "stroke-width": 1.5 }, svg);
+    const nA = Math.max(2, Math.round((X(b) - X(a)) / 28)); for (let i = 0; i <= nA; i++) { const xx = a + (b - a) * i / nA, w = w1 + (w2 - w1) * i / nA; if (Math.abs(w) < 1e-9) continue; if (w > 0) arrow(svg, X(xx), yt(w), X(xx), yb - hb / 2 - 2, "var(--blue)", 1.6, "b"); else arrow(svg, X(xx), yb - hb / 2 - 2, X(xx), yt(w), "var(--blue)", 1.6, "b"); }
+    label(svg, X(a) - 4, yt(w1) - 10, `w_{1} = ${fmt(w1)} kN/m`, "var(--blue)", 12, { "text-anchor": "end" }); label(svg, X(b) + 4, yt(w2) - 10, `w_{2} = ${fmt(w2)} kN/m`, "var(--blue)", 12, { "text-anchor": "start" });
+    if ($("d4show").checked && Math.abs(W) > 1e-9) { arrow(svg, X(xbar), 16, X(xbar), yb - hb / 2 - Math.min(hg(w1), hg(w2)) - 4, "var(--red)", 3, "r"); label(svg, X(xbar), 8, `W = ${fmt(W)} kN at x̄ = ${fmt(xbar)} m`, "var(--red)", 13); line(svg, X(xbar), yb + 22, X(xbar), yb + 70, "var(--red)", 1, { "stroke-dasharray": "3 3" }); }
+    arrow(svg, X(0), yb + hb / 2 + 62, X(0), yb + hb / 2 + 6, "var(--red)", 2.5, "r"); label(svg, X(0), yb + hb / 2 + 76, `R_{A} = ${fmt(RA)} kN`, "var(--red)", 12); arrow(svg, X(L), yb + hb / 2 + 62, X(L), yb + hb / 2 + 6, "var(--red)", 2.5, "r"); label(svg, X(L), yb + hb / 2 + 76, `R_{B} = ${fmt(RB)} kN`, "var(--red)", 12);
+    line(svg, X(0), 226, X(L), 226, "#555", 1); [0, a, b, L].forEach(v => { line(svg, X(v), 222, X(v), 230, "#555", 1); text(svg, X(v), 238, fmt(v), { "font-size": 11, fill: "#555" }); });
+    // formulas
+    const shape = Math.abs(w1 - w2) < 1e-9 ? "uniform" : (Math.abs(w1) < 1e-9 || Math.abs(w2) < 1e-9 ? "triangular" : "trapezoidal");
+    let f = `<span class="h">Resultant (area under the load diagram):</span> <i>W</i> = <span class="int">∫</span><sub>${fmt(a)}</sub><sup>${fmt(b)}</sup> <i>w</i> d<i>x</i> = ½(<i>w</i><sub>1</sub> + <i>w</i><sub>2</sub>)(<i>b</i> − <i>a</i>) = ½(${fmt(w1)} + ${fmt(w2)})(${fmt(b - a)}) = <b>${fmt(W)} kN</b><br>`;
+    f += `<span class="h">Location (centroid of that area):</span> <i>x̄</i> = <i>a</i> + (<i>b</i> − <i>a</i>)·(<i>w</i><sub>1</sub> + 2<i>w</i><sub>2</sub>) / [3(<i>w</i><sub>1</sub> + <i>w</i><sub>2</sub>)] = <b>${fmt(xbar)} m</b> <span class="c">(${shape}: ${shape === "uniform" ? "midpoint" : shape === "triangular" ? "⅓ of the length from the tall end" : "between the midpoint and the tall end"})</span><br>`;
+    f += `<span class="h">Reactions:</span> Σ<i>M</i><sub>A</sub> = 0: <i>R</i><sub>B</sub>(${fmt(L)}) − ${fmt(W)}(${fmt(xbar)}) = 0 → <i>R</i><sub>B</sub> = <b>${fmt(RB)} kN</b>; &nbsp;Σ<i>F</i><sub>y</sub> = 0: <i>R</i><sub>A</sub> = ${fmt(W)} − ${fmt(RB)} = <b>${fmt(RA)} kN</b>`;
+    $("s4out").innerHTML = f;
+    // M comparison
+    const Ms = $("s4M"); Ms.style.display = $("d4M").checked ? "" : "none"; if ($("d4M").checked) { clear(Ms); const N = 200; const Mreal = [], Mres = []; for (let i = 0; i <= N; i++) { const xx = L * i / N; let m = RA * xx; if (xx > a) { const xe = Math.min(xx, b), t = xe - a, k = (w2 - w1) / (b - a || 1), Xr = xx - a; m -= w1 * (Xr * t - t * t / 2) + k * (Xr * t * t / 2 - t * t * t / 3); } Mreal.push([xx, m]); Mres.push([xx, RA * xx - (xx > xbar ? W * (xx - xbar) : 0)]); }
+      const mmax = Math.max(1e-9, ...Mreal.map(p => Math.abs(p[1])), ...Mres.map(p => Math.abs(p[1]))); const Y = v => 150 - 110 * v / mmax; const Xd = v => 80 + 660 * v / L;
+      line(Ms, Xd(0), Y(0), Xd(L), Y(0), "#333", 1.5); text(Ms, 24, 90, "M [kN·m]", { "font-size": 12, "font-weight": 600, transform: "rotate(-90 24 90)" });
+      el("polyline", { points: Mres.map(p => `${Xd(p[0])},${Y(p[1])}`).join(" "), fill: "none", stroke: "#999", "stroke-width": 2, "stroke-dasharray": "6 4" }, Ms); el("polyline", { points: Mreal.map(p => `${Xd(p[0])},${Y(p[1])}`).join(" "), fill: "none", stroke: "var(--red)", "stroke-width": 2.5 }, Ms);
+      label(Ms, 600, 24, "M(x) with the real distributed load", "var(--red)", 12); label(Ms, 600, 42, "M(x) if the load were a single force W at x̄ (wrong inside the loaded span)", "#777", 12); text(Ms, Xd(L / 2), 190, "x [m]", { "font-size": 11, fill: "#555" }); }
+  }
+  ["d4L", "d4a", "d4b", "d4w1", "d4w2", "d4show", "d4M"].forEach(id => $(id).addEventListener("input", draw));
+  document.querySelectorAll("[data-shape]").forEach(b => b.onclick = () => { const s = b.dataset.shape; if (s === "uni") { $("d4w1").value = 6; $("d4w2").value = 6; } if (s === "tri") { $("d4w1").value = 0; $("d4w2").value = 9; } if (s === "trap") { $("d4w1").value = 2; $("d4w2").value = 8; } draw(); });
+  $("d4reset").onclick = () => { $("d4L").value = 6; $("d4a").value = 1; $("d4b").value = 5; $("d4w1").value = 2; $("d4w2").value = 8; $("d4show").checked = true; $("d4M").checked = false; draw(); };
+  draw();
+  renderChecks("c4", [
+    { q: "A triangular load grows from 0 at x = 0 to w₀ = 12 kN/m at x = 6 m. What is the resultant W?", unit: "kN", a: 36, sol: "<i>W</i> = ½ <i>w</i><sub>0</sub> <i>L</i> = ½ × 12 × 6 = <b>36 kN</b>." },
+    { q: "Same load: where does W act, measured from x = 0?", unit: "m", a: 4, sol: "Centroid of a triangle: ⅔ of the length from the zero end (⅓ from the tall end): <i>x̄</i> = ⅔ × 6 = <b>4 m</b>." },
+    { q: "M11: a simply supported beam of span 9 m carries 20 kN/m over the first 6 m from A. Reaction at A?", unit: "kN", a: 80, sol: "<i>W</i> = 20 × 6 = 120 kN at <i>x̄</i> = 3 m. Σ<i>M</i><sub>A</sub>: <i>R</i><sub>C</sub>(9) = 120(3) → <i>R</i><sub>C</sub> = 40 kN; <i>R</i><sub>A</sub> = 120 − 40 = <b>80 kN</b>." },
+  ]);
+})();
+
+/* ===================================================================== TAB 5: section properties */
+(function () {
+  let rects = [];
+  const PRE = { tee: { u: "in", r: [{ b: 4, h: 2, y0: 0, xc: 0 }, { b: 1, h: 4, y0: 2, xc: 0 }], q: 2 }, ibeam: { u: "in", r: [{ b: 120, h: 0.5, y0: 0, xc: 0 }, { b: 6, h: 8, y0: 0.5, xc: 0 }, { b: 80, h: 0.5, y0: 8.75, xc: 0 }], q: 3.99 }, box: { u: "in", r: [{ b: 4, h: 0.5, y0: 0, xc: 0 }, { b: 4, h: 0.5, y0: 3.5, xc: 0 }, { b: 0.5, h: 3, y0: 0.5, xc: -1.75 }, { b: 0.5, h: 3, y0: 0.5, xc: 1.75 }], q: 2 }, rect: { u: "mm", r: [{ b: 50, h: 100, y0: 0, xc: 0 }], q: 50 } };
+  function renderList() { const d = $("r5list"); d.innerHTML = ""; rects.forEach((r, i) => { const row = document.createElement("div"); row.className = "rowline"; row.innerHTML = `<span style="width:16px;font-weight:600">${i + 1}</span><label>b <input type="number" data-ri="${i}" data-k="b" value="${r.b}" step="any" style="width:64px"></label><label>h <input type="number" data-ri="${i}" data-k="h" value="${r.h}" step="any" style="width:64px"></label><label>y<sub>0</sub> <input type="number" data-ri="${i}" data-k="y0" value="${r.y0}" step="any" style="width:64px"></label><label>x<sub>c</sub> <input type="number" data-ri="${i}" data-k="xc" value="${r.xc}" step="any" style="width:64px"></label><button class="x" data-rdel="${i}">×</button>`; d.appendChild(row); }); if (typeof fixLabels === "function") fixLabels(); }
+  $("r5list").addEventListener("input", e => { const i = +e.target.dataset.ri; if (isNaN(i)) return; rects[i][e.target.dataset.k] = parseFloat(e.target.value) || 0; draw(); });
+  $("r5list").addEventListener("click", e => { const i = e.target.dataset.rdel; if (i === undefined) return; rects.splice(+i, 1); renderList(); draw(); });
+  $("r5add").onclick = () => { rects.push({ b: 2, h: 2, y0: 0, xc: 0 }); renderList(); draw(); };
+  $("r5preset").addEventListener("change", e => { const p = PRE[e.target.value]; if (!p) return; rects = JSON.parse(JSON.stringify(p.r)); $("r5u").value = p.u; renderList(); draw(); $("r5qN").value = p.q; $("r5q").value = p.q; draw(); });
+  $("r5reset").onclick = () => { rects = JSON.parse(JSON.stringify(PRE.tee.r)); $("r5u").value = "in"; $("r5preset").value = ""; renderList(); $("r5qN").value = 2; $("r5q").value = 2; draw(); };
+  $("r5q").addEventListener("input", e => { $("r5qN").value = e.target.value; draw(); }); $("r5qN").addEventListener("input", e => { $("r5q").value = e.target.value; draw(); }); $("r5u").addEventListener("change", draw);
+  function draw() {
+    const u = $("r5u").value; const svg = $("s5svg"); clear(svg);
+    if (!rects.length) { $("s5out").innerHTML = "<span class='c'>Add a rectangle.</span>"; return; }
+    const A = rects.reduce((s, r) => s + r.b * r.h, 0); const Ay = rects.reduce((s, r) => s + r.b * r.h * (r.y0 + r.h / 2), 0); const ybar = Ay / A;
+    const Ax = rects.reduce((s, r) => s + r.b * r.h * r.xc, 0); const xbar = Ax / A;
+    const terms = rects.map(r => { const a = r.b * r.h, yc = r.y0 + r.h / 2, d = yc - ybar, I0 = r.b * r.h ** 3 / 12; return { a, yc, d, I0, Ad2: a * d * d }; });
+    const I = terms.reduce((s, t) => s + t.I0 + t.Ad2, 0); const Iy = rects.reduce((s, r) => s + r.h * r.b ** 3 / 12 + r.b * r.h * (r.xc - xbar) ** 2, 0);
+    const ymin = Math.min(...rects.map(r => r.y0)), ymax = Math.max(...rects.map(r => r.y0 + r.h)); const xmin = Math.min(...rects.map(r => r.xc - r.b / 2)), xmax = Math.max(...rects.map(r => r.xc + r.b / 2));
+    $("r5q").min = ymin; $("r5q").max = ymax; $("r5q").step = (ymax - ymin) / 200; let yq = Math.min(Math.max(num("r5qN"), ymin), ymax);
+    // Q of the area above level yq, about the centroidal axis; width t at the level
+    let Q = 0, tw = 0; rects.forEach(r => { const top = r.y0 + r.h, lo = Math.max(yq, r.y0); if (top > lo) { const a = r.b * (top - lo), yc = (top + lo) / 2; Q += a * (yc - ybar); } if (yq >= r.y0 && yq < r.y0 + r.h) tw += r.b; });
+    const rg = Math.sqrt(I / A), c = Math.max(ymax - ybar, ybar - ymin), S = I / c;
+    // drawing
+    const sc = Math.min(300 / Math.max(xmax - xmin, 1e-9), 280 / Math.max(ymax - ymin, 1e-9)); const ox = 200 - ((xmin + xmax) / 2) * sc, oy = 180 + ((ymin + ymax) / 2) * sc; const X = v => ox + v * sc, Y = v => oy - v * sc;
+    rects.forEach((r, i) => { el("rect", { x: X(r.xc - r.b / 2), y: Y(r.y0 + r.h), width: r.b * sc, height: r.h * sc, fill: "rgba(31,119,180,.15)", stroke: "var(--blue)", "stroke-width": 1.5 }, svg); el("circle", { cx: X(r.xc), cy: Y(r.y0 + r.h / 2), r: 3, fill: "var(--blue)" }, svg); text(svg, X(r.xc) + 10, Y(r.y0 + r.h / 2), `${i + 1}`, { "font-size": 11, fill: "var(--blue)", "text-anchor": "start" }); });
+    // shaded area above level
+    rects.forEach(r => { const top = r.y0 + r.h, lo = Math.max(yq, r.y0); if (top > lo) el("rect", { x: X(r.xc - r.b / 2), y: Y(top), width: r.b * sc, height: (top - lo) * sc, fill: "rgba(172,65,66,.25)" }, svg); });
+    line(svg, X(xmin) - 30, Y(ybar), X(xmax) + 30, Y(ybar), "var(--red)", 2, { "stroke-dasharray": "6 4" }); label(svg, X(xmax) + 60, Y(ybar), `centroidal axis z`, "var(--red)", 12);
+    line(svg, X(xmin) - 20, Y(yq), X(xmax) + 20, Y(yq), "#444", 1.5); label(svg, X(xmin) - 60, Y(yq), `y = ${fmt(yq)} ${u}`, "#444", 11);
+    el("circle", { cx: X(xbar), cy: Y(ybar), r: 4, fill: "var(--red)" }, svg);
+    // dimension for ybar
+    line(svg, X(xmax) + 40, Y(ymin), X(xmax) + 40, Y(ybar), "#555", 1); text(svg, X(xmax) + 52, (Y(ymin) + Y(ybar)) / 2, `ȳ = ${fmt(ybar)} ${u}`, { "font-size": 12, fill: "#555", "text-anchor": "start" });
+    // right-side text table
+    const tx = 470; let ty = 30; const T = (s, dy = 22, attrs = {}) => { text(svg, tx, ty, s, Object.assign({ "text-anchor": "start", "font-size": 13 }, attrs)); ty += dy; };
+    T(`Parallel-axis theorem: I = Σ ( b h³/12 + A d² )`, 26, { "font-weight": 600 });
+    terms.forEach((t, i) => T(`${i + 1}:  A = ${fmt(t.a)}, d = ${fmt(t.d)}  →  ${fmt(t.I0)} + ${fmt(t.Ad2)} = ${fmt(t.I0 + t.Ad2)} ${u}⁴`, 20));
+    T(`I_{z} = ${fmt(I)} ${u}⁴`, 26, { "font-weight": 600, fill: "var(--red)" });
+    T(`Q at the level (shaded area × its arm) = ${fmt(Q)} ${u}³`, 20); T(`width at the level t = ${fmt(tw)} ${u}`, 20);
+    T(`r = √(I/A) = ${fmt(rg)} ${u},   c = ${fmt(c)} ${u},   S = I/c = ${fmt(S)} ${u}³`, 20);
+    $("s5out").innerHTML = `<span class="h">Area</span> <i>A</i> = Σ<i>b</i><sub>i</sub><i>h</i><sub>i</sub> = ${fmt(A)} ${u}² &nbsp; <span class="h">Centroid</span> <i>ȳ</i> = Σ<i>A</i><sub>i</sub><i>ȳ</i><sub>i</sub> / Σ<i>A</i><sub>i</sub> = (${terms.map(t => `${fmt(t.a)}·${fmt(t.yc)}`).join(" + ")}) / ${fmt(A)} = <b>${fmt(ybar)} ${u}</b> <span class="c">(from the bottom)</span><br>` +
+      `<span class="h">Second moment about the centroidal z-axis</span> <i>I</i><sub>z</sub> = Σ(<i>b</i><sub>i</sub><i>h</i><sub>i</sub>³/12 + <i>A</i><sub>i</sub><i>d</i><sub>i</sub>²) = <b>${fmt(I)} ${u}⁴</b> &nbsp; <span class="c">(about the vertical axis: <i>I</i><sub>y</sub> = ${fmt(Iy)} ${u}⁴ — the smaller of the two governs buckling, M12)</span><br>` +
+      `<span class="h">First moment at <i>y</i> = ${fmt(yq)} ${u}</span> <i>Q</i> = <i>A</i>′·<i>ȳ</i>′ = <b>${fmt(Q)} ${u}³</b> <span class="c">(area above the level × distance from its centroid to the neutral axis; using the area below gives the same magnitude, M08; <i>Q</i> is largest at the centroid)</span><br>` +
+      `<span class="h">Radius of gyration</span> <i>r</i> = √(<i>I</i>/<i>A</i>) = <b>${fmt(rg)} ${u}</b> &nbsp; <span class="h">Section modulus</span> <i>S</i> = <i>I</i>/<i>c</i> = <b>${fmt(S)} ${u}³</b>`;
+    circ();
+  }
+  function circ() { const co = num("c5o"), ci = Math.min(num("c5i"), co), u = $("c5u").value; const J = Math.PI / 2 * (co ** 4 - ci ** 4), I = J / 2, A = Math.PI * (co ** 2 - ci ** 2); $("s5circ").innerHTML = `<i>J</i> = ½π(<i>c</i>⁴ − <i>c</i><sub>i</sub>⁴) = <b>${fmt(J)} ${u}⁴</b> &nbsp; <i>I</i> = <i>J</i>/2 = ${fmt(I)} ${u}⁴ &nbsp; <i>A</i> = ${fmt(A)} ${u}² &nbsp; <i>r</i> = √(<i>I</i>/<i>A</i>) = ${fmt(Math.sqrt(I / A))} ${u}<br><span class="c">Solid shaft: <i>J</i> = π<i>c</i>⁴/2 = π<i>d</i>⁴/32 (M06). For a circle <i>I</i><sub>y</sub> = <i>I</i><sub>z</sub> = <i>J</i>/2.</span>`; }
+  ["c5o", "c5i", "c5u"].forEach(id => $(id).addEventListener("input", circ));
+  rects = JSON.parse(JSON.stringify(PRE.tee.r)); renderList(); draw();
+  renderChecks("c5", [
+    { q: "M08: an inverted T-section has a flange 4 in wide × 2 in tall at the bottom and a web 1 in wide × 4 in tall on top of it. Distance of the centroid from the bottom?", unit: "in", a: 2, sol: "<i>ȳ</i> = (8 × 1 + 4 × 4)/(8 + 4) = 24/12 = <b>2 in</b>." },
+    { q: "Same section: I about the centroidal horizontal axis.", unit: "in⁴", a: 32, sol: "Flange: 4·2³/12 + 8·(1 − 2)² = 2.667 + 8; web: 1·4³/12 + 4·(4 − 2)² = 5.333 + 16. Total <b>32 in⁴</b>." },
+    { q: "Same section: Q for the web above the flange–web junction (y = 2 in), about the neutral axis.", unit: "in³", a: 8, sol: "Area above the junction = web = 1 × 4 = 4 in², centroid at <i>y</i> = 4 in, i.e. 2 in above the N.A. → <i>Q</i> = 4 × 2 = <b>8 in³</b>. (Using the flange below the N.A.: 8 × 1 = 8 in³ — same magnitude.)" },
+    { q: "M06: a solid shaft has diameter 40 mm. Polar moment of area J?", unit: "mm⁴", a: 251327, tol: 0.01, sol: "<i>J</i> = π<i>c</i>⁴/2 with <i>c</i> = 20 mm: π × 20⁴/2 = <b>2.513 × 10⁵ mm⁴</b>." },
+  ]);
+})();
+
+/* ===================================================================== TAB 6: 3-D moments */
+(function () {
+  function draw() {
+    const L1 = num("m6L1"), L2 = num("m6L2"), Fx = num("m6Fx"), Fy = num("m6Fy"), Fz = num("m6Fz");
+    // r from A to D = (L1, 0, L2); M = r × F
+    const r = [L1, 0, L2], F = [Fx, Fy, Fz];
+    const M = [r[1] * F[2] - r[2] * F[1], r[2] * F[0] - r[0] * F[2], r[0] * F[1] - r[1] * F[0]];
+    const svg = $("s6svg"); clear(svg); arrowDef(svg, "a", "#222"); arrowDef(svg, "r", "var(--red)"); arrowDef(svg, "b", "var(--blue)"); arrowDef(svg, "g", "var(--green)");
+    // isometric projection: x to the right-down, y up, z to the left-down (toward viewer)
+    const P = (x, y, z) => [380 + 22 * x * 0.92 - 16 * z * 0.75, 190 - 22 * y * 0.9 + 16 * z * 0.5 - 22 * x * 0.18];
+    const sc = Math.min(1, 14 / Math.max(L1, L2, 1)); const p = (x, y, z) => P(x * sc, y * sc, z * sc);
+    const A = p(0, 0, 0), C = p(L1, 0, 0), D = p(L1, 0, L2);
+    // wall at A
+    el("polygon", { points: [p(0, 5, -4), p(0, 5, 4), p(0, -5, 4), p(0, -5, -4)].map(q => q.join(",")).join(" "), fill: "#e8e8e8", stroke: "#777", "stroke-width": 1.5 }, svg);
+    line(svg, A[0], A[1], C[0], C[1], "#8a94a6", 14, { "stroke-linecap": "round" }); line(svg, C[0], C[1], D[0], D[1], "#8a94a6", 10, { "stroke-linecap": "round" });
+    text(svg, A[0] - 14, A[1] - 16, "A (section)", { "font-size": 12, "font-weight": 600 }); text(svg, C[0] + 14, C[1] - 14, "C", { "font-weight": 600 }); text(svg, D[0] - 14, D[1] + 16, "D", { "font-weight": 600 });
+    // axes at A
+    const ax = (vx, vy, vz, lab, col) => { const e = p(vx, vy, vz); arrow(svg, A[0], A[1], e[0], e[1], col, 1.5, "a"); label(svg, e[0] + 8, e[1], lab, col, 12); };
+    const al = 5 / sc; ax(al, 0, 0, "x", "#444"); ax(0, al, 0, "y", "#444"); ax(0, 0, al, "z", "#444");
+    // force components at D
+    const fs = 60 / Math.max(Math.abs(Fx), Math.abs(Fy), Math.abs(Fz), 1); const fa = (vx, vy, vz, lab) => { if (!vx && !vy && !vz) return; const dir = [p(vx, 0, 0), p(0, vy, 0), p(0, 0, vz)]; const dx = (vx ? dir[0][0] - A[0] : 0) + (vy ? dir[1][0] - A[0] : 0) + (vz ? dir[2][0] - A[0] : 0), dy = (vx ? dir[0][1] - A[1] : 0) + (vy ? dir[1][1] - A[1] : 0) + (vz ? dir[2][1] - A[1] : 0); const n = Math.hypot(dx, dy) || 1; const Lp = 70; arrow(svg, D[0], D[1], D[0] + dx / n * Lp, D[1] + dy / n * Lp, "var(--red)", 3, "r"); label(svg, D[0] + dx / n * (Lp + 16), D[1] + dy / n * (Lp + 16), lab, "var(--red)", 12); };
+    if (Fx) fa(Math.sign(Fx), 0, 0, `F_{x} = ${fmt(Fx)}`); if (Fy) fa(0, Math.sign(Fy), 0, `F_{y} = ${fmt(Fy)}`); if (Fz) fa(0, 0, Math.sign(Fz), `F_{z} = ${fmt(Fz)}`);
+    // dims
+    text(svg, (A[0] + C[0]) / 2, (A[1] + C[1]) / 2 - 22, `L_{AC} = ${fmt(L1)} in`, { "font-size": 12, fill: "#555" }); text(svg, (C[0] + D[0]) / 2 + 64, (C[1] + D[1]) / 2 + 6, `L_{CD} = ${fmt(L2)} in`, { "font-size": 12, fill: "#555" });
+    // internal resultants at A (reaction of the wall on the bar is opposite; we report what the section carries = resultant of the load)
+    const rowsM = [["x", `r_y F_z − r_z F_y`, `(0)(${fmt(Fz)}) − (${fmt(L2)})(${fmt(Fy)})`, M[0], "torque T about the bar axis"], ["y", `r_z F_x − r_x F_z`, `(${fmt(L2)})(${fmt(Fx)}) − (${fmt(L1)})(${fmt(Fz)})`, M[1], "bending about y"], ["z", `r_x F_y − r_y F_x`, `(${fmt(L1)})(${fmt(Fy)}) − (0)(${fmt(Fx)})`, M[2], "bending about z"]];
+    $("s6out").innerHTML = `<span class="h">Position vector from the section to the load:</span> <b>r</b> = (<i>L</i><sub>AC</sub>, 0, <i>L</i><sub>CD</sub>) = (${fmt(L1)}, 0, ${fmt(L2)}) in; &nbsp;<b>F</b> = (${fmt(Fx)}, ${fmt(Fy)}, ${fmt(Fz)}) lb<br>` +
+      `<span class="h">Moment about A:</span> <b>M</b> = <b>r</b> × <b>F</b><br>` + rowsM.map(([k, f, n, v, w]) => `<i>M</i><sub>${k}</sub> = ${f.replace(/_(\w)/g, "<sub>$1</sub>").replace(/([rF])/g, "<i>$1</i>")} = ${n} = <b>${fmt(v)} lb·in</b> <span class="c">(${w})</span>`).join("<br>") +
+      `<br><span class="c">Right-hand rule check: a downward <i>F</i><sub>y</sub> applied at the end of the arm (offset <i>L</i><sub>CD</sub> in +z) twists the bar: thumb along the resulting <i>M</i><sub>x</sub>. The same force, offset <i>L</i><sub>AC</sub> in +x from A, bends the bar about z. Each component of <b>F</b> is handled separately, with its own two lever arms — exactly the table-filling exercise of M10.</span>`;
+    const resultants = [["N (axial)", Fx, "lb"], ["V_y (shear)", Fy, "lb"], ["V_z (shear)", Fz, "lb"], ["T = M_x (torque)", M[0], "lb·in"], ["M_y (bending)", M[1], "lb·in"], ["M_z (bending)", M[2], "lb·in"]];
+    $("s6tab").innerHTML = `<table>${resultants.map(([n, v, u]) => `<tr><td>${n.replace(/_(\w+)/g, "<sub>$1</sub>").replace(/\b([NVTM])\b/g, "<i>$1</i>")}</td><td>${fmt(v)} ${u}</td><td class="c">${Math.abs(v) < 1e-9 ? "= 0" : "≠ 0"}</td></tr>`).join("")}</table><span class="c">These are the resultants of the applied load about A; the section carries equal and opposite internal resultants. Zero / non-zero is the first thing to decide (M10).</span>`;
+  }
+  ["m6L1", "m6L2", "m6Fx", "m6Fy", "m6Fz"].forEach(id => $(id).addEventListener("input", draw));
+  document.querySelectorAll("[data-f6]").forEach(b => b.onclick = () => { const k = b.dataset.f6; $("m6Fx").value = k === "x" || k === "all" ? 300 : 0; $("m6Fy").value = k === "y" || k === "all" ? -250 : 0; $("m6Fz").value = k === "z" || k === "all" ? 150 : 0; draw(); });
+  $("m6reset").onclick = () => { $("m6L1").value = 9; $("m6L2").value = 12; $("m6Fx").value = 0; $("m6Fy").value = -250; $("m6Fz").value = 0; draw(); };
+  draw();
+  renderChecks("c6", [
+    { q: "Bent bar: <i>L</i><sub>AC</sub> = 9 in along <i>x</i>, arm <i>L</i><sub>CD</sub> = 12 in along <i>z</i>, and a downward force <i>F</i><sub>y</sub> = −250 lb at D. Torque about the bar axis at the wall section A (sign by the right-hand rule)?", unit: "lb·in", a: 3000, sol: "<i>M</i><sub>x</sub> = <i>r</i><sub>y</sub><i>F</i><sub>z</sub> − <i>r</i><sub>z</sub><i>F</i><sub>y</sub> = 0 − (12)(−250) = <b>+3000 lb·in</b>: the arm turns the bar about +x." },
+    { q: "Same load: bending moment about <i>z</i> at A?", unit: "lb·in", a: -2250, sol: "<i>M</i><sub>z</sub> = <i>r</i><sub>x</sub><i>F</i><sub>y</sub> − <i>r</i><sub>y</sub><i>F</i><sub>x</sub> = (9)(−250) − 0 = <b>−2250 lb·in</b> (a downward load on a cantilever bends it ‘frowning’: negative <i>M</i><sub>z</sub> in these axes, top fibers in tension)." },
+    { q: "Now apply only <i>F</i><sub>z</sub> = +150 lb at D (toward the viewer). Bending moment about <i>y</i> at A?", unit: "lb·in", a: -1350, sol: "<i>M</i><sub>y</sub> = <i>r</i><sub>z</sub><i>F</i><sub>x</sub> − <i>r</i><sub>x</sub><i>F</i><sub>z</sub> = 0 − (9)(150) = <b>−1350 lb·in</b>; <i>F</i><sub>z</sub> produces no torque because it is parallel to the arm CD (<i>r</i><sub>z</sub><i>F</i><sub>z</sub> terms cancel in the cross product)." },
+  ]);
+})();
+
+/* ===================================================================== TAB 7: units */
+(function () {
+  const U = { // to SI base
+    length: { m: 1, mm: 1e-3, in: 0.0254, ft: 0.3048 },
+    force: { N: 1, kN: 1e3, lb: 4.4482216, kip: 4448.2216 },
+    stress: { Pa: 1, kPa: 1e3, MPa: 1e6, GPa: 1e9, psi: 6894.757, ksi: 6894757 },
+    moment: { "N·m": 1, "kN·m": 1e3, "lb·in": 0.1129848, "lb·ft": 1.3558179, "kip·in": 112.9848, "kip·ft": 1355.8179 },
+    angle: { rad: 1, deg: Math.PI / 180 },
+    w: { "N/m": 1, "kN/m": 1e3, "lb/in": 175.1268, "lb/ft": 14.5939, "kip/ft": 14593.9 },
+    I: { "mm⁴": 1e-12, "m⁴": 1, "in⁴": 4.162314e-7 },
+  };
+  const all = []; for (const g in U) for (const k in U[g]) all.push([g, k]);
+  $("u7from").innerHTML = all.map(([g, k]) => `<option value="${g}|${k}">${k}</option>`).join(""); $("u7to").innerHTML = $("u7from").innerHTML; $("u7from").value = "stress|MPa"; $("u7to").value = "stress|ksi";
+  function conv() { const [g1, k1] = $("u7from").value.split("|"), [g2, k2] = $("u7to").value.split("|"); if (g1 !== g2) { $("u7res").textContent = "— choose units of the same kind"; return; } const v = num("u7v") * U[g1][k1] / U[g2][k2]; $("u7res").textContent = `= ${v.toPrecision(5).replace(/\.?0+$/, "").replace(/(\.\d*?)0+e/, "$1e")} ${k2}`; }
+  ["u7v", "u7from", "u7to"].forEach(id => $(id).addEventListener("input", conv)); conv();
+  renderChecks("c7", [
+    { q: "Express 5.623 × 10⁸ Pa in MPa (M01).", unit: "MPa", a: 562.3, sol: "1 MPa = 10⁶ Pa → 5.623 × 10⁸ / 10⁶ = <b>562.3 MPa</b>. Report stresses in MPa or ksi, not in Pa with large exponents." },
+    { q: "A 58 kN force acts on an area of 12 mm × 100 mm. Stress in MPa?", unit: "MPa", a: 48.33, sol: "Convert kN → N first: 58 000 N / 1200 mm² = <b>48.3 N/mm² = 48.3 MPa</b> (M05)." },
+    { q: "An angle of twist of 4° in radians (M06)?", unit: "rad", a: 0.06981, sol: "4 × π/180 = <b>0.0698 rad</b>. φ = TL/(GJ) is in radians — never plug degrees into it." },
+    { q: "40 kips on a 2-in-diameter rod: stress in ksi?", unit: "ksi", a: 12.73, sol: "A = π(1 in)² = 3.1416 in²; σ = 40 kip / 3.1416 in² = <b>12.73 ksi</b> (1 ksi = 1 kip/in²)." },
+    { q: "Convert 12.73 ksi to MPa.", unit: "MPa", a: 87.8, tol: 0.01, sol: "1 ksi = 6.895 MPa → 12.73 × 6.895 = <b>87.8 MPa</b>." },
+  ]);
+})();
+
+
+/* group label text into single flex items so subscripts stay attached */
+function fixLabels(root = document) { root.querySelectorAll("label").forEach(lab => { if (lab.dataset.grouped) return; lab.dataset.grouped = "1"; const kids = [...lab.childNodes]; let run = []; const flush = () => { if (run.length && run.some(n => (n.textContent || "").trim())) { const sp = document.createElement("span"); run[0].parentNode.insertBefore(sp, run[0]); run.forEach(n => sp.appendChild(n)); } run = []; }; kids.forEach(n => { if (n.nodeType === 1 && /^(INPUT|SELECT|BUTTON|TEXTAREA|SVG)$/.test(n.tagName)) flush(); else run.push(n); }); flush(); }); }
+fixLabels();
+
+/* tabs */
+document.querySelectorAll("#nav button").forEach(b => b.onclick = () => { document.querySelectorAll("#nav button").forEach(x => x.classList.remove("active")); document.querySelectorAll("section.tab").forEach(x => x.classList.remove("active")); b.classList.add("active"); document.getElementById(b.dataset.tab).classList.add("active"); if (typeof gtag === "function") gtag("event", "tab_view", { module: "statics-review", tab: b.textContent.trim() }); });
+</script>
+</body>
+</html>
