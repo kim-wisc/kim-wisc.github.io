@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shear &amp; Moment Diagram Explorer</title>
+<style>
+  :root { --red:#ac4142; --blue:#1f77b4; --green:#2a9d8f; --ink:#222; --mut:#666; --grid:#ddd; --grid2:#eee; --bg:#fff; --panel:#f7f7f9; --vfill:rgba(31,119,180,.18); --mfill:rgba(172,65,66,.18); }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; color:var(--ink); background:var(--bg); }
+  header { padding:14px 22px 8px; border-bottom:1px solid #e3e3e3; }
+  header h1 { margin:0 0 4px; font-size:22px; }
+  header p { margin:0; color:var(--mut); font-size:14px; }
+  .alpha-banner { display:flex; gap:10px; align-items:flex-start; margin:8px 0 2px; padding:9px 12px; background:#fff3cd; border:1px solid #e6c860; border-left:6px solid #d9a400; border-radius:8px; color:#5c4400; font-size:14px; line-height:1.4; }
+  .alpha-banner a { color:#7a5a00; font-weight:600; }
+  .alpha-icon { font-size:18px; line-height:1; color:#b58500; }
+  .alpha { display:inline-block; vertical-align:middle; font-size:.55em; font-weight:600; letter-spacing:.04em; padding:2px 8px; border-radius:999px; background:#fff3cd; color:#7a5a00; border:1px solid #e6c860; }
+  nav { display:flex; gap:6px; padding:10px 22px 0; flex-wrap:wrap; }
+  nav button { border:1px solid #ccc; background:#f2f2f2; padding:8px 14px; border-radius:8px 8px 0 0; cursor:pointer; font-size:15px; }
+  nav button.active { background:#fff; border-bottom-color:#fff; font-weight:600; }
+  section.tab { display:none; padding:12px 22px 24px; }
+  section.tab.active { display:block; }
+  .layout { display:flex; gap:18px; flex-wrap:wrap; align-items:flex-start; }
+  .side { flex:0 0 340px; max-width:100%; }
+  .main { flex:1 1 320px; min-width:0; }
+  .panel { background:var(--panel); border:1px solid #e3e3e3; border-radius:10px; padding:10px 12px; margin-bottom:10px; font-size:14px; }
+  .panel h3 { margin:0 0 6px; font-size:14px; color:#444; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .panel h3 .hint { font-weight:400; color:var(--mut); font-size:12px; }
+  .rowline { display:flex; flex-wrap:wrap; gap:6px 8px; align-items:center; margin:4px 0; }
+  .rowline label { display:inline-flex; align-items:center; gap:4px; }
+  input[type=number] { width:78px; padding:4px 6px; font-size:14px; border:1px solid #bbb; border-radius:6px; }
+  input[type=number].wide { width:92px; }
+  select { padding:4px 6px; font-size:14px; border:1px solid #bbb; border-radius:6px; background:#fff; max-width:100%; }
+  #preset { width: 270px; max-width: calc(100vw - 110px); }
+  .rowline label { max-width:100%; }
+  button { padding:5px 10px; font-size:14px; border:1px solid #bbb; background:#fff; border-radius:6px; cursor:pointer; }
+  button:hover { background:#eef; }
+  button.x { padding:2px 8px; color:#a00; font-weight:700; }
+  button.primary { background:var(--red); color:#fff; border-color:var(--red); }
+  button.primary:hover { background:#8f3536; }
+  .ctrl { display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; margin:6px 0 10px; font-size:14px; }
+  .ctrl input[type=range] { width:min(520px, 60vw); }
+  .ctrl .val { font-family: ui-monospace, Menlo, monospace; min-width:90px; }
+  svg { background:#fff; border:1px solid #e6e6e6; border-radius:8px; width:100%; max-width:820px; height:auto; display:block; margin-bottom:8px; }
+  .readout { font-family: ui-monospace, Menlo, Consolas, monospace; font-size:13px; background:var(--panel); border:1px solid #e3e3e3; border-radius:8px; padding:8px 12px; white-space:pre-wrap; line-height:1.5; }
+  .note { color:var(--mut); font-size:13px; max-width:1100px; line-height:1.45; }
+  .flag { color:#c1121f; font-weight:700; }
+  .hidden-dia { position:relative; }
+  .veil { position:absolute; inset:0; background:rgba(247,247,249,.96); border:1px dashed #bbb; border-radius:8px; display:flex; align-items:center; justify-content:center; gap:10px; font-size:15px; color:#444; }
+  table.keys { border-collapse:collapse; font-size:13px; font-family: ui-monospace, Menlo, monospace; }
+  table.keys td, table.keys th { border-bottom:1px solid #e3e3e3; padding:3px 10px 3px 0; text-align:right; }
+  table.keys th { color:#444; font-weight:600; }
+  table.keys td:first-child, table.keys th:first-child { text-align:left; }
+  .eq { font-family: "Times New Roman", Times, serif; font-size:16px; line-height:1.6; }
+  .eq i { font-style:italic; }
+  @media (max-width: 760px) { .ctrl input[type=range] { width:88vw; } .side { flex-basis:100%; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Shear &amp; Moment Diagram Explorer — beams under transverse loads <span class="alpha">ALPHA v0.1</span></h1>
+  <p style="margin:0 0 6px"><b>So Yeon KIM</b>, Assistant Professor, Department of Mechanical Engineering, University of Wisconsin–Madison — developed as part of the <i>Mechanics of Materials</i> course.
+     Found an error or have a suggestion? <a id="reportLink" href="#" target="_blank" rel="noopener">Report it here</a>.</p>
+  <div class="alpha-banner"><span class="alpha-icon">&#9888;</span><div><b>Alpha version (v0.1, Oct 2026) — still being tested and may contain errors.</b> Please double-check results against your own hand calculations and the lecture notes, and <a id="reportLink2" href="#" target="_blank" rel="noopener">report anything that looks wrong</a>.</div></div>
+  <p>Sign convention (Module 7): <i>x</i> is measured from the left end. Loads <i>P</i> and <i>w</i>(<i>x</i>) are entered <b>positive downward</b>; an applied couple <i>M</i><sub>0</sub> is positive <b>counter-clockwise</b>. Internal shear <i>V</i> is positive when it tends to rotate the segment <b>clockwise</b>; internal moment <i>M</i> is positive when it bends the beam upward (<b>“smiles”</b>). Hence <i>dV</i>/<i>dx</i> = −<i>w</i>, <i>dM</i>/<i>dx</i> = <i>V</i>.</p>
+</header>
+
+<nav id="nav">
+  <button class="active" data-tab="tdia">V–M diagrams</button>
+  <button data-tab="tcut">Section cut &amp; graphical approach</button>
+</nav>
+
+<!-- ============================================================ TAB 1 -->
+<section class="tab active" id="tdia">
+<div class="layout">
+  <div class="side">
+    <div class="panel">
+      <h3>Beam <span class="hint">length and units</span></h3>
+      <div class="rowline">
+        <label>Units <select id="units">
+          <option value="kN-m">kN, m (kN/m, kN·m)</option>
+          <option value="N-m">N, m (N/m, N·m)</option>
+          <option value="kip-ft">kip, ft (kip/ft, kip·ft)</option>
+          <option value="lb-ft">lb, ft (lb/ft, lb·ft)</option>
+          <option value="lb-in">lb, in (lb/in, lb·in)</option>
+        </select></label>
+        <label><i>L</i> [<span class="uL">m</span>] <input type="number" id="L" value="6" step="0.5" min="0.1"></label>
+      </div>
+      <div class="rowline">
+        <label>Preset <select id="preset">
+          <option value="">— choose —</option>
+          <optgroup label="From the Module 7 notes">
+            <option value="midspan">Simply supported, 10,000 lb at midspan (slide 7)</option>
+            <option value="cantw">Cantilever with uniform w (slide 13)</option>
+            <option value="overhang">Overhanging beam, 30 kips + 2 &amp; 5 kips/ft (slide 16)</option>
+            <option value="pure">Two 80-lb overhang loads: pure bending (slide 19)</option>
+            <option value="couch">The couch (slide 11)</option>
+          </optgroup>
+          <optgroup label="Statically indeterminate">
+            <option value="propped">Propped cantilever, uniform w</option>
+            <option value="fixfix">Fixed–fixed, point load off-center</option>
+            <option value="cont">Two-span continuous, uniform w</option>
+          </optgroup>
+          <optgroup label="Other">
+            <option value="couple">Simply supported with a couple M₀</option>
+            <option value="tri">Simply supported, triangular load</option>
+          </optgroup>
+        </select></label>
+        <button id="resetAll">Reset</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Supports <span class="hint">pin / roller: v = 0 · fixed: v = 0, θ = 0</span></h3>
+      <div id="supList"></div>
+      <div class="rowline"><button id="addSup">+ add support</button></div>
+    </div>
+
+    <div class="panel">
+      <h3>Loads <span class="hint">P, w positive ↓ · M₀ positive ↺</span></h3>
+      <div id="loadList"></div>
+      <div class="rowline"><button data-add="P">+ point load P</button> <button data-add="w">+ distributed w</button> <button data-add="M">+ couple M₀</button></div>
+    </div>
+
+    <div class="panel">
+      <h3>Predict first <span class="hint">hide, sketch, then reveal</span></h3>
+      <div class="rowline">
+        <label><input type="checkbox" id="showR" checked> reactions</label>
+        <label><input type="checkbox" id="showV" checked> V diagram</label>
+        <label><input type="checkbox" id="showM" checked> M diagram</label>
+        <button id="hideAll">Hide all</button>
+      </div>
+      <div class="rowline">
+        <label><input type="checkbox" id="showVals" checked> values on diagrams</label>
+        <label><input type="checkbox" id="showPure" checked> highlight pure bending</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <svg id="beamSvg" viewBox="0 0 820 220"></svg>
+    <div class="hidden-dia"><svg id="vSvg" viewBox="0 0 820 230"></svg><div class="veil" id="veilV" style="display:none"><span>V diagram hidden — sketch it first.</span><button class="primary" data-reveal="showV">Reveal V</button></div></div>
+    <div class="hidden-dia"><svg id="mSvg" viewBox="0 0 820 230"></svg><div class="veil" id="veilM" style="display:none"><span>M diagram hidden — sketch it first.</span><button class="primary" data-reveal="showM">Reveal M</button></div></div>
+    <div class="readout" id="summary"></div>
+    <div style="margin-top:8px; overflow-x:auto"><table class="keys" id="keyTable"></table></div>
+    <p class="note">Reactions and diagrams are computed with Euler–Bernoulli beam theory (stiffness method, uniform <i>EI</i>), so statically indeterminate beams are handled too; for determinate beams the result is identical to the statics in the notes. Values at a jump are listed as left/right of the point. Solid dots on the diagrams mark key points; “pure bending” marks regions where <i>V</i> = 0 and <i>M</i> ≠ 0.</p>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ TAB 2 -->
+<section class="tab" id="tcut">
+<div class="ctrl">
+  <span><b>Cut position</b> <i>x</i> [<span class="uL">m</span>]</span>
+  <input type="range" id="xcut" min="0" max="6" step="0.01" value="2">
+  <input type="number" id="xcutN" value="2" step="0.1" style="width:90px">
+  <button id="prevKey">◀ key point</button><button id="nextKey">key point ▶</button>
+  <label><input type="checkbox" id="fromRight"> cut from the right instead</label>
+  <button id="resetCut">Reset</button>
+</div>
+<div class="layout">
+  <div class="main">
+    <svg id="cutBeamSvg" viewBox="0 0 820 220"></svg>
+    <svg id="fbdSvg" viewBox="0 0 820 250"></svg>
+    <div class="readout eq" id="eqBox"></div>
+  </div>
+  <div class="main">
+    <svg id="cutVSvg" viewBox="0 0 820 230"></svg>
+    <svg id="cutMSvg" viewBox="0 0 820 230"></svg>
+    <div class="readout" id="areaBox"></div>
+  </div>
+</div>
+<p class="note"><b>FBD approach</b> (left): the segment to the left of the cut is isolated, with the unknown <i>V</i> and <i>M</i> drawn in their <b>positive</b> directions on the cut face; equilibrium gives their values. <b>Graphical approach</b> (right): the shaded area under <i>w</i> between the left end and the cut is the drop in shear, Δ<i>V</i> = −∫<i>w dx</i>, and the shaded area under <i>V</i> is the change in moment, Δ<i>M</i> = ∫<i>V dx</i>; point loads and couples add jumps. Where <i>V</i> crosses zero, <i>M</i> has a local maximum or minimum.</p>
+</section>
+
+<script>
+/* ===================================================================== config */
+const REPORT_FORM_URL = "https://forms.gle/6EWQRUDerN1ZvfAe8";
+const ANALYTICS_GA4 = "G-5MZ1MTJD64";   // GA4 property "Teaching modules (kim-wisc.github.io)"
+const ANALYTICS_GOATCOUNTER = "";
+if (ANALYTICS_GA4 && window.self === window.top) { const t = document.createElement("script"); t.async = true; t.src = "https://www.googletagmanager.com/gtag/js?id=" + ANALYTICS_GA4; document.head.appendChild(t);
+  window.dataLayer = window.dataLayer || []; function gtag(){ dataLayer.push(arguments); } gtag("js", new Date()); gtag("config", ANALYTICS_GA4); }
+if (ANALYTICS_GOATCOUNTER && window.self === window.top) { const t = document.createElement("script"); t.async = true; t.setAttribute("data-goatcounter", "https://" + ANALYTICS_GOATCOUNTER + ".goatcounter.com/count"); t.src = "//gc.zgo.at/count.js"; document.head.appendChild(t); }
+document.getElementById("reportLink").href = REPORT_FORM_URL;
+document.getElementById("reportLink2").href = REPORT_FORM_URL;
+
+/* ===================================================================== helpers */
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs = {}, parent = null, txt = null) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (txt !== null) e.textContent = txt; if (parent) parent.appendChild(e); return e; }
+function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+function arrowDef(svg, id, color) { const defs = svg.querySelector("defs") || el("defs", {}, svg); const m = el("marker", { id: svg.id + "_" + id, viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: "auto-start-reverse" }, defs); el("path", { d: "M0,0 L10,5 L0,10 z", fill: color }, m); }
+function line(svg, x1, y1, x2, y2, stroke, w = 2, extra = {}) { return el("line", Object.assign({ x1, y1, x2, y2, stroke, "stroke-width": w }, extra), svg); }
+function arrow(svg, x1, y1, x2, y2, color, w = 2.5, mk = "a") { const root = svg.ownerSVGElement || svg; return line(svg, x1, y1, x2, y2, color, w, { "marker-end": `url(#${root.id}_${mk})`, "stroke-linecap": "round" }); }
+function text(svg, x, y, s, attrs = {}) {
+  const t = el("text", Object.assign({ x, y, "font-size": 13, "text-anchor": "middle", "dominant-baseline": "middle", fill: "#222" }, attrs), svg);
+  const parts = String(s).split(/(_\{[^}]*\})/);
+  for (const part of parts) { if (!part) continue; const m = part.match(/^_\{([^}]*)\}$/); if (m) el("tspan", { "baseline-shift": "sub", "font-size": "70%" }, t, m[1]); else el("tspan", {}, t, part); }
+  return t;
+}
+function couplePath(x, cy, r, ccw) { // 260° arc centred at (x,cy); ccw as seen on screen
+  const P = th => `${(x + r * Math.cos(th * Math.PI / 180)).toFixed(1)} ${(cy - r * Math.sin(th * Math.PI / 180)).toFixed(1)}`;
+  return ccw ? `M ${P(-60)} A ${r} ${r} 0 1 0 ${P(200)}` : `M ${P(240)} A ${r} ${r} 0 1 1 ${P(-20)}`; }
+function label(svg, x, y, s, color, size = 13, attrs = {}) { return text(svg, x, y, s, Object.assign({ fill: color, "font-size": size, "font-weight": 600, "paint-order": "stroke", stroke: "#fff", "stroke-width": 4, "stroke-linejoin": "round" }, attrs)); }
+function niceStep(span, target = 6) { if (!(span > 0)) return 1; const raw = span / target, k = Math.pow(10, Math.floor(Math.log10(raw))); return [1, 2, 2.5, 5, 10].map(m => m * k).reduce((a, b) => Math.abs(b - raw) < Math.abs(a - raw) ? b : a); }
+function fmt(v) { if (!isFinite(v)) return "—"; if (Math.abs(v) < 1e-9) return "0"; const a = Math.abs(v); let d = a >= 1000 ? 0 : a >= 100 ? 1 : a >= 10 ? 2 : 3; let s = v.toFixed(d); if (s.includes(".")) s = s.replace(/0+$/, "").replace(/\.$/, ""); return s; }
+function fmtSigned(v) { return (v >= 0 ? "+" : "−") + fmt(Math.abs(v)); }
+const UNITS = {
+  "kN-m": { F: "kN", L: "m", w: "kN/m", M: "kN·m" },
+  "N-m":  { F: "N",  L: "m", w: "N/m",  M: "N·m" },
+  "kip-ft": { F: "kip", L: "ft", w: "kip/ft", M: "kip·ft" },
+  "lb-ft":  { F: "lb",  L: "ft", w: "lb/ft",  M: "lb·ft" },
+  "lb-in":  { F: "lb",  L: "in", w: "lb/in",  M: "lb·in" },
+};
+const U = () => UNITS[S.units];
+
+/* ===================================================================== state */
+let S = { units: "kN-m", L: 6, supports: [{ type: "pin", x: 0 }, { type: "roller", x: 6 }], loads: [{ type: "P", x: 2, val: 20 }, { type: "w", x1: 3, x2: 6, w1: 8, w2: 8 }] };
+const DEFAULT = JSON.parse(JSON.stringify(S));
+const PRESETS = {
+  midspan: { units: "lb-ft", L: 20, supports: [{ type: "pin", x: 0 }, { type: "roller", x: 20 }], loads: [{ type: "P", x: 10, val: 10000 }] },
+  cantw:   { units: "kN-m", L: 4, supports: [{ type: "fixed", x: 4 }], loads: [{ type: "w", x1: 0, x2: 4, w1: 5, w2: 5 }] },
+  overhang:{ units: "kip-ft", L: 25, supports: [{ type: "pin", x: 5 }, { type: "roller", x: 25 }], loads: [{ type: "P", x: 0, val: 30 }, { type: "w", x1: 5, x2: 15, w1: 2, w2: 2 }, { type: "w", x1: 15, x2: 25, w1: 5, w2: 5 }] },
+  pure:    { units: "lb-in", L: 50, supports: [{ type: "pin", x: 12 }, { type: "roller", x: 38 }], loads: [{ type: "P", x: 0, val: 80 }, { type: "P", x: 50, val: 80 }] },
+  couch:   { units: "lb-ft", L: 6, supports: [{ type: "pin", x: 0.5 }, { type: "roller", x: 5.5 }], loads: [{ type: "P", x: 1.6, val: 180 }, { type: "P", x: 3.0, val: 160 }, { type: "P", x: 4.3, val: 150 }] },
+  propped: { units: "kN-m", L: 6, supports: [{ type: "fixed", x: 0 }, { type: "roller", x: 6 }], loads: [{ type: "w", x1: 0, x2: 6, w1: 10, w2: 10 }] },
+  fixfix:  { units: "kN-m", L: 6, supports: [{ type: "fixed", x: 0 }, { type: "fixed", x: 6 }], loads: [{ type: "P", x: 2, val: 30 }] },
+  cont:    { units: "kN-m", L: 10, supports: [{ type: "pin", x: 0 }, { type: "roller", x: 5 }, { type: "roller", x: 10 }], loads: [{ type: "w", x1: 0, x2: 10, w1: 6, w2: 6 }] },
+  couple:  { units: "kN-m", L: 6, supports: [{ type: "pin", x: 0 }, { type: "roller", x: 6 }], loads: [{ type: "M", x: 2, val: 30 }] },
+  tri:     { units: "kN-m", L: 6, supports: [{ type: "pin", x: 0 }, { type: "roller", x: 6 }], loads: [{ type: "w", x1: 0, x2: 6, w1: 0, w2: 12 }] },
+};
+
+/* ===================================================================== solver (stiffness method, EI = 1) */
+function solveBeam(st) {
+  const L = st.L, tol = 1e-9 * Math.max(L, 1);
+  const cl = x => Math.min(Math.max(x, 0), L);
+  let xs = [0, L];
+  st.supports.forEach(s => xs.push(cl(s.x)));
+  st.loads.forEach(l => { if (l.type === "w") { xs.push(cl(l.x1)); xs.push(cl(l.x2)); } else xs.push(cl(l.x)); });
+  xs.sort((a, b) => a - b);
+  const nodes = []; xs.forEach(x => { if (!nodes.length || x - nodes[nodes.length - 1] > tol) nodes.push(x); });
+  const n = nodes.length, ndof = 2 * n;
+  const nodeAt = x => { x = cl(x); let best = 0; for (let i = 1; i < n; i++) if (Math.abs(nodes[i] - x) < Math.abs(nodes[best] - x)) best = i; return best; };
+  const K = Array.from({ length: ndof }, () => new Float64Array(ndof));
+  const F = new Float64Array(ndof);
+  // distributed load value at x (sum of all w loads, downward positive)
+  const wAt = (x, side) => { let w = 0; st.loads.forEach(l => { if (l.type !== "w") return; const a = Math.min(l.x1, l.x2), b = Math.max(l.x1, l.x2); if (b - a < tol) return; const inside = side < 0 ? (x > a + tol && x <= b + tol) : (x >= a - tol && x < b - tol); if (!inside) return; const wa = l.x1 <= l.x2 ? l.w1 : l.w2, wb = l.x1 <= l.x2 ? l.w2 : l.w1; w += wa + (wb - wa) * (x - a) / (b - a); }); return w; };
+  for (let e = 0; e < n - 1; e++) {
+    const l = nodes[e + 1] - nodes[e], l2 = l * l, l3 = l2 * l;
+    const k = [[12, 6 * l, -12, 6 * l], [6 * l, 4 * l2, -6 * l, 2 * l2], [-12, -6 * l, 12, -6 * l], [6 * l, 2 * l2, -6 * l, 4 * l2]];
+    const d = [2 * e, 2 * e + 1, 2 * e + 2, 2 * e + 3];
+    for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) K[d[i]][d[j]] += k[i][j] / l3;
+    // equivalent nodal loads for a trapezoidal downward load w1 -> w2 over the element
+    const w1 = wAt(nodes[e], +1), w2 = wAt(nodes[e + 1], -1);
+    const wu = w1, wt = w2 - w1;  // uniform part + triangular part (0 at node 1, wt at node 2)
+    F[d[0]] += -(wu * l / 2 + 3 * wt * l / 20);
+    F[d[1]] += -(wu * l2 / 12 + wt * l2 / 30);
+    F[d[2]] += -(wu * l / 2 + 7 * wt * l / 20);
+    F[d[3]] += +(wu * l2 / 12 + wt * l2 / 20);
+  }
+  st.loads.forEach(l => { if (l.type === "P") F[2 * nodeAt(l.x)] += -l.val; if (l.type === "M") F[2 * nodeAt(l.x) + 1] += l.val; });
+  // constraints
+  const fixed = new Array(ndof).fill(false), supNode = [];
+  st.supports.forEach((s, i) => { const nd = nodeAt(s.x); supNode.push(nd); fixed[2 * nd] = true; if (s.type === "fixed") fixed[2 * nd + 1] = true; });
+  const free = []; for (let i = 0; i < ndof; i++) if (!fixed[i]) free.push(i);
+  // solve K_ff u_f = F_f
+  const m = free.length; const A = free.map(i => free.map(j => K[i][j])), b = free.map(i => F[i]);
+  const u = new Float64Array(ndof); let unstable = false;
+  const scale = Math.max(1, ...A.map(r => Math.max(...r.map(Math.abs))));
+  for (let c = 0; c < m; c++) {
+    let p = c; for (let r = c + 1; r < m; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
+    if (Math.abs(A[p][c]) < 1e-10 * scale) { unstable = true; break; }
+    [A[c], A[p]] = [A[p], A[c]]; [b[c], b[p]] = [b[p], b[c]];
+    for (let r = c + 1; r < m; r++) { const f = A[r][c] / A[c][c]; if (!f) continue; for (let k2 = c; k2 < m; k2++) A[r][k2] -= f * A[c][k2]; b[r] -= f * b[c]; }
+  }
+  if (!unstable) { for (let c = m - 1; c >= 0; c--) { let s = b[c]; for (let k2 = c + 1; k2 < m; k2++) s -= A[c][k2] * b[k2]; b[c] = s / A[c][c]; } free.forEach((i, k2) => u[i] = b[k2]); }
+  if (st.supports.length === 0) unstable = true;
+  // reactions
+  const reactions = st.supports.map((s, i) => { const nd = supNode[i]; const Ry = unstable ? 0 : K[2 * nd].reduce((acc, kij, j) => acc + kij * u[j], 0) - F[2 * nd]; let Mz = 0; if (s.type === "fixed" && !unstable) Mz = K[2 * nd + 1].reduce((acc, kij, j) => acc + kij * u[j], 0) - F[2 * nd + 1]; return { x: nodes[nd], Ry, Mz, type: s.type }; });
+  // V(x), M(x) from the left segment (statics)
+  const Vof = (x, side = +1) => { let V = 0; const left = (xi) => side > 0 ? xi <= x + tol : xi < x - tol; reactions.forEach(r => { if (left(r.x)) V += r.Ry; }); st.loads.forEach(l => { if (l.type === "P" && left(l.x)) V -= l.val; if (l.type === "w") V -= wInt(l, x); }); return V; };
+  const Mof = (x, side = +1) => { let M = 0; const left = (xi) => side > 0 ? xi <= x + tol : xi < x - tol; reactions.forEach(r => { if (left(r.x)) { M += r.Ry * (x - r.x); M -= r.Mz; } }); st.loads.forEach(l => { if (l.type === "P" && left(l.x)) M -= l.val * (x - l.x); if (l.type === "M" && left(l.x)) M -= l.val; if (l.type === "w") M -= wMom(l, x); }); return M; };
+  function wInt(l, x) { const a = Math.min(l.x1, l.x2), b = Math.max(l.x1, l.x2); if (b - a < tol || x <= a) return 0; const wa = l.x1 <= l.x2 ? l.w1 : l.w2, wb = l.x1 <= l.x2 ? l.w2 : l.w1; const xe = Math.min(x, b), t = xe - a, k = (wb - wa) / (b - a); return wa * t + k * t * t / 2; }
+  function wMom(l, x) { // ∫_a^min(x,b) w(s)(x−s) ds
+    const a = Math.min(l.x1, l.x2), b = Math.max(l.x1, l.x2); if (b - a < tol || x <= a) return 0; const wa = l.x1 <= l.x2 ? l.w1 : l.w2, wb = l.x1 <= l.x2 ? l.w2 : l.w1; const xe = Math.min(x, b), t = xe - a, k = (wb - wa) / (b - a);
+    // ∫_0^t (wa + k s)(x−a−s) ds with X = x−a
+    const X = x - a; return wa * (X * t - t * t / 2) + k * (X * t * t / 2 - t * t * t / 3); }
+  // sampled curves per element
+  const segs = [];
+  for (let e = 0; e < n - 1; e++) { const a = nodes[e], b = nodes[e + 1], N = 48, pts = []; for (let i = 0; i <= N; i++) { const x = a + (b - a) * i / N; const side = i === 0 ? +1 : (i === N ? -1 : +1); pts.push({ x, V: Vof(x, side), M: Mof(x, side) }); } segs.push({ a, b, pts }); }
+  // key points: nodes (left/right), V zero crossings inside elements
+  const keys = [];
+  nodes.forEach((x, i) => { const VL = i === 0 ? null : Vof(x, -1), VR = i === n - 1 ? null : Vof(x, +1), ML = i === 0 ? null : Mof(x, -1), MR = i === n - 1 ? null : Mof(x, +1); keys.push({ x, VL, VR, ML, MR, node: true }); });
+  segs.forEach(s => { for (let i = 1; i < s.pts.length; i++) { const p = s.pts[i - 1], q = s.pts[i]; if (p.V * q.V < 0) { // refine by bisection
+        let lo = p.x, hi = q.x; for (let k2 = 0; k2 < 40; k2++) { const mid = (lo + hi) / 2; if (Vof(lo) * Vof(mid) <= 0) hi = mid; else lo = mid; } const xz = (lo + hi) / 2; keys.push({ x: xz, VL: 0, VR: 0, ML: Mof(xz), MR: Mof(xz), zero: true }); } } });
+  keys.sort((a, b) => a.x - b.x);
+  let Vmax = 0, Mmax = 0, xVmax = 0, xMmax = 0, Vmin = 0, Vmx = 0, Mmin = 0, Mmx = 0;
+  segs.forEach(s => s.pts.forEach(p => { if (Math.abs(p.V) > Math.abs(Vmax)) { Vmax = p.V; xVmax = p.x; } if (Math.abs(p.M) > Math.abs(Mmax)) { Mmax = p.M; xMmax = p.x; } Vmin = Math.min(Vmin, p.V); Vmx = Math.max(Vmx, p.V); Mmin = Math.min(Mmin, p.M); Mmx = Math.max(Mmx, p.M); }));
+  const vScale = Math.max(Math.abs(Vmin), Math.abs(Vmx), 1e-12), mScale = Math.max(Math.abs(Mmin), Math.abs(Mmx), 1e-12);
+  const pure = segs.filter(s => s.pts.every(p => Math.abs(p.V) < 1e-9 * Math.max(vScale, 1)) && s.pts.some(p => Math.abs(p.M) > 1e-9 * Math.max(mScale, 1))).map(s => [s.a, s.b]);
+  return { nodes, reactions, segs, keys, unstable, Vof, Mof, wAt, Vmax, Mmax, xVmax, xMmax, Vmin, Vmx, Mmin, Mmx, pure };
+}
+
+/* ===================================================================== drawing: beam figure */
+const PAD_L = 70, PAD_R = 70;
+function xmap(L, W) { return x => PAD_L + (W - PAD_L - PAD_R) * x / L; }
+function drawSupport(svg, X, yb, type, color = "#333") {
+  if (type === "fixed") { const side = X < 410 ? -1 : 1; const x0 = X + side * 0; el("rect", { x: side < 0 ? x0 - 10 : x0, y: yb - 34, width: 10, height: 68, fill: "#777" }, svg); for (let i = 0; i < 7; i++) line(svg, side < 0 ? x0 - 10 : x0 + 10, yb - 32 + i * 10, side < 0 ? x0 - 20 : x0 + 20, yb - 24 + i * 10, "#777", 1.5); return; }
+  // pin: triangle; roller: triangle on circles
+  const h = 22; el("polygon", { points: `${X},${yb} ${X - 14},${yb + h} ${X + 14},${yb + h}`, fill: type === "pin" ? "#bbb" : "#fff", stroke: color, "stroke-width": 2 }, svg);
+  if (type === "roller") { el("circle", { cx: X - 7, cy: yb + h + 6, r: 5, fill: "#fff", stroke: color, "stroke-width": 2 }, svg); el("circle", { cx: X + 7, cy: yb + h + 6, r: 5, fill: "#fff", stroke: color, "stroke-width": 2 }, svg); }
+  const yg = yb + h + (type === "roller" ? 12 : 1); line(svg, X - 22, yg, X + 22, yg, color, 2); for (let i = -2; i <= 2; i++) line(svg, X + i * 9, yg, X + i * 9 - 6, yg + 7, color, 1.2);
+}
+function drawBeamFigure(svg, st, R, opts = {}) {
+  clear(svg); arrowDef(svg, "a", "#222"); arrowDef(svg, "r", "var(--red)"); arrowDef(svg, "b", "var(--blue)");
+  const W = 820, L = st.L, X = xmap(L, W), yb = 100, hb = 14; const u = U();
+  // supports (behind beam)
+  st.supports.forEach(s => drawSupport(svg, X(s.x), yb + hb / 2, s.type));
+  // beam
+  el("rect", { x: X(0), y: yb - hb / 2, width: X(L) - X(0), height: hb, fill: "#cfd6de", stroke: "#333", "stroke-width": 1.5 }, svg);
+  // distributed loads
+  st.loads.forEach(l => { if (l.type !== "w") return; const a = Math.min(l.x1, l.x2), b = Math.max(l.x1, l.x2); if (b - a <= 0) return; const wa = l.x1 <= l.x2 ? l.w1 : l.w2, wb = l.x1 <= l.x2 ? l.w2 : l.w1; const wmax = Math.max(...st.loads.filter(q => q.type === "w").map(q => Math.max(Math.abs(q.w1), Math.abs(q.w2))), 1e-9); const hgt = w => 14 + 36 * Math.abs(w) / wmax;
+    const ytop = w => yb - hb / 2 - (w >= 0 ? hgt(w) : -hgt(w)) ; // for negative (upward) loads draw below? keep arrows from above but pointing up
+    const pa = ytop(wa), pb = ytop(wb);
+    el("polygon", { points: `${X(a)},${yb - hb / 2} ${X(a)},${pa} ${X(b)},${pb} ${X(b)},${yb - hb / 2}`, fill: "rgba(31,119,180,.12)", stroke: "var(--blue)", "stroke-width": 1.5 }, svg);
+    const nA = Math.max(2, Math.round((X(b) - X(a)) / 26)); for (let i = 0; i <= nA; i++) { const x = a + (b - a) * i / nA, w = wa + (wb - wa) * i / nA; if (Math.abs(w) < 1e-12) continue; const y0 = ytop(w); if (w > 0) arrow(svg, X(x), y0, X(x), yb - hb / 2 - 2, "var(--blue)", 1.8, "b"); else arrow(svg, X(x), yb - hb / 2 - 2, X(x), y0, "var(--blue)", 1.8, "b"); }
+    const lab = Math.abs(wa - wb) < 1e-12 ? `w = ${fmt(wa)} ${u.w}` : `w = ${fmt(wa)} → ${fmt(wb)} ${u.w}`; label(svg, (X(a) + X(b)) / 2, Math.min(pa, pb) - 10, lab, "var(--blue)"); });
+  // point loads and couples
+  st.loads.forEach((l, i) => { if (l.type === "P") { const x = X(l.x); if (l.val >= 0) arrow(svg, x, yb - hb / 2 - 62, x, yb - hb / 2 - 2, "#222", 2.5, "a"); else arrow(svg, x, yb + hb / 2 + 62, x, yb + hb / 2 + 2, "#222", 2.5, "a"); label(svg, x, l.val >= 0 ? yb - hb / 2 - 72 : yb + hb / 2 + 72, `P = ${fmt(Math.abs(l.val))} ${u.F}${l.val < 0 ? " ↑" : ""}`, "#222"); }
+    if (l.type === "M") { const x = X(l.x), r = 20, cy = yb; const ccw = l.val >= 0; // arc from right going over the top
+      el("path", { d: couplePath(x, cy, r, ccw), fill: "none", stroke: "var(--green)", "stroke-width": 2.5, "marker-end": `url(#${svg.id}_g)` }, svg); label(svg, x, cy - r - 12, `M_{0} = ${fmt(Math.abs(l.val))} ${u.M} ${ccw ? "↺" : "↻"}`, "var(--green)"); } });
+  arrowDef(svg, "g", "var(--green)");
+  // reactions
+  if (opts.showR && R && !R.unstable) R.reactions.forEach(r => { const x = X(r.x); const up = r.Ry >= 0; const y1 = up ? yb + hb / 2 + 66 : yb + hb / 2 + 4, y2 = up ? yb + hb / 2 + 4 : yb + hb / 2 + 66; if (Math.abs(r.Ry) > 1e-9) { arrow(svg, x, y1, x, y2, "var(--red)", 2.5, "r"); label(svg, x, yb + hb / 2 + 80, `R = ${fmt(Math.abs(r.Ry))} ${u.F}${up ? "" : " ↓"}`, "var(--red)"); }
+    if (r.type === "fixed" && Math.abs(r.Mz) > 1e-9) { const ccw = r.Mz >= 0, rr = 26; el("path", { d: couplePath(x, yb, rr, ccw), fill: "none", stroke: "var(--red)", "stroke-width": 2.5, "marker-end": `url(#${svg.id}_r)` }, svg); label(svg, x + (x < 410 ? 56 : -56), yb + hb / 2 + 34, `M_{R} = ${fmt(Math.abs(r.Mz))} ${u.M} ${ccw ? "↺" : "↻"}`, "var(--red)"); } });
+  // dimensions
+  const yd = 204; line(svg, X(0), yd, X(L), yd, "#555", 1); line(svg, X(0), yd - 5, X(0), yd + 5, "#555", 1); line(svg, X(L), yd - 5, X(L), yd + 5, "#555", 1);
+  const marks = Array.from(new Set([0, L, ...st.supports.map(s => s.x), ...st.loads.flatMap(l => l.type === "w" ? [l.x1, l.x2] : [l.x])].map(v => Math.round(v * 1e6) / 1e6))).filter(v => v >= 0 && v <= L).sort((a, b) => a - b);
+  marks.forEach(mx => { line(svg, X(mx), yd - 4, X(mx), yd + 4, "#555", 1); text(svg, X(mx), yd + 10, fmt(mx), { "font-size": 11, fill: "#555" }); });
+  text(svg, (X(0) + X(L)) / 2, yd - 9, `x [${u.L}]  (L = ${fmt(L)} ${u.L})`, { "font-size": 11, fill: "#555" });
+  const fixL = st.supports.some(q => q.type === "fixed" && q.x <= 1e-9), fixR = st.supports.some(q => q.type === "fixed" && Math.abs(q.x - L) <= 1e-9);
+  text(svg, X(0) - (fixL ? 26 : 10), yb, "A", { "font-size": 13, "font-weight": 600, "text-anchor": "end" }); text(svg, X(L) + (fixR ? 26 : 10), yb, "B", { "font-size": 13, "font-weight": 600, "text-anchor": "start" });
+  if (R && R.unstable) label(svg, 410, 30, "Unstable / under-constrained beam: add or change supports (a pin or roller alone cannot resist rotation; a free beam needs a fixed end or two vertical supports).", "#c1121f", 13);
+  // cut marker
+  if (opts.cutX !== undefined) { const x = X(opts.cutX); line(svg, x, 20, x, yb + 52, "var(--red)", 2, { "stroke-dasharray": "5 4" }); label(svg, x, 11, `cut at x = ${fmt(opts.cutX)} ${u.L}`, "var(--red)", 12); }
+}
+
+/* ===================================================================== drawing: diagram */
+function drawDiagram(svg, st, R, which, opts = {}) {
+  clear(svg); const W = 820, H = 230, L = st.L, X = xmap(L, W); const u = U();
+  const vals = which === "V" ? [R.Vmin, R.Vmx] : [R.Mmin, R.Mmx]; let lo = Math.min(0, vals[0]), hi = Math.max(0, vals[1]); if (hi - lo < 1e-12) { lo = -1; hi = 1; }
+  const span = hi - lo; lo -= 0.12 * span; hi += 0.12 * span; const step = niceStep(hi - lo, 5);
+  const top = 26, bot = H - 34; const Y = v => bot - (bot - top) * (v - lo) / (hi - lo);
+  const color = which === "V" ? "var(--blue)" : "var(--red)", fill = which === "V" ? "var(--vfill)" : "var(--mfill)";
+  // grid
+  for (let g = Math.ceil(lo / step) * step; g <= hi + 1e-9; g += step) { line(svg, X(0), Y(g), X(L), Y(g), "#e6e6e6", 1); text(svg, X(0) - 8, Y(g), fmt(g), { "font-size": 11, fill: "#555", "text-anchor": "end" }); }
+  R.nodes.forEach(nx => line(svg, X(nx), top, X(nx), bot, "#eee", 1));
+  line(svg, X(0), Y(0), X(L), Y(0), "#333", 1.5); line(svg, X(0), top, X(0), bot, "#333", 1);
+  text(svg, 14, (top + bot) / 2, `${which} [${which === "V" ? u.F : u.M}]`, { "font-size": 13, "font-weight": 600, transform: `rotate(-90 14 ${(top + bot) / 2})` });
+  text(svg, (X(0) + X(L)) / 2, H - 8, `x [${u.L}]`, { "font-size": 12, fill: "#555" });
+  R.nodes.forEach(nx => text(svg, X(nx), bot + 12, fmt(nx), { "font-size": 11, fill: "#555" }));
+  text(svg, X(L) - 4, top - 10, which === "V" ? "Shear force diagram" : "Bending moment diagram", { "font-size": 13, "font-weight": 600, "text-anchor": "end", fill: color });
+  if (R.unstable) { label(svg, 410, (top + bot) / 2, "no solution — unstable beam", "#c1121f", 14); return { X, Y }; }
+  // pure bending highlight
+  if (opts.showPure && which === "M") R.pure.forEach(([a, b]) => { el("rect", { x: X(a), y: top, width: X(b) - X(a), height: bot - top, fill: "rgba(42,157,143,.10)" }, svg); label(svg, (X(a) + X(b)) / 2, top + 10, "pure bending (V = 0)", "var(--green)", 11); });
+  // filled curve per segment
+  R.segs.forEach(s => { const ptsStr = s.pts.map(p => `${X(p.x)},${Y(which === "V" ? p.V : p.M)}`).join(" "); el("polygon", { points: `${X(s.a)},${Y(0)} ${ptsStr} ${X(s.b)},${Y(0)}`, fill }, svg); el("polyline", { points: ptsStr, fill: "none", stroke: color, "stroke-width": 2.5, "stroke-linejoin": "round" }, svg); });
+  // jumps
+  for (let i = 1; i < R.segs.length; i++) { const a = R.segs[i - 1].pts[R.segs[i - 1].pts.length - 1], b = R.segs[i].pts[0]; const va = which === "V" ? a.V : a.M, vb = which === "V" ? b.V : b.M; if (Math.abs(va - vb) > 1e-9) line(svg, X(b.x), Y(va), X(b.x), Y(vb), color, 2.5); }
+  // key values
+  if (opts.showVals) { const placed = []; R.keys.forEach(k => { const pairs = which === "V" ? [[k.VL, -1], [k.VR, +1]] : [[k.ML, -1], [k.MR, +1]]; const seen = []; pairs.forEach(([v, side]) => { if (v === null || v === undefined) return; if (seen.some(s => Math.abs(s - v) < 1e-9)) return; seen.push(v); const x = X(k.x), y = Y(v); el("circle", { cx: x, cy: y, r: 3.2, fill: color }, svg); if (Math.abs(v) < 1e-9 && !k.zero) return; let ly = v >= 0 ? y - 12 : y + 13; if (placed.some(p => Math.abs(p[0] - x) < 40 && Math.abs(p[1] - ly) < 12)) ly += v >= 0 ? -12 : 12; placed.push([x, ly]); const s = k.zero && which === "V" ? `V = 0 at x = ${fmt(k.x)}` : (k.zero ? `${fmt(v)}` : fmt(v)); label(svg, x + (side < 0 ? -2 : 2), ly, s, color, 11, { "text-anchor": k.zero ? "middle" : (side < 0 ? "end" : "start") }); }); }); }
+  // cut marker and shading
+  if (opts.cutX !== undefined) { const xc = X(opts.cutX); line(svg, xc, top, xc, bot, "var(--red)", 1.5, { "stroke-dasharray": "5 4" }); if (opts.shade) { const clip = el("clipPath", { id: svg.id + "_clip" }, el("defs", {}, svg)); el("rect", { x: X(0), y: 0, width: Math.max(0, xc - X(0)), height: H }, clip); const g = el("g", { "clip-path": `url(#${svg.id}_clip)` }, svg); R.segs.forEach(s => { const ptsStr = s.pts.map(p => `${X(p.x)},${Y(which === "V" ? p.V : p.M)}`).join(" "); el("polygon", { points: `${X(s.a)},${Y(0)} ${ptsStr} ${X(s.b)},${Y(0)}`, fill: which === "V" ? "rgba(31,119,180,.35)" : "rgba(172,65,66,.35)" }, g); }); }
+    const v = which === "V" ? R.Vof(opts.cutX, opts.side) : R.Mof(opts.cutX, opts.side); el("circle", { cx: xc, cy: Y(v), r: 5, fill: "#fff", stroke: "var(--red)", "stroke-width": 2.5 }, svg); label(svg, xc + 8, Y(v) - 12, `${which}(${fmt(opts.cutX)}) = ${fmt(v)} ${which === "V" ? u.F : u.M}`, "var(--red)", 12, { "text-anchor": xc > 600 ? "end" : "start" }); }
+  return { X, Y };
+}
+
+/* ===================================================================== UI: lists */
+function renderLists() {
+  const u = U(); document.querySelectorAll(".uL").forEach(e => e.textContent = u.L);
+  const sl = document.getElementById("supList"); sl.innerHTML = "";
+  S.supports.forEach((s, i) => { const d = document.createElement("div"); d.className = "rowline"; d.innerHTML = `<select data-si="${i}" data-k="type"><option value="pin"${s.type === "pin" ? " selected" : ""}>pin</option><option value="roller"${s.type === "roller" ? " selected" : ""}>roller</option><option value="fixed"${s.type === "fixed" ? " selected" : ""}>fixed</option></select> <label>at x = <input type="number" data-si="${i}" data-k="x" value="${s.x}" step="0.1" min="0" max="${S.L}"> ${u.L}</label> <button class="x" data-sdel="${i}" title="remove">×</button>`; sl.appendChild(d); });
+  const ll = document.getElementById("loadList"); ll.innerHTML = "";
+  S.loads.forEach((l, i) => { const d = document.createElement("div"); d.className = "rowline"; let h = "";
+    if (l.type === "P") h = `<b>P</b> <label>= <input type="number" data-li="${i}" data-k="val" value="${l.val}" step="1"> ${u.F}</label> <label>at x = <input type="number" data-li="${i}" data-k="x" value="${l.x}" step="0.1" min="0" max="${S.L}"> ${u.L}</label>`;
+    if (l.type === "w") h = `<b>w</b> <label>from x = <input type="number" data-li="${i}" data-k="x1" value="${l.x1}" step="0.1" min="0" max="${S.L}"></label> <label>to <input type="number" data-li="${i}" data-k="x2" value="${l.x2}" step="0.1" min="0" max="${S.L}"> ${u.L}</label> <label>w<sub>1</sub> = <input type="number" data-li="${i}" data-k="w1" value="${l.w1}" step="0.5"></label> <label>w<sub>2</sub> = <input type="number" data-li="${i}" data-k="w2" value="${l.w2}" step="0.5"> ${u.w}</label>`;
+    if (l.type === "M") h = `<b>M<sub>0</sub></b> <label>= <input type="number" data-li="${i}" data-k="val" value="${l.val}" step="1"> ${u.M} (↺ +)</label> <label>at x = <input type="number" data-li="${i}" data-k="x" value="${l.x}" step="0.1" min="0" max="${S.L}"> ${u.L}</label>`;
+    d.innerHTML = h + ` <button class="x" data-ldel="${i}" title="remove">×</button>`; ll.appendChild(d); });
+  document.getElementById("L").value = S.L; document.getElementById("units").value = S.units;
+  const xc = document.getElementById("xcut"); xc.max = S.L; xc.step = Math.max(S.L / 400, 1e-6); const xn = document.getElementById("xcutN"); xn.max = S.L; xn.step = Math.max(S.L / 100, 1e-6); if (parseFloat(xc.value) > S.L) { xc.value = S.L / 3; xn.value = fmt(S.L / 3); }
+}
+document.getElementById("supList").addEventListener("input", e => { const t = e.target, i = +t.dataset.si; if (isNaN(i)) return; S.supports[i][t.dataset.k] = t.dataset.k === "x" ? (parseFloat(t.value) || 0) : t.value; update(false); });
+document.getElementById("loadList").addEventListener("input", e => { const t = e.target, i = +t.dataset.li; if (isNaN(i)) return; S.loads[i][t.dataset.k] = parseFloat(t.value) || 0; update(false); });
+document.getElementById("supList").addEventListener("click", e => { const i = e.target.dataset.sdel; if (i === undefined) return; S.supports.splice(+i, 1); update(true); });
+document.getElementById("loadList").addEventListener("click", e => { const i = e.target.dataset.ldel; if (i === undefined) return; S.loads.splice(+i, 1); update(true); });
+document.getElementById("addSup").onclick = () => { S.supports.push({ type: "roller", x: Math.round(S.L / 2 * 10) / 10 }); update(true); };
+document.querySelectorAll("[data-add]").forEach(b => b.onclick = () => { const t = b.dataset.add; if (t === "P") S.loads.push({ type: "P", x: Math.round(S.L / 2 * 10) / 10, val: 10 }); if (t === "w") S.loads.push({ type: "w", x1: 0, x2: S.L, w1: 5, w2: 5 }); if (t === "M") S.loads.push({ type: "M", x: Math.round(S.L / 2 * 10) / 10, val: 10 }); update(true); });
+document.getElementById("L").addEventListener("input", e => { const v = parseFloat(e.target.value); if (v > 0) { S.L = v; update(false); } });
+document.getElementById("units").addEventListener("change", e => { S.units = e.target.value; update(true); });
+document.getElementById("preset").addEventListener("change", e => { const p = PRESETS[e.target.value]; if (!p) return; S = JSON.parse(JSON.stringify(p)); update(true); });
+document.getElementById("resetAll").onclick = () => { S = JSON.parse(JSON.stringify(DEFAULT)); document.getElementById("preset").value = ""; ["showR", "showV", "showM", "showVals", "showPure"].forEach(id => document.getElementById(id).checked = true); update(true); };
+["showR", "showV", "showM", "showVals", "showPure"].forEach(id => document.getElementById(id).addEventListener("change", () => update(false)));
+document.getElementById("hideAll").onclick = () => { ["showR", "showV", "showM"].forEach(id => document.getElementById(id).checked = false); update(false); };
+document.querySelectorAll("[data-reveal]").forEach(b => b.onclick = () => { document.getElementById(b.dataset.reveal).checked = true; update(false); });
+
+/* ===================================================================== update */
+let R = null;
+function update(relist) {
+  if (relist) renderLists();
+  R = solveBeam(S); const u = U();
+  const showR = document.getElementById("showR").checked, showV = document.getElementById("showV").checked, showM = document.getElementById("showM").checked;
+  drawBeamFigure(document.getElementById("beamSvg"), S, R, { showR });
+  const vs = document.getElementById("vSvg"), ms = document.getElementById("mSvg");
+  document.getElementById("veilV").style.display = showV ? "none" : "flex"; document.getElementById("veilM").style.display = showM ? "none" : "flex";
+  drawDiagram(vs, S, R, "V", { showVals: document.getElementById("showVals").checked, showPure: false });
+  drawDiagram(ms, S, R, "M", { showVals: document.getElementById("showVals").checked, showPure: document.getElementById("showPure").checked });
+  // summary
+  let s = "";
+  if (R.unstable) s = "Unstable beam — no equilibrium solution. Add a support (e.g. a pin + roller, or a fixed end).";
+  else {
+    const det = (() => { let n = 0; S.supports.forEach(x => n += x.type === "fixed" ? 2 : 1); return n; })();
+    s += `Vertical unknowns: ${det} (reactions and fixed-end moments)  →  ${det <= 2 ? "statically determinate" : "statically indeterminate (degree " + (det - 2) + "; solved with uniform EI)"}\n`;
+    if (showR) { s += "Reactions (↑ and ↺ positive): "; s += R.reactions.map(r => `R(${fmt(r.x)} ${u.L}) = ${fmt(r.Ry)} ${u.F}` + (r.type === "fixed" ? `, M_R = ${fmt(r.Mz)} ${u.M}` : "")).join(";  ") + "\n"; const sumR = R.reactions.reduce((a, r) => a + r.Ry, 0); let sumP = 0; S.loads.forEach(l => { if (l.type === "P") sumP += l.val; if (l.type === "w") { const a = Math.min(l.x1, l.x2), b = Math.max(l.x1, l.x2); sumP += (l.w1 + l.w2) / 2 * (b - a); } }); s += `Check ΣF_y: reactions ${fmt(sumR)} ${u.F} = applied loads ${fmt(sumP)} ${u.F}\n`; } else s += "Reactions hidden.\n";
+    if (showV) s += `|V|_max = ${fmt(Math.abs(R.Vmax))} ${u.F} at x = ${fmt(R.xVmax)} ${u.L}   (V ranges from ${fmt(R.Vmin)} to ${fmt(R.Vmx)} ${u.F})\n`;
+    if (showM) s += `|M|_max = ${fmt(Math.abs(R.Mmax))} ${u.M} at x = ${fmt(R.xMmax)} ${u.L}   (M ranges from ${fmt(R.Mmin)} to ${fmt(R.Mmx)} ${u.M})`;
+    if (R.pure.length && showM) s += `\nPure bending (V = 0, M ≠ 0) on: ` + R.pure.map(([a, b]) => `${fmt(a)}–${fmt(b)} ${u.L}`).join(", ");
+  }
+  document.getElementById("summary").textContent = s;
+  // key table
+  const t = document.getElementById("keyTable"); t.innerHTML = "";
+  if (!R.unstable && (showV || showM)) { t.innerHTML = `<tr><th>x [${u.L}]</th>${showV ? `<th>V⁻ [${u.F}]</th><th>V⁺ [${u.F}]</th>` : ""}${showM ? `<th>M⁻ [${u.M}]</th><th>M⁺ [${u.M}]</th>` : ""}<th></th></tr>`; R.keys.forEach(k => { const tr = document.createElement("tr"); const c = v => v === null || v === undefined ? "" : fmt(v); tr.innerHTML = `<td>${fmt(k.x)}</td>${showV ? `<td>${c(k.VL)}</td><td>${c(k.VR)}</td>` : ""}${showM ? `<td>${c(k.ML)}</td><td>${c(k.MR)}</td>` : ""}<td style="text-align:left;color:#666">${k.zero ? "V = 0 → M extremum" : ""}</td>`; t.appendChild(tr); }); }
+  updateCut();
+}
+
+/* ===================================================================== section cut tab */
+function cutX() { return Math.min(Math.max(parseFloat(document.getElementById("xcut").value) || 0, 0), S.L); }
+function updateCut() {
+  if (!R) return; const u = U(); const x = cutX(); document.getElementById("xcutN").value = fmt(x);
+  const fromRight = document.getElementById("fromRight").checked; const side = +1;
+  drawBeamFigure(document.getElementById("cutBeamSvg"), S, R, { showR: true, cutX: x });
+  drawDiagram(document.getElementById("cutVSvg"), S, R, "V", { showVals: false, cutX: x, side, shade: !fromRight });
+  drawDiagram(document.getElementById("cutMSvg"), S, R, "M", { showVals: false, cutX: x, side, shade: !fromRight, showPure: false });
+  // FBD of the segment
+  const svg = document.getElementById("fbdSvg"); clear(svg); arrowDef(svg, "a", "#222"); arrowDef(svg, "r", "var(--red)"); arrowDef(svg, "b", "var(--blue)"); arrowDef(svg, "g", "var(--green)"); arrowDef(svg, "v", "#6a4c93");
+  if (R.unstable) { label(svg, 410, 115, "no FBD — unstable beam", "#c1121f", 14); document.getElementById("eqBox").textContent = ""; document.getElementById("areaBox").textContent = ""; return; }
+  const W = 820, L = S.L, X = xmap(L, W), yb = 134, hb = 14;
+  const a = fromRight ? x : 0, b = fromRight ? L : x; // segment [a,b]
+  const tol = 1e-9 * Math.max(L, 1);
+  const inSeg = xi => fromRight ? xi > x + tol && xi <= L + tol : xi < x - tol && xi >= -tol;
+  const inSegClosedEnd = xi => fromRight ? xi >= x - tol && xi <= L + tol : xi <= x + tol && xi >= -tol; // supports/loads exactly at the cut are taken on the left segment for a left cut
+  const include = xi => fromRight ? (xi > x + tol) : (xi <= x + tol); // left cut: x_i <= x (side +1) ; right cut: x_i > x
+  text(svg, 410, 14, fromRight ? `FBD of the segment to the RIGHT of the cut (${fmt(x)} ≤ x ≤ ${fmt(L)} ${u.L})` : `FBD of the segment to the LEFT of the cut (0 ≤ x ≤ ${fmt(x)} ${u.L})`, { "font-size": 13, "font-weight": 600 });
+  if (b - a > tol) el("rect", { x: X(a), y: yb - hb / 2, width: X(b) - X(a), height: hb, fill: "#cfd6de", stroke: "#333", "stroke-width": 1.5 }, svg);
+  // loads on the segment
+  const V = R.Vof(x, side), M = R.Mof(x, side);
+  const Fi = []; // list of forces for equations: {name, Fy (up+), x}
+  const Mi = []; // couples: {name, Mz (ccw+)}
+  R.reactions.forEach((r, i) => { if (!include(r.x)) return; const xx = X(r.x); const lab = String.fromCharCode(65 + i); if (Math.abs(r.Ry) > 1e-9) { const up = r.Ry >= 0; arrow(svg, xx, up ? yb + hb / 2 + 50 : yb + hb / 2 + 4, xx, up ? yb + hb / 2 + 4 : yb + hb / 2 + 50, "var(--red)", 2.5, "r"); label(svg, xx, yb + hb / 2 + 62, `R_{${lab}} = ${fmt(Math.abs(r.Ry))}${up ? "" : " ↓"}`, "var(--red)", 12); } Fi.push({ name: `R_{${lab}}`, Fy: r.Ry, x: r.x }); if (r.type === "fixed" && Math.abs(r.Mz) > 1e-9) { const ccw = r.Mz >= 0, rr = 22; el("path", { d: couplePath(xx, yb, rr, ccw), fill: "none", stroke: "var(--red)", "stroke-width": 2.5, "marker-end": `url(#${svg.id}_r)` }, svg); label(svg, xx, yb - rr - 12, `M_{R} = ${fmt(Math.abs(r.Mz))}${ccw ? " ↺" : " ↻"}`, "var(--red)", 12); Mi.push({ name: `M_{R}`, Mz: r.Mz }); } });
+  S.loads.forEach((l, i) => { if (l.type === "P" && include(l.x)) { const xx = X(l.x); if (l.val >= 0) arrow(svg, xx, yb - hb / 2 - 52, xx, yb - hb / 2 - 2, "#222", 2.5, "a"); else arrow(svg, xx, yb + hb / 2 + 52, xx, yb + hb / 2 + 2, "#222", 2.5, "a"); label(svg, xx, l.val >= 0 ? yb - hb / 2 - 62 : yb + hb / 2 + 64, `P = ${fmt(Math.abs(l.val))}${l.val < 0 ? " ↑" : ""}`, "#222", 12); Fi.push({ name: "P", Fy: -l.val, x: l.x }); }
+    if (l.type === "M" && include(l.x)) { const xx = X(l.x), r = 18, ccw = l.val >= 0; el("path", { d: couplePath(xx, yb, r, ccw), fill: "none", stroke: "var(--green)", "stroke-width": 2.5, "marker-end": `url(#${svg.id}_g)` }, svg); label(svg, xx, yb - r - 12, `M_{0} = ${fmt(Math.abs(l.val))}${ccw ? " ↺" : " ↻"}`, "var(--green)", 12); Mi.push({ name: "M_{0}", Mz: l.val }); }
+    if (l.type === "w") { const la = Math.min(l.x1, l.x2), lb = Math.max(l.x1, l.x2); const sa = Math.max(la, a), sb = Math.min(lb, b); if (sb - sa <= tol) return; const wa0 = l.x1 <= l.x2 ? l.w1 : l.w2, wb0 = l.x1 <= l.x2 ? l.w2 : l.w1; const wAt2 = xx => wa0 + (wb0 - wa0) * (xx - la) / (lb - la); const wa = wAt2(sa), wb = wAt2(sb); const wmax = Math.max(Math.abs(wa0), Math.abs(wb0), 1e-9); const hg = w => 10 + 30 * Math.abs(w) / wmax; const yt = w => yb - hb / 2 - (w >= 0 ? hg(w) : -hg(w));
+      el("polygon", { points: `${X(sa)},${yb - hb / 2} ${X(sa)},${yt(wa)} ${X(sb)},${yt(wb)} ${X(sb)},${yb - hb / 2}`, fill: "rgba(31,119,180,.12)", stroke: "var(--blue)", "stroke-width": 1.5 }, svg); const nA = Math.max(1, Math.round((X(sb) - X(sa)) / 26)); for (let k = 0; k <= nA; k++) { const xx = sa + (sb - sa) * k / nA, w = wAt2(xx); if (Math.abs(w) < 1e-12) continue; if (w > 0) arrow(svg, X(xx), yt(w), X(xx), yb - hb / 2 - 2, "var(--blue)", 1.6, "b"); else arrow(svg, X(xx), yb - hb / 2 - 2, X(xx), yt(w), "var(--blue)", 1.6, "b"); }
+      // resultant
+      const Wres = (wa + wb) / 2 * (sb - sa); const xbar = Math.abs(wa + wb) > 1e-12 ? sa + (sb - sa) * (wa + 2 * wb) / (3 * (wa + wb)) : (sa + sb) / 2; const xr = X(xbar); if (Math.abs(Wres) > 1e-12) { arrow(svg, xr, yb - hb / 2 - 80, xr, yb - hb / 2 - Math.min(hg(wa), hg(wb)) - 4, "var(--blue)", 2.2, "b"); label(svg, xr, yb - hb / 2 - 90, `w·Δx = ${fmt(Wres)} at x̄ = ${fmt(xbar)}`, "var(--blue)", 12); } Fi.push({ name: `(w·Δx)`, Fy: -Wres, x: xbar, Wres, span: [sa, sb], wa, wb }); } });
+  // internal V and M at the cut, positive directions
+  const xc = X(x);
+  if (!fromRight) { // right face of left segment: V points DOWN (positive), M CCW
+    arrow(svg, xc + 10, yb - 4, xc + 10, yb + 44, "#6a4c93", 3, "v"); label(svg, xc + 24, yb + 46, "V", "#6a4c93", 15);
+    el("path", { d: `M ${xc + 36} ${yb + 4} A 24 24 0 1 0 ${xc + 16} ${yb - 20}`, fill: "none", stroke: "#6a4c93", "stroke-width": 3, "marker-end": `url(#${svg.id}_v)` }, svg); label(svg, xc + 48, yb - 26, "M", "#6a4c93", 15);
+    el("circle", { cx: xc, cy: yb, r: 3, fill: "var(--red)" }, svg); label(svg, xc - 10, yb + 10, "O", "var(--red)", 12);
+  } else { // left face of right segment: V points UP (positive), M CW
+    arrow(svg, xc - 10, yb + 4, xc - 10, yb - 44, "#6a4c93", 3, "v"); label(svg, xc - 24, yb - 48, "V", "#6a4c93", 15);
+    el("path", { d: `M ${xc - 36} ${yb + 4} A 24 24 0 1 1 ${xc - 16} ${yb - 20}`, fill: "none", stroke: "#6a4c93", "stroke-width": 3, "marker-end": `url(#${svg.id}_v)` }, svg); label(svg, xc - 48, yb - 26, "M", "#6a4c93", 15);
+    el("circle", { cx: xc, cy: yb, r: 3, fill: "var(--red)" }, svg); label(svg, xc + 10, yb + 10, "O", "var(--red)", 12);
+  }
+  // dimension line from the far end to the cut
+  const yd = 232; line(svg, X(a), yd, X(b), yd, "#555", 1); line(svg, X(a), yd - 5, X(a), yd + 5, "#555", 1); line(svg, X(b), yd - 5, X(b), yd + 5, "#555", 1); text(svg, (X(a) + X(b)) / 2, yd - 9, fromRight ? `L − x = ${fmt(L - x)} ${u.L}` : `x = ${fmt(x)} ${u.L}`, { "font-size": 11, fill: "#555" });
+  // equations
+  const sgn = v => v >= 0 ? " + " : " − "; const ab = v => fmt(Math.abs(v));
+  let eq = "";
+  if (!fromRight) {
+    // ΣFy = 0: ΣFi − V = 0
+    let terms = Fi.map(f => `${sgn(f.Fy)}${ab(f.Fy)}`).join(""); terms = terms.replace(/^ \+ /, "").replace(/^ − /, "−");
+    eq += `Σ<i>F</i><sub>y</sub> = 0:  ${terms || "0"} − <i>V</i> = 0   →   <i>V</i>(${fmt(x)}) = <b>${fmt(V)} ${u.F}</b><br>`;
+    // ΣM_O = 0 about the cut (CCW +): M + Σ(−Fy·(x−xi)) ... each upward force at xi (left of O) gives CW moment about O: −Fy (x−xi)
+    let mt = Fi.map(f => { const arm = x - f.x; return `${sgn(-f.Fy)}${ab(f.Fy)}(${fmt(arm)})`; }).join("") + Mi.map(c => `${sgn(c.Mz)}${ab(c.Mz)}`).join("");
+    eq += `Σ<i>M</i><sub>O</sub> = 0 (↺ +):  <i>M</i>${mt} = 0   →   <i>M</i>(${fmt(x)}) = <b>${fmt(M)} ${u.M}</b><br>`;
+  } else {
+    let terms = Fi.map(f => `${sgn(f.Fy)}${ab(f.Fy)}`).join(""); terms = terms.replace(/^ \+ /, "").replace(/^ − /, "−");
+    eq += `Σ<i>F</i><sub>y</sub> = 0:  <i>V</i>${terms ? (terms.startsWith("−") ? " " + terms : " + " + terms) : ""} = 0   →   <i>V</i>(${fmt(x)}) = <b>${fmt(V)} ${u.F}</b><br>`;
+    let mt = Fi.map(f => { const arm = f.x - x; return `${sgn(f.Fy)}${ab(f.Fy)}(${fmt(arm)})`; }).join("") + Mi.map(c => `${sgn(c.Mz)}${ab(c.Mz)}`).join("");
+    eq += `Σ<i>M</i><sub>O</sub> = 0 (↺ +):  −<i>M</i>${mt} = 0   →   <i>M</i>(${fmt(x)}) = <b>${fmt(M)} ${u.M}</b><br>`;
+  }
+  const wnote = Fi.filter(f => f.Wres !== undefined).map(f => `(w·Δx) = ${Math.abs(f.wa - f.wb) < 1e-9 ? `${fmt(f.wa)} × ${fmt(f.span[1] - f.span[0])}` : `½(${fmt(f.wa)} + ${fmt(f.wb)}) × ${fmt(f.span[1] - f.span[0])}`} = ${fmt(f.Wres)} ${u.F}, acting at x̄ = ${fmt(f.x)} ${u.L}`).join("; ");
+  if (wnote) eq += `<span style="font-size:13px;color:#555">Distributed load replaced by its resultant for the moment equation: ${wnote}.</span>`;
+  const Vatcut = R.Vof(x, +1), Vleft = R.Vof(x, -1);
+  if (Math.abs(Vatcut - Vleft) > 1e-9 && x > tol && x < L - tol) eq += `<br><span class="flag">A point load or reaction acts exactly at the cut: V jumps from ${fmt(Vleft)} to ${fmt(Vatcut)} ${u.F} here (the value just right of the cut is shown).</span>`;
+  document.getElementById("eqBox").innerHTML = eq;
+  // graphical approach
+  let area = "";
+  const V0 = R.Vof(0, +1), M0 = R.Mof(0, +1);
+  // ∫0^x w dx  and jumps from point loads/reactions in (0, x]
+  let wint = 0; S.loads.forEach(l => { if (l.type !== "w") return; const la = Math.min(l.x1, l.x2), lb = Math.max(l.x1, l.x2); if (lb - la < tol || x <= la) return; const wa0 = l.x1 <= l.x2 ? l.w1 : l.w2, wb0 = l.x1 <= l.x2 ? l.w2 : l.w1; const xe = Math.min(x, lb), t = xe - la, k = (wb0 - wa0) / (lb - la); wint += wa0 * t + k * t * t / 2; });
+  let jumps = 0; R.reactions.forEach(r => { if (r.x > tol && r.x <= x + tol) jumps += r.Ry; }); S.loads.forEach(l => { if (l.type === "P" && l.x > tol && l.x <= x + tol) jumps -= l.val; });
+  let mjumps = 0; S.loads.forEach(l => { if (l.type === "M" && l.x > tol && l.x <= x + tol) mjumps -= l.val; }); R.reactions.forEach(r => { if (r.type === "fixed" && r.x > tol && r.x <= x + tol) mjumps -= r.Mz; });
+  // ∫0^x V dx numerically from segments
+  let vint = 0; R.segs.forEach(s => { if (s.a >= x) return; const xe = Math.min(x, s.b); const pts = s.pts; for (let i = 1; i < pts.length; i++) { const p = pts[i - 1], q = pts[i]; if (p.x >= xe) break; const x2 = Math.min(q.x, xe); const Vq = p.V + (q.V - p.V) * (x2 - p.x) / (q.x - p.x || 1); vint += (p.V + Vq) / 2 * (x2 - p.x); } });
+  area += `Graphical approach from the left end (x = 0):\n`;
+  area += `  V(0⁺) = ${fmt(V0)} ${u.F}   (reaction / load at the left end, if any)\n`;
+  area += `  area under w from 0 to ${fmt(x)}: ∫w dx = ${fmt(wint)} ${u.F}   →   ΔV = −${fmt(wint)} ${u.F}\n`;
+  if (Math.abs(jumps) > 1e-9) area += `  jumps from point forces in (0, ${fmt(x)}]: ${fmtSigned(jumps)} ${u.F}\n`;
+  area += `  V(${fmt(x)}) = ${fmt(V0)} − ${fmt(wint)}${Math.abs(jumps) > 1e-9 ? " " + fmtSigned(jumps) : ""} = ${fmt(Vatcut)} ${u.F}\n\n`;
+  area += `  M(0⁺) = ${fmt(M0)} ${u.M}   (${Math.abs(M0) > 1e-9 ? "fixed-end moment or applied couple at the left end" : "free or simply supported end"})\n`;
+  area += `  area under V from 0 to ${fmt(x)}: ∫V dx = ${fmt(vint)} ${u.M}   →   ΔM = ${fmtSigned(vint)} ${u.M}\n`;
+  if (Math.abs(mjumps) > 1e-9) area += `  jumps from couples in (0, ${fmt(x)}]: ${fmtSigned(mjumps)} ${u.M}\n`;
+  area += `  M(${fmt(x)}) = ${fmt(M0)} ${fmtSigned(vint)}${Math.abs(mjumps) > 1e-9 ? " " + fmtSigned(mjumps) : ""} = ${fmt(R.Mof(x, +1))} ${u.M}`;
+  const zero = R.keys.find(k => k.zero && Math.abs(k.x - x) < Math.max(S.L / 400, 1e-6) * 1.01); if (zero) area += `\n\n  V = 0 here → M has a local ${R.Mof(x) >= 0 ? "maximum" : "minimum"}: ${fmt(R.Mof(x))} ${u.M}`;
+  document.getElementById("areaBox").textContent = area;
+}
+document.getElementById("xcut").addEventListener("input", updateCut);
+document.getElementById("xcutN").addEventListener("change", e => { const v = Math.min(Math.max(parseFloat(e.target.value) || 0, 0), S.L); document.getElementById("xcut").value = v; updateCut(); });
+document.getElementById("fromRight").addEventListener("change", updateCut);
+document.getElementById("resetCut").onclick = () => { document.getElementById("xcut").value = S.L / 3; document.getElementById("fromRight").checked = false; updateCut(); };
+function keyXs() { const xs = R ? R.keys.map(k => k.x) : [0, S.L]; return Array.from(new Set(xs.map(v => Math.round(v * 1e6) / 1e6))).sort((a, b) => a - b); }
+document.getElementById("nextKey").onclick = () => { const x = cutX(), ks = keyXs(); const nx = ks.find(k => k > x + 1e-6); if (nx !== undefined) { document.getElementById("xcut").value = nx; updateCut(); } };
+document.getElementById("prevKey").onclick = () => { const x = cutX(), ks = keyXs().reverse(); const px = ks.find(k => k < x - 1e-6); if (px !== undefined) { document.getElementById("xcut").value = px; updateCut(); } };
+
+/* tabs */
+document.querySelectorAll("#nav button").forEach(b => b.onclick = () => { document.querySelectorAll("#nav button").forEach(x => x.classList.remove("active")); document.querySelectorAll("section.tab").forEach(x => x.classList.remove("active")); b.classList.add("active"); document.getElementById(b.dataset.tab).classList.add("active"); if (typeof gtag === "function") gtag("event", "tab_view", { module: "beam-vm", tab: b.textContent.trim() }); });
+
+update(true);
+</script>
+</body>
+</html>
