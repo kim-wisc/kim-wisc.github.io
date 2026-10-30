@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mohr's Circle Explorer</title>
+<style>
+  :root { --cx:#d1495b; --cy:#1f77b4; --cz:#6a4c93; --cs:#2a9d8f; --ink:#222; --mut:#666; --grid:#ddd; --grid2:#eee; --bg:#fff; --panel:#f7f7f9; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; color:var(--ink); background:var(--bg); }
+  header { padding:14px 22px 8px; border-bottom:1px solid #e3e3e3; }
+  header h1 { margin:0 0 4px; font-size:22px; }
+  header p { margin:0; color:var(--mut); font-size:14px; }
+  nav { display:flex; gap:6px; padding:10px 22px 0; flex-wrap:wrap; }
+  nav button { border:1px solid #ccc; background:#f2f2f2; padding:8px 14px; border-radius:8px 8px 0 0; cursor:pointer; font-size:15px; }
+  nav button.active { background:#fff; border-bottom-color:#fff; font-weight:600; }
+  section.tab { display:none; padding:12px 22px 24px; }
+  section.tab.active { display:block; }
+  .row { display:flex; gap:18px; flex-wrap:wrap; align-items:flex-start; }
+  .inputs { background:var(--panel); border:1px solid #e3e3e3; border-radius:10px; padding:10px 14px; display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; margin-bottom:10px; font-size:14px; }
+  .inputs label { display:inline-flex; align-items:center; gap:6px; } .inputs label span sub, .ctrl sub { font-size:75%; }
+  .banner-title { font-weight:600; color:#444; margin-right:6px; }
+  .inputs input[type=number] { width:86px; padding:4px 6px; font-size:14px; border:1px solid #bbb; border-radius:6px; }
+  .inputs input[type=text] { width:60px; padding:4px 6px; font-size:14px; border:1px solid #bbb; border-radius:6px; }
+  .inputs select { padding:4px 6px; font-size:14px; }
+  .ctrl { display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; margin:6px 0 10px; font-size:14px; }
+  .ctrl input[type=range] { width:min(520px, 60vw); }
+  .ctrl button, .inputs button { padding:5px 12px; font-size:14px; border:1px solid #bbb; background:#fff; border-radius:6px; cursor:pointer; }
+  .ctrl button:hover, .inputs button:hover { background:#eef; }
+  .ctrl .val { font-family: ui-monospace, Menlo, monospace; min-width:90px; }
+  svg { background:#fff; border:1px solid #e6e6e6; border-radius:8px; }
+  .readout { font-family: ui-monospace, Menlo, Consolas, monospace; font-size:13px; background:var(--panel); border:1px solid #e3e3e3; border-radius:8px; padding:8px 12px; white-space:pre; line-height:1.5; }
+  .note { color:var(--mut); font-size:13px; max-width:1100px; line-height:1.45; }
+  .flag { color:#c1121f; font-weight:700; }
+  @media (max-width: 700px) { .ctrl input[type=range] { width:90vw; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Mohr's Circle Explorer — stress &amp; strain transformations</h1>
+  <p style="margin:0 0 6px"><b>So Yeon KIM</b>, Assistant Professor, Department of Mechanical Engineering, University of Wisconsin–Madison — developed as part of the <i>Mechanics of Materials</i> course.
+     Found an error or have a suggestion? <a id="reportLink" href="#" target="_blank" rel="noopener">Report it here</a>.</p>
+  <p>Sign convention (Module 9): θ from x to x′, + CCW. On the circle the shear is plotted upward and a shear that tends to rotate the element <b>clockwise</b> is plotted <b>positive</b>: X′ = (σ<sub>x′</sub>, −τ<sub>x′y′</sub>), Y′ = (σ<sub>y′</sub>, +τ<sub>x′y′</sub>). A CCW rotation θ of the element is a CCW rotation 2θ of X′ about C.</p>
+</header>
+<nav id="nav">
+  <button data-tab="t2d" class="active">2-D stress</button>
+  <button data-tab="tstrain">2-D strain</button>
+  <button data-tab="trot">3-D Mohr's circle-1</button>
+  <button data-tab="t3d">3-D Mohr's circle-2</button>
+  <button data-tab="tmem">Element on a member</button>
+  <button data-tab="tfail">Failure on a plane</button>
+</nav>
+
+<!-- ============================ 2-D STRESS ============================ -->
+<section id="t2d" class="tab active">
+  <div class="inputs">
+    <label><span>σ<sub>x</sub> [<span class="u s_u">MPa</span>]</span><input type="number" id="s_sx" value="80" step="1"></label>
+    <label><span>σ<sub>y</sub> [<span class="u s_u">MPa</span>]</span><input type="number" id="s_sy" value="-20" step="1"></label>
+    <label><span>τ<sub>xy</sub> [<span class="u s_u">MPa</span>]</span><input type="number" id="s_txy" value="40" step="1"></label>
+    <label><span>units</span><input type="text" id="s_units" value="MPa"></label>
+    <label><input type="checkbox" id="s_gauto" checked> auto grid</label>
+    <label><span>grid major [<span class="u s_u">MPa</span>]</span><input type="number" id="s_gmaj" value="20" step="1" disabled></label>
+    <label><span>minor [<span class="u s_u">MPa</span>]</span><input type="number" id="s_gmin" value="4" step="1" disabled></label>
+    <label><span></span><input type="checkbox" id="s_trail" checked> trail</label>
+  </div>
+  <div class="ctrl">
+    <button id="s_play">▶ play</button>
+    <input type="range" id="s_theta" min="-180" max="180" step="0.1" value="0">
+    <span class="val" id="s_thetav">θ = 0.00°</span>
+    <button data-set="0" class="s_jump">θ = 0°</button>
+    <span id="s_jumps"></span>
+    <button id="s_reset">reset element</button>
+    <label><span>speed</span><input type="range" id="s_speed" min="10" max="200" value="60" style="width:100px"></label>
+  </div>
+  <div class="row">
+    <svg id="s_el" width="520" height="520" viewBox="0 0 520 520"></svg>
+    <svg id="s_mc" width="640" height="560" viewBox="0 0 640 560"></svg>
+    <div class="readout" id="s_read"></div>
+  </div>
+  <p class="note">Drag the slider (or press play) to rotate the element. Negative θ = clockwise. The dotted trail is the path of X′ and Y′; at θ<sub>p</sub> the shear vanishes (principal planes), at θ<sub>s</sub> it is maximal.</p>
+</section>
+
+<!-- ============================ 2-D STRAIN ============================ -->
+<section id="tstrain" class="tab">
+  <div class="inputs">
+    <label><span>ε<sub>x</sub> [<span class="u e_u">με</span>]</span><input type="number" id="e_ex" value="420" step="10"></label>
+    <label><span>ε<sub>y</sub> [<span class="u e_u">με</span>]</span><input type="number" id="e_ey" value="-300" step="10"></label>
+    <label><span>γ<sub>xy</sub> [<span class="u e_u">με</span>]</span><input type="number" id="e_gxy" value="-210" step="10"></label>
+    <label><span>units</span><input type="text" id="e_units" value="με"></label>
+    <label><input type="checkbox" id="e_gauto" checked> auto grid</label>
+    <label><span>grid major [<span class="u e_u">με</span>]</span><input type="number" id="e_gmaj" value="100" step="10" disabled></label>
+    <label><span>minor [<span class="u e_u">με</span>]</span><input type="number" id="e_gmin" value="20" step="5" disabled></label>
+    <label><span>exaggeration (max strain drawn as this fraction)</span><input type="number" id="e_exag" value="0.25" step="0.05" min="0.02" max="1"></label>
+    <label><span></span><input type="checkbox" id="e_trail" checked> trail</label>
+  </div>
+  <div class="ctrl">
+    <button id="e_play">▶ play</button>
+    <input type="range" id="e_theta" min="-180" max="180" step="0.1" value="0">
+    <span class="val" id="e_thetav">θ = 0.0°</span>
+    <button data-set="0" class="e_jump">θ = 0°</button>
+    <span id="e_jumps"></span>
+    <button id="e_reset">reset element</button>
+  </div>
+  <div class="row">
+    <svg id="e_el" width="520" height="520" viewBox="0 0 520 520"></svg>
+    <svg id="e_mc" width="640" height="560" viewBox="0 0 640 560"></svg>
+    <div class="readout" id="e_read"></div>
+  </div>
+  <p class="note">Strain uses the same equations with σ → ε and τ → γ/2; Mohr's circle for strain plots γ/2 vertically. The pink element is the (exaggerated) deformed shape in the rotated frame: sides stretched by ε<sub>x′</sub>, ε<sub>y′</sub> and the right angle changed by γ<sub>x′y′</sub>.</p>
+</section>
+
+<!-- ============================ 3-D ROTATION ============================ -->
+<section id="trot" class="tab">
+  <div class="inputs">
+    <label><span>σ<sub>x</sub> [<span class="u r_u">MPa</span>]</span><input type="number" id="r_sx" value="80" step="1"></label>
+    <label><span>σ<sub>y</sub> [<span class="u r_u">MPa</span>]</span><input type="number" id="r_sy" value="-20" step="1"></label>
+    <label><span>σ<sub>z</sub> [<span class="u r_u">MPa</span>]</span><input type="number" id="r_sz" value="20" step="1"></label>
+    <label><span>τ<sub>xy</sub> [<span class="u r_u">MPa</span>]</span><input type="number" id="r_txy" value="40" step="1"></label>
+    <label><span>τ<sub>xz</sub> [<span class="u r_u">MPa</span>]</span><input type="number" id="r_txz" value="0" step="1"></label>
+    <label><span>τ<sub>yz</sub> [<span class="u r_u">MPa</span>]</span><input type="number" id="r_tyz" value="0" step="1"></label>
+    <label><span>units</span><input type="text" id="r_units" value="MPa"></label>
+  </div>
+  <div class="ctrl">
+    <span style="width:70px">θ<sub>x′</sub></span><input type="range" id="r_tx" min="-180" max="180" step="0.5" value="0"><span class="val" id="r_txv">0.0°</span>
+    <button id="r_px">principal about x′</button>
+  </div>
+  <div class="ctrl">
+    <span style="width:70px">θ<sub>y′</sub></span><input type="range" id="r_ty" min="-180" max="180" step="0.5" value="0"><span class="val" id="r_tyv">0.0°</span>
+    <button id="r_py">principal about y′</button>
+  </div>
+  <div class="ctrl">
+    <span style="width:70px">θ<sub>z′</sub></span><input type="range" id="r_tz" min="-180" max="180" step="0.5" value="0"><span class="val" id="r_tzv">0.0°</span>
+    <button id="r_pz">principal about z′</button>
+    <label><input type="checkbox" id="r_trail" checked> trail</label>
+    <label title="textbook 3-D diagram uses |τ|; signed τ follows the 2-D CW rule in the plane of the current rotation and is only defined for rotation about a principal axis"><input type="checkbox" id="r_signed"> signed τ (2-D CW rule)</label>
+    <span id="r_signwarn" class="flag" style="flex-basis:100%; font-size:13px"></span>
+    <button id="r_clear">clear trail</button>
+    <button id="r_reset">reset element</button>
+  </div>
+  <div class="row">
+    <svg id="r_el" width="480" height="480" viewBox="0 0 480 480"></svg>
+    <svg id="r_mc" width="700" height="660" viewBox="0 0 700 660"></svg>
+    <div class="readout" id="r_read"></div>
+  </div>
+  <p class="note">Each slider rotates the element about its <b>current</b> x′, y′ or z′ axis, on top of what was done before (the order is the order you move them). The faces are plotted as (normal stress, |resultant shear| on the face), the textbook 3-D diagram, so a point moves continuously and stays on a circle only while rotating about a principal axis. Tick "signed τ" to use the 2-D clockwise-positive rule instead (X′ = (σ<sub>x′</sub>, −τ<sub>x′y′</sub>) etc.): this is only defined for rotation about a principal axis, and the page warns when it is not. Demo: press <i>principal about z′</i> (τ<sub>x′y′</sub> → 0, all faces shear-free), then drag θ<sub>x′</sub> — Y′ and Z′ trace the σ<sub>2</sub>–σ<sub>3</sub> circle while X′ stays at σ<sub>1</sub>. Without the first step the points leave the circles for the shaded region. </p>
+</section>
+
+<!-- ============================ 3-D CIRCLES ============================ -->
+<section id="t3d" class="tab">
+  <div class="inputs">
+    <label><span>σ<sub>x</sub> [<span class="u d_u">MPa</span>]</span><input type="number" id="d_sx" value="80" step="1"></label>
+    <label><span>σ<sub>y</sub> [<span class="u d_u">MPa</span>]</span><input type="number" id="d_sy" value="-20" step="1"></label>
+    <label><span>τ<sub>xy</sub> [<span class="u d_u">MPa</span>]</span><input type="number" id="d_txy" value="40" step="1"></label>
+    <label><span>units</span><input type="text" id="d_units" value="MPa"></label>
+    <label><span>σ<sub>z</sub> range [<span class="u d_u">MPa</span>]</span><input type="number" id="d_zmin" value="-60" step="10"> … <input type="number" id="d_zmax" value="120" step="10"></label>
+  </div>
+  <div class="ctrl">
+    <button id="d_play">▶ play</button>
+    <input type="range" id="d_sz" min="-60" max="120" step="0.5" value="0">
+    <span class="val" id="d_szv">σ<sub>z</sub> = 0.0</span>
+    <button id="d_zero">reset: σ<sub>z</sub> = 0</button>
+  </div>
+  <div class="row">
+    <svg id="d_el" width="440" height="460" viewBox="0 0 440 460"></svg>
+    <svg id="d_mc" width="700" height="660" viewBox="0 0 700 660"></svg>
+    <div class="readout" id="d_read"></div>
+  </div>
+  <p class="note">Plane stress still has a third principal stress σ<sub>z</sub> (τ<sub>xz</sub> = τ<sub>yz</sub> = 0). The three circles are drawn on (σ<sub>1</sub>,σ<sub>2</sub>), (σ<sub>2</sub>,σ<sub>3</sub>), (σ<sub>1</sub>,σ<sub>3</sub>); the in-plane x–y circle is bold. The absolute maximum shear is (σ<sub>1</sub>−σ<sub>3</sub>)/2 and leaves the x–y plane as soon as σ<sub>z</sub> moves outside the in-plane circle.</p>
+</section>
+
+<!-- ============================ MEMBER ============================ -->
+<section id="tmem" class="tab">
+  <div class="inputs">
+    <label><span>N [kN] (axial, + tension)</span><input type="number" id="m_N" value="50" step="5"></label>
+    <label><span>P [kN] (transverse, + downward)</span><input type="number" id="m_P" value="1" step="0.5"></label>
+    <label><span>T [N·m] (torque, + about +x)</span><input type="number" id="m_T" value="600" step="50"></label>
+    <label><span>r [mm]</span><input type="number" id="m_r" value="20" step="1"></label>
+    <label><span>L [m]</span><input type="number" id="m_L" value="0.5" step="0.1"></label>
+    <label><span>position</span><select id="m_mode"><option value="cyl">cylindrical (x, ρ, φ)</option><option value="cart">Cartesian (x, y, z)</option></select></label>
+  </div>
+  <div class="inputs" style="flex-direction:column; align-items:flex-start; gap:6px">
+    <div class="ctrl" style="margin:0"><span class="banner-title">Position of the element</span>
+      <span style="width:110px">axial x/L</span><input type="range" id="m_xf" min="0" max="1" step="0.001" value="0" style="width:260px"><span class="val" id="m_xfv"></span> <label><span>x [m]</span><input type="number" id="m_xn" step="0.01" style="width:80px"></label></div>
+    <div class="ctrl m_cyl" style="margin:0">
+      <span style="width:110px">radius ρ/r</span><input type="range" id="m_rf" min="0" max="1" step="0.001" value="1" style="width:260px"><span class="val" id="m_rfv"></span> <label><span>ρ [mm]</span><input type="number" id="m_rn" step="0.5" style="width:80px"></label>
+      <span style="width:150px">angle φ [deg] (90° = top)</span><input type="range" id="m_phi" min="0" max="360" step="0.1" value="90" style="width:260px"><span class="val" id="m_phiv"></span> <label><span>φ [deg]</span><input type="number" id="m_phin" step="1" style="width:80px"></label>
+      <button id="m_play">▶ sweep φ</button>
+      <button data-phi="90" class="m_jump">top</button><button data-phi="0" class="m_jump">side (+z)</button><button data-phi="270" class="m_jump">bottom</button></div>
+    <div class="ctrl m_cart" style="display:none; margin:0">
+      <span style="width:110px">y/r</span><input type="range" id="m_yf" min="-1" max="1" step="0.001" value="1" style="width:260px"><span class="val" id="m_yfv"></span> <label><span>y [mm]</span><input type="number" id="m_yn" step="0.5" style="width:80px"></label>
+      <span style="width:150px">z/r</span><input type="range" id="m_zf" min="-1" max="1" step="0.001" value="0" style="width:260px"><span class="val" id="m_zfv"></span> <label><span>z [mm]</span><input type="number" id="m_zn" step="0.5" style="width:80px"></label>
+      <span id="m_warn" class="flag"></span></div>
+  </div>
+  <div class="inputs" style="flex-direction:column; align-items:flex-start; gap:6px">
+    <div class="ctrl" style="margin:0"><span class="banner-title">Orientation of the element (rotations about its current axes, in the order you move them)</span></div>
+    <div class="ctrl" style="margin:0">
+      <span style="width:110px">θ<sub>x′</sub> [deg]</span><input type="range" id="m_tx" min="-180" max="180" step="0.1" value="0" style="width:260px"><span class="val" id="m_txv">0.0°</span> <label><span>[deg]</span><input type="number" id="m_txn" step="1" value="0" style="width:80px"></label>
+      <span style="width:150px">θ<sub>y′</sub> [deg]</span><input type="range" id="m_ty" min="-180" max="180" step="0.1" value="0" style="width:260px"><span class="val" id="m_tyv">0.0°</span> <label><span>[deg]</span><input type="number" id="m_tyn" step="1" value="0" style="width:80px"></label></div>
+    <div class="ctrl" style="margin:0">
+      <span style="width:110px">θ<sub>z′</sub> [deg]</span><input type="range" id="m_tz" min="-180" max="180" step="0.1" value="0" style="width:260px"><span class="val" id="m_tzv">0.0°</span> <label><span>[deg]</span><input type="number" id="m_tzn" step="1" value="0" style="width:80px"></label>
+      <button id="m_align">align with (x, t, n): y′ → tangential, z′ → radial</button>
+      <button id="m_pz">principal about z′</button>
+      <button id="m_reset">reset orientation</button>
+      <label><input type="checkbox" id="m_trail" checked> trail</label>
+      <label title="textbook 3-D diagram uses |τ|; signed τ follows the 2-D CW rule in the plane of the current rotation and is only defined for rotation about a principal axis"><input type="checkbox" id="m_signed"> signed τ (2-D CW rule)</label>
+      <span id="m_signwarn" class="flag" style="flex-basis:100%; font-size:13px"></span>
+      <button id="m_clear">clear trail</button></div>
+  </div>
+  <div class="row">
+    <div>
+      <svg id="m_mem" width="560" height="330" viewBox="0 0 560 330"></svg><br>
+      <svg id="m_el" width="560" height="330" viewBox="0 0 560 330" style="margin-top:8px"></svg>
+    </div>
+    <svg id="m_mc" width="640" height="680" viewBox="0 0 640 680"></svg>
+    <div class="readout" id="m_read"></div>
+  </div>
+  <p class="note">A cantilever solid circular shaft (fixed at x = 0, free end at x = L) carries at its free end an axial force N, a transverse force P (downward) and a torque T.
+  Internal resultants on a section at x (sign conventions of Modules 7–8: +N tension, +V rotates the element clockwise, +M makes the beam "smile"): N, V = P, M = −P(L − x), T.
+  Stresses at a point (x, y, z) of the section by superposition: σ<sub>x</sub> = N/A − My/I; torsion τ = Tρ/J acting tangentially, i.e. (τ<sub>xy</sub>, τ<sub>xz</sub>)<sub>T</sub> = (T/J)(−z, y);
+  transverse shear τ<sub>xy</sub> = VQ/(It) with Q = (2/3)(r² − y²)<sup>3/2</sup>, t = 2√(r² − y²) → τ<sub>xy</sub> = −V(r² − y²)/(3I) (F<sub>y</sub> = ∫τ<sub>xy</sub>dA = −V), and τ<sub>xz</sub> = Vyz/(3I) from the elementary circular-section assumption that the shear stresses on a chord point to the intersection of the boundary tangents.
+  Pick the point in cylindrical (x, ρ, φ) or Cartesian (x, y, z) coordinates, then rotate the element about its own x′, y′, z′ axes (each slider rotates about the <i>current</i> axis, on top of the previous rotations).
+  "Align with (x, t, n)" rotates the element about x by −φ so that y′ = t (tangential) and z′ = n (radial): on the surface this is the plane-stress element of the lecture (σ<sub>t</sub> = σ<sub>n</sub> = 0, τ<sub>xn</sub> = 0) and "principal about z′" then gives the principal planes of that element.</p>
+</section>
+
+<!-- ============================ FAILURE ============================ -->
+<section id="tfail" class="tab">
+  <div class="inputs">
+    <label><span>σ<sub>x</sub> [<span class="u f_u">MPa</span>]</span><input type="number" id="f_sx" value="80" step="1"></label>
+    <label><span>σ<sub>y</sub> [<span class="u f_u">MPa</span>]</span><input type="number" id="f_sy" value="-20" step="1"></label>
+    <label><span>τ<sub>xy</sub> [<span class="u f_u">MPa</span>]</span><input type="number" id="f_txy" value="40" step="1"></label>
+    <label><span>σ<sub>t,allow</sub> [<span class="u f_u">MPa</span>]</span><input type="number" id="f_st" value="120" step="5"></label>
+    <label><span>σ<sub>c,allow</sub> [<span class="u f_u">MPa</span>]</span><input type="number" id="f_sc" value="300" step="5"></label>
+    <label><span>τ<sub>allow</sub> [<span class="u f_u">MPa</span>]</span><input type="number" id="f_ta" value="90" step="5"></label>
+    <label><span>units</span><input type="text" id="f_units" value="MPa"></label>
+  </div>
+  <div class="ctrl">
+    <button id="f_play">▶ play</button>
+    <input type="range" id="f_lam" min="0" max="2" step="0.005" value="0">
+    <span class="val" id="f_lamv">λ = 0.00</span>
+    <button id="f_tofail">λ → failure</button>
+    <button id="f_zero">reset: λ = 0</button>
+  </div>
+  <div class="row">
+    <svg id="f_el" width="520" height="520" viewBox="0 0 520 520"></svg>
+    <svg id="f_mc" width="700" height="660" viewBox="0 0 700 660"></svg>
+    <div class="readout" id="f_read"></div>
+  </div>
+  <p class="note">The stress state is scaled by a load factor λ. Mohr's circle grows until it first touches a limit: σ = +σ<sub>t,allow</sub> (tension), σ = −σ<sub>c,allow</sub> (compression) or |τ| = τ<sub>allow</sub> (shear). The touching point is a specific plane: the principal plane (normal at θ<sub>p</sub>) for tension/compression, the maximum-shear plane (θ<sub>p</sub> ± 45°) for shear — drawn on the element as the crack / slip line. Lower τ<sub>allow</sub> (ductile metal, τ<sub>allow</sub> ≈ σ<sub>y</sub>/2) to switch the mode to shear.</p>
+</section>
+
+<script>
+/* ===== Visit counting (optional): paste your Google Analytics 4 measurement ID (G-XXXXXXXXXX) and/or your
+   GoatCounter code; leave empty to disable.  Used when the explorer is opened full screen (outside the site layout). ===== */
+const ANALYTICS_GA4 = "G-5MZ1MTJD64";   // GA4 property "Teaching modules (kim-wisc.github.io)"
+const ANALYTICS_GOATCOUNTER = "";
+if (ANALYTICS_GA4 && window.self === window.top) { const t = document.createElement("script"); t.async = true; t.src = "https://www.googletagmanager.com/gtag/js?id=" + ANALYTICS_GA4; document.head.appendChild(t);
+  window.dataLayer = window.dataLayer || []; function gtag(){ dataLayer.push(arguments); } gtag("js", new Date()); gtag("config", ANALYTICS_GA4); }
+if (ANALYTICS_GOATCOUNTER && window.self === window.top) { const t = document.createElement("script"); t.async = true; t.setAttribute("data-goatcounter", "https://" + ANALYTICS_GOATCOUNTER + ".goatcounter.com/count"); t.src = "//gc.zgo.at/count.js"; document.head.appendChild(t); }
+
+/* ===== Error-report form: paste the link of your Google Form (Send -> link) here ===== */
+const REPORT_FORM_URL = "https://forms.gle/6EWQRUDerN1ZvfAe8";
+document.getElementById("reportLink").href = REPORT_FORM_URL;
+
+/* ===================================================================== helpers */
+const NS = "http://www.w3.org/2000/svg";
+const d2r = d => d * Math.PI / 180, r2d = r => r * 180 / Math.PI;
+const fmt = (v, n = 2) => (Math.abs(v) < 0.5 * Math.pow(10, -n) ? 0 : v).toFixed(n);
+const wrap90 = a => { a = ((a + 90) % 180 + 180) % 180 - 90; return Math.abs(a + 90) < 1e-9 ? 90 : a; };
+function el(tag, attrs = {}, parent = null, text = null) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text !== null) e.textContent = text;
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+function num(id) { return parseFloat(document.getElementById(id).value) || 0; }
+function val(id) { return document.getElementById(id).value; }
+function arrowDef(svg, id, color) {
+  const defs = svg.querySelector("defs") || el("defs", {}, svg);
+  const m = el("marker", { id: svg.id + "_" + id, viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: "auto-start-reverse" }, defs);
+  el("path", { d: "M0,0 L10,5 L0,10 z", fill: color }, m);
+}
+function line(svg, x1, y1, x2, y2, stroke, w = 2, extra = {}) { return el("line", Object.assign({ x1, y1, x2, y2, stroke, "stroke-width": w }, extra), svg); }
+function arrow(svg, x1, y1, x2, y2, color, w = 3, mk) { const root = svg.ownerSVGElement || svg; return line(svg, x1, y1, x2, y2, color, w, { "marker-end": `url(#${root.id}_${mk})`, "stroke-linecap": "round" }); }
+function text(svg, x, y, s, attrs = {}) {
+  // "_{...}" in s is rendered as a subscript
+  const t = el("text", Object.assign({ x, y, "font-size": 14, "text-anchor": "middle", "dominant-baseline": "middle", fill: "#222" }, attrs), svg);
+  const parts = String(s).split(/(_\{[^}]*\})/);
+  for (const part of parts) {
+    if (!part) continue;
+    const m = part.match(/^_\{([^}]*)\}$/);
+    if (m) el("tspan", { "baseline-shift": "sub", "font-size": "70%" }, t, m[1]); else el("tspan", {}, t, part);
+  }
+  return t;
+}
+function setRich(node, s) {   // HTML readouts: "_{...}" -> <sub>
+  const esc = String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  node.innerHTML = esc.replace(/_\{([^}]*)\}/g, "<sub>$1</sub>");
+}
+function labelBox(svg, x, y, s, color, size = 14) {
+  const t = text(svg, x, y, s, { fill: color, "font-size": size, "font-weight": 700, "paint-order": "stroke", stroke: "#fff", "stroke-width": 5, "stroke-linejoin": "round" });
+  return t;
+}
+function niceStep(span, target = 7) { const raw = span / target, k = Math.pow(10, Math.floor(Math.log10(raw))); return [1, 2, 5, 10].map(m => m * k).reduce((a, b) => Math.abs(b - raw) < Math.abs(a - raw) ? b : a); }
+
+/* Mohr axes with grid; returns mapping functions */
+function mohrAxes(svg, xmin, xmax, ymin, ymax, gmaj, gmin, xlabel, ylabel, title, bottom = 60) {
+  clear(svg);
+  const W = +svg.getAttribute("width"), H = +svg.getAttribute("height");
+  const m = { l: 70, r: 20, t: 40, b: bottom };
+  const pw = W - m.l - m.r, ph = H - m.t - m.b;
+  const sx = pw / (xmax - xmin), sy = ph / (ymax - ymin), s = Math.min(sx, sy);     // equal aspect
+  const cxm = (xmin + xmax) / 2, cym = (ymin + ymax) / 2;
+  const X = v => m.l + pw / 2 + (v - cxm) * s, Y = v => m.t + ph / 2 - (v - cym) * s;
+  const x0 = cxm - pw / 2 / s, x1 = cxm + pw / 2 / s, y0 = cym - ph / 2 / s, y1 = cym + ph / 2 / s;
+  const g = el("g", {}, svg);
+  const clip = el("clipPath", { id: svg.id + "_clip" }, el("defs", {}, svg));
+  el("rect", { x: m.l, y: m.t, width: pw, height: ph }, clip);
+  if (gmin > 0 && (x1 - x0) / gmin < 400) for (let v = Math.ceil(x0 / gmin) * gmin; v <= x1; v += gmin) line(g, X(v), m.t, X(v), m.t + ph, "#efefef", 1);
+  if (gmin > 0 && (y1 - y0) / gmin < 400) for (let v = Math.ceil(y0 / gmin) * gmin; v <= y1; v += gmin) line(g, m.l, Y(v), m.l + pw, Y(v), "#efefef", 1);
+
+  // coarsen the labelled grid until the tick labels fit side by side
+  const nextNice = v => { const k = Math.pow(10, Math.floor(Math.log10(v))), m = v / k; return (m < 2 ? 2 : m < 5 ? 5 : 10) * k; };
+  const labelW = v => (v >= 1 ? 0 : Math.min(6, Math.ceil(-Math.log10(v)))) + String(Math.round(Math.max(Math.abs(x0), Math.abs(x1)))).length + 2;
+  for (let i = 0; i < 12 && gmaj * s < 8.5 * labelW(gmaj); i++) gmaj = nextNice(gmaj);
+  const dec = gmaj >= 1 ? 0 : Math.min(6, Math.ceil(-Math.log10(gmaj)));
+  const tick = v => (Math.abs(v) < 1e-12 ? 0 : v).toFixed(dec);
+  for (let v = Math.ceil(x0 / gmaj - 1e-9) * gmaj; v <= x1 + 1e-9; v += gmaj) { line(g, X(v), m.t, X(v), m.t + ph, "#d4d4d4", 1); text(g, X(v), m.t + ph + 16, tick(v), { "font-size": 12 }); }
+  for (let v = Math.ceil(y0 / gmaj - 1e-9) * gmaj; v <= y1 + 1e-9; v += gmaj) { line(g, m.l, Y(v), m.l + pw, Y(v), "#d4d4d4", 1); text(g, m.l - 8, Y(v), tick(v), { "font-size": 12, "text-anchor": "end" }); }
+  if (y0 < 0 && y1 > 0) line(g, m.l, Y(0), m.l + pw, Y(0), "#555", 1.5);
+  if (x0 < 0 && x1 > 0) line(g, X(0), m.t, X(0), m.t + ph, "#555", 1.5);
+  el("rect", { x: m.l, y: m.t, width: pw, height: ph, fill: "none", stroke: "#999" }, g);
+  text(svg, m.l + pw / 2, m.t + ph + 44, xlabel, { "font-size": 15 });
+  text(svg, 18, m.t + ph / 2, ylabel, { "font-size": 15, transform: `rotate(-90 18 ${m.t + ph / 2})` });
+  text(svg, m.l + pw / 2, 18, title, { "font-size": 16, "font-weight": 600 });
+  const plot = el("g", { "clip-path": `url(#${svg.id}_clip)` }, svg);
+  return { X, Y, s, plot, m, pw, ph, x0, x1, y0, y1 };
+}
+function circlePath(ax, cx, r) { return el("circle", { cx: ax.X(cx), cy: ax.Y(0), r: r * ax.s, fill: "none" }, ax.plot); }
+function arcPath(ax, cx, cy, r, a1, a2) {  // degrees, math convention, CCW from a1 to a2 (a2>a1)
+  const big = Math.abs(a2 - a1) > 180 ? 1 : 0;
+  const p = a => [ax.X(cx) + r * ax.s * Math.cos(d2r(a)), ax.Y(cy) - r * ax.s * Math.sin(d2r(a))];
+  const [x1, y1] = p(a1), [x2, y2] = p(a2);
+  return el("path", { d: `M${x1},${y1} A${r * ax.s},${r * ax.s} 0 ${big} 0 ${x2},${y2}`, fill: "none" }, ax.plot);
+}
+
+/* 2-D transformation (s = tau or gamma/2) */
+function transform2(nx, ny, s, th) { const c2 = Math.cos(2 * th), s2 = Math.sin(2 * th), hd = 0.5 * (nx - ny), a = 0.5 * (nx + ny); return [a + hd * c2 + s * s2, a - hd * c2 - s * s2, -hd * s2 + s * c2]; }
+
+/* generic player */
+function makePlayer(btn, slider, onFrame, speedEl) {
+  let running = false, raf = null, last = 0;
+  const tick = t => {
+    if (!running) return;
+    const sp = speedEl ? +speedEl.value : 60;             // deg per second
+    if (last) { let v = +slider.value + sp * (t - last) / 1000; const mx = +slider.max, mn = +slider.min; if (v > mx) v = mn + (v - mx); slider.value = v; onFrame(); }
+    last = t; raf = requestAnimationFrame(tick);
+  };
+  btn.onclick = () => { running = !running; btn.textContent = running ? "❚❚ pause" : "▶ play"; last = 0; if (running) raf = requestAnimationFrame(tick); };
+  return { stop() { running = false; btn.textContent = "▶ play"; } };
+}
+
+/* ===================================================================== 2-D stress / strain element drawings */
+function drawElement2D(svg, th, nx, ny, s, scale, mode, labels, units, exag) {
+  clear(svg);
+  const W = +svg.getAttribute("width"), H = +svg.getAttribute("height"), cx = W / 2, cy = H / 2 - 10, U = 95;  // px per unit, square half-size 0.85
+  arrowDef(svg, "ax", "#d1495b"); arrowDef(svg, "ay", "#1f77b4"); arrowDef(svg, "as", "#2a9d8f"); arrowDef(svg, "ag", "#999");
+  const P = (x, y) => [cx + x * U, cy - y * U];
+  // fixed axes
+  arrow(svg, ...P(-2.0, 0), ...P(2.0, 0), "#aaa", 1, "ag"); arrow(svg, ...P(0, -2.0), ...P(0, 2.0), "#aaa", 1, "ag");
+  text(svg, ...P(2.1, 0.12), "x", { fill: "#888", "font-style": "italic" }); text(svg, ...P(0.12, 2.1), "y", { fill: "#888", "font-style": "italic" });
+  const c = Math.cos(th), sn = Math.sin(th), ex = [c, sn], ey = [-sn, c], h = 0.85;
+  const R = (x, y) => [x * ex[0] + y * ey[0], x * ex[1] + y * ey[1]];
+  const corners = [[h, h], [-h, h], [-h, -h], [h, -h]].map(p => P(...R(...p)));
+  const poly = corners.map(p => p.join(",")).join(" ");
+  if (mode === "stress") {
+    el("polygon", { points: poly, fill: "#f3f3f3", stroke: "#333", "stroke-width": 1.6 }, svg);
+  } else {
+    el("polygon", { points: poly, fill: "none", stroke: "#888", "stroke-width": 1.2, "stroke-dasharray": "6,4" }, svg);
+    const k = exag / scale, E = [[1 + k * nx, k * s], [k * s, 1 + k * ny]];   // s = gamma/2
+    const def = [[h, h], [-h, h], [-h, -h], [h, -h]].map(([x, y]) => { const u = E[0][0] * x + E[0][1] * y, v = E[1][0] * x + E[1][1] * y; return P(...R(u, v)); });
+    el("polygon", { points: def.map(p => p.join(",")).join(" "), fill: "#fbe9ec", stroke: "#d1495b", "stroke-width": 2.2, "fill-opacity": 0.9 }, svg);
+    // corner angle at (-h,-h): directions of the two deformed sides
+    const dx = R(E[0][0], E[1][0]), dy = R(E[0][1], E[1][1]); const o = (() => { const u = -h * (E[0][0] + E[0][1]), v = -h * (E[1][0] + E[1][1]); return R(u, v); })();
+    const n1 = Math.hypot(...dx), n2 = Math.hypot(...dy);
+    arrow(svg, ...P(...o), ...P(o[0] + 0.9 * h * dx[0] / n1, o[1] + 0.9 * h * dx[1] / n1), "#2a9d8f", 2.2, "as");
+    arrow(svg, ...P(...o), ...P(o[0] + 0.9 * h * dy[0] / n2, o[1] + 0.9 * h * dy[1] / n2), "#2a9d8f", 2.2, "as");
+    const a1 = Math.atan2(dx[1], dx[0]), a2 = Math.atan2(dy[1], dy[0]), rr = 0.35 * h;
+    const pa = P(o[0] + rr * Math.cos(a1), o[1] + rr * Math.sin(a1)), pb = P(o[0] + rr * Math.cos(a2), o[1] + rr * Math.sin(a2));
+    el("path", { d: `M${pa[0]},${pa[1]} A${rr * U},${rr * U} 0 0 0 ${pb[0]},${pb[1]}`, fill: "none", stroke: "#2a9d8f", "stroke-width": 1.6 }, svg);
+    const am = (a1 + a2) / 2; labelBox(svg, ...P(o[0] + 0.55 * h * Math.cos(am), o[1] + 0.55 * h * Math.sin(am)), "π/2 − " + labels.s, "#2a9d8f", 13);
+    const lx = P(...R(h * (1 + k * nx) + 0.35, 0)), ly = P(...R(0, h * (1 + k * ny) + 0.35));
+    labelBox(svg, lx[0], lx[1], labels.nx, "#d1495b"); labelBox(svg, ly[0], ly[1], labels.ny, "#1f77b4");
+  }
+  // x', y' axes inside the square
+  const sgn = th >= 0 ? 1 : -1;
+  arrow(svg, ...P(0, 0), ...P(...R(0.8 * h, 0)), "#d1495b", 1.4, "ax"); arrow(svg, ...P(0, 0), ...P(...R(0, 0.8 * h)), "#1f77b4", 1.4, "ay");
+  labelBox(svg, ...P(...R(0.62 * h, sgn * 0.17)), "x′", "#d1495b"); labelBox(svg, ...P(...R(-sgn * 0.17, 0.62 * h)), "y′", "#1f77b4");
+  const td = r2d(th);
+  if (Math.abs(td) > 1) {
+    const ra = 0.3, a1 = Math.min(0, td), a2 = Math.max(0, td);
+    const pa = P(ra * Math.cos(d2r(a1)), ra * Math.sin(d2r(a1))), pb = P(ra * Math.cos(d2r(a2)), ra * Math.sin(d2r(a2)));
+    el("path", { d: `M${pa[0]},${pa[1]} A${ra * U},${ra * U} 0 ${Math.abs(td) > 180 ? 1 : 0} 0 ${pb[0]},${pb[1]}`, fill: "none", stroke: "#444", "stroke-width": 1.3 }, svg);
+    if (Math.abs(td) > 6) labelBox(svg, ...P(0.45 * Math.cos(d2r(td / 2)), 0.45 * Math.sin(d2r(td / 2))), `θ=${td.toFixed(0)}°`, "#333", 13);
+  }
+  if (mode === "stress") {
+    const amax = 0.75 * h, gap = 0.08, ln = v => amax * (0.3 + 0.7 * Math.min(Math.abs(v) / scale, 1));
+    const faces = [[ex, nx, "#d1495b", "ax", labels.nx], [[-ex[0], -ex[1]], nx, "#d1495b", "ax", null], [ey, ny, "#1f77b4", "ay", labels.ny], [[-ey[0], -ey[1]], ny, "#1f77b4", "ay", null]];
+    for (const [n, v, col, mk, lab] of faces) {
+      if (Math.abs(v) < 1e-9) continue;
+      const L = ln(v);
+      const b = [(h + gap) * n[0], (h + gap) * n[1]];
+      if (v > 0) arrow(svg, ...P(...b), ...P(b[0] + L * n[0], b[1] + L * n[1]), col, 3.2, mk);
+      else arrow(svg, ...P(b[0] + L * n[0], b[1] + L * n[1]), ...P(...b), col, 3.2, mk);
+      if (lab) labelBox(svg, ...P((h + gap + L + 0.24) * n[0], (h + gap + L + 0.24) * n[1]), lab, col);
+    }
+    if (Math.abs(s) > 1e-9) {
+      const L = ln(s), sg = Math.sign(s);
+      const pairs = [[ex, ey, labels.s], [[-ex[0], -ex[1]], [-ey[0], -ey[1]], null], [ey, ex, null], [[-ey[0], -ey[1]], [-ex[0], -ex[1]], null]];
+      for (const [n, t, lab] of pairs) {
+        const d = [sg * t[0], sg * t[1]], b = [(h + gap) * n[0] - 0.5 * L * d[0], (h + gap) * n[1] - 0.5 * L * d[1]];
+        arrow(svg, ...P(...b), ...P(b[0] + L * d[0], b[1] + L * d[1]), "#2a9d8f", 2.8, "as");
+        if (lab) labelBox(svg, ...P((h + gap + 0.2) * n[0] + (0.5 * L + 0.22) * d[0], (h + gap + 0.2) * n[1] + (0.5 * L + 0.22) * d[1]), lab, "#2a9d8f");
+      }
+    }
+  }
+}
+
+/* ===================================================================== 2-D module (stress or strain) */
+function module2D(pre, mode) {
+  const g = id => document.getElementById(pre + id);
+  const svgEl = g("el"), svgMc = g("mc"), read = g("read"), slider = g("theta"), tv = g("thetav"), jumps = g("jumps");
+  const labels = mode === "stress" ? { nx: "σ_{x′}", ny: "σ_{y′}", s: "τ_{x′y′}", n: "σ", sh: "τ", one: "σ₁", two: "σ₂", smax: "τ_{max}" } : { nx: "ε_{x′}", ny: "ε_{y′}", s: "γ_{x′y′}", n: "ε", sh: "γ/2", one: "ε₁", two: "ε₂", smax: "γ_{max}/2" };
+  let S = {}, theta = 0;                      // theta is the exact state; the slider is only a view of it
+  function inputs() {
+    const nx = num(mode === "stress" ? "s_sx" : "e_ex"), ny = num(mode === "stress" ? "s_sy" : "e_ey"), raw = num(mode === "stress" ? "s_txy" : "e_gxy");
+    const s = mode === "stress" ? raw : raw / 2, avg = 0.5 * (nx + ny), R = Math.hypot(0.5 * (nx - ny), s);
+    const tp = wrap90(0.5 * r2d(Math.atan2(2 * s, nx - ny)));
+    const scale = Math.max(Math.abs(avg + R), Math.abs(avg - R), R, 1e-9);
+    if (g("gauto").checked) {            // default grid from the size of the circle (works for kPa … GPa, μ-strain …)
+      const gm = niceStep((avg + R) - (avg - R) + 0.8 * scale, 7); g("gmaj").value = gm; g("gmin").value = gm / 5;
+    }
+    g("gmaj").disabled = g("gmin").disabled = g("gauto").checked;
+    S = { nx, ny, s, avg, R, p1: avg + R, p2: avg - R, scale, units: val(pre + "units"),
+          gmaj: num(pre + "gmaj"), gmin: num(pre + "gmin"), tp: [tp, wrap90(tp + 90)].sort((a, b) => b - a), ts: [wrap90(tp + 45), wrap90(tp + 135)].sort((a, b) => b - a),
+          exag: mode === "strain" ? num("e_exag") : 0 };
+    jumps.innerHTML = "";
+    for (const a of S.tp) { const b = document.createElement("button"); b.innerHTML = `θ<sub>p</sub> = ${a.toFixed(2)}°`; b.onclick = () => { player.stop(); theta = a; slider.value = a; draw(); }; jumps.appendChild(b); }
+    for (const a of S.ts) { const b = document.createElement("button"); b.innerHTML = `θ<sub>s</sub> = ${a.toFixed(2)}°`; b.onclick = () => { player.stop(); theta = a; slider.value = a; draw(); }; jumps.appendChild(b); }
+  }
+  function draw() {
+    const td = theta, th = d2r(td); tv.textContent = `θ = ${td.toFixed(2)}°`;
+    let [nxp, nyp, sp] = transform2(S.nx, S.ny, S.s, th);
+    if (Math.abs(sp) < 1e-9 * S.scale) sp = 0;            // exact principal plane: no residual 1e-15 shear
+    drawElement2D(svgEl, th, nxp, nyp, sp, S.scale, mode, labels, S.units, S.exag);
+    const pad = 0.4 * S.scale;
+    const ax = mohrAxes(svgMc, S.p2 - pad, S.p1 + pad, -S.R - pad, S.R + pad, S.gmaj, S.gmin, `${labels.n} [${S.units}]  (tension +)`, `${labels.sh} [${S.units}]  (shear rotating element CW plotted +)`, `${labels.sh}–${labels.n} plane: the points trace Mohr's circle`);
+    const pl = ax.plot;
+    circlePath(ax, S.avg, S.R).setAttribute("stroke", "#ccc"); pl.lastChild.setAttribute("stroke-dasharray", "5,5");
+    // trail
+    if (g("trail").checked) {
+      const n = Math.max(2, Math.round(Math.abs(td)) + 1);
+      for (let i = 0; i < n; i++) { const t = d2r(td * i / (n - 1)); const [a, b, c] = transform2(S.nx, S.ny, S.s, t); el("circle", { cx: ax.X(a), cy: ax.Y(-c), r: 2, fill: "#d1495b", opacity: 0.45 }, pl); el("circle", { cx: ax.X(b), cy: ax.Y(c), r: 2, fill: "#1f77b4", opacity: 0.45 }, pl); }
+    }
+    // reference line C->X and 2theta arc
+    line(pl, ax.X(S.avg), ax.Y(0), ax.X(S.nx), ax.Y(-S.s), "#999", 1.2, { "stroke-dasharray": "3,4" });
+    const phi0 = r2d(Math.atan2(-S.s, S.nx - S.avg));
+    if (Math.abs(td) > 1) { arcPath(ax, S.avg, 0, 0.4 * S.R, phi0 + Math.min(0, 2 * td), phi0 + Math.max(0, 2 * td)).setAttribute("stroke", "#444"); pl.lastChild.setAttribute("stroke-width", 1.4);
+      if (Math.abs(td) > 4) labelBox(pl, ax.X(S.avg + 0.55 * S.R * Math.cos(d2r(phi0 + td))), ax.Y(0.55 * S.R * Math.sin(d2r(phi0 + td))), `2θ=${(2 * td).toFixed(0)}°`, "#333", 13); }
+    line(pl, ax.X(nxp), ax.Y(-sp), ax.X(nyp), ax.Y(sp), "#333", 1.5);
+    el("circle", { cx: ax.X(S.avg), cy: ax.Y(0), r: 5, fill: "none", stroke: "#000", "stroke-width": 1.5 }, pl); text(pl, ax.X(S.avg) + 12, ax.Y(0) - 10, "C");
+    for (const [v, lab] of [[S.p1, labels.one], [S.p2, labels.two]]) { el("circle", { cx: ax.X(v), cy: ax.Y(0), r: 4, fill: "#fff", stroke: "#444" }, pl); text(pl, ax.X(v), ax.Y(0) + 18, `${lab} = ${fmt(v, 1)} ${S.units}`, { "font-size": 12, fill: "#555" }); }
+    el("circle", { cx: ax.X(nxp), cy: ax.Y(-sp), r: 7, fill: "#d1495b" }, pl); labelBox(pl, ax.X(nxp) + 16, ax.Y(-sp) - 12, "X′", "#d1495b");
+    el("circle", { cx: ax.X(nyp), cy: ax.Y(sp), r: 7, fill: "#1f77b4" }, pl); labelBox(pl, ax.X(nyp) + 16, ax.Y(sp) - 12, "Y′", "#1f77b4");
+    // legend
+    const lg = el("g", {}, svgMc); let yy = ax.m.t + 16;
+    el("rect", { x: ax.m.l + 8, y: yy - 12, width: 300, height: 46, fill: "#fff", stroke: "#ddd", rx: 6 }, lg);
+    el("circle", { cx: ax.m.l + 22, cy: yy, r: 6, fill: "#d1495b" }, lg); text(lg, ax.m.l + 34, yy, `X′ face: (${labels.nx}, −${labels.s}${mode === "strain" ? "/2" : ""})  [${S.units}]`, { "text-anchor": "start", "font-size": 13 });
+    el("circle", { cx: ax.m.l + 22, cy: yy + 20, r: 6, fill: "#1f77b4" }, lg); text(lg, ax.m.l + 34, yy + 20, `Y′ face: (${labels.ny}, +${labels.s}${mode === "strain" ? "/2" : ""})  [${S.units}]`, { "text-anchor": "start", "font-size": 13 });
+    const shearFull = mode === "stress" ? sp : 2 * sp, isP = Math.abs(sp) < 1e-7 * S.scale + 1e-12, isS = Math.abs(Math.abs(sp) - S.R) < 1e-7 * S.scale + 1e-12;
+    setRich(read, `θ = ${td.toFixed(1)}°\n${labels.nx} = ${fmt(nxp)} ${S.units}\n${labels.ny} = ${fmt(nyp)} ${S.units}\n${labels.s} = ${fmt(shearFull)} ${S.units}\nplotted ${labels.sh} at X′ = ${fmt(-sp)} ${S.units}` +
+      (isP ? `\n← principal plane: ${labels.s} = 0` : "") + (isS ? `\n← max in-plane shear` : "") +
+      `\n\n${labels.n}_{avg} = ${fmt(S.avg)} ${S.units}   R = ${fmt(S.R)} ${S.units}\n${labels.one} = ${fmt(S.p1)} ${S.units}   ${labels.two} = ${fmt(S.p2)} ${S.units}\n${labels.smax} = ${fmt(S.R)} ${S.units}` + (mode === "strain" ? `   γ_{max} = ${fmt(2 * S.R)} ${S.units}` : "") +
+      `\nθ_{p} = ${S.tp.map(a => a.toFixed(2)).join(", ")}°\nθ_{s} = ${S.ts.map(a => a.toFixed(2)).join(", ")}°`);
+  }
+  const fromSlider = () => { theta = +slider.value; draw(); };
+  const player = makePlayer(g("play"), slider, fromSlider, document.getElementById("s_speed"));
+  slider.oninput = () => { player.stop(); fromSlider(); };
+  document.querySelectorAll(`.${pre}jump`).forEach(b => b.onclick = () => { player.stop(); theta = +b.dataset.set; slider.value = theta; draw(); });
+  g("reset").onclick = () => { player.stop(); theta = 0; slider.value = 0; draw(); };
+  document.querySelectorAll(`#${pre === "s_" ? "t2d" : "tstrain"} .inputs input`).forEach(i => i.oninput = () => { inputs(); draw(); });
+  inputs(); draw();
+}
+
+/* ===================================================================== 3-D helpers */
+const K3 = 0.5, A3 = d2r(40), VIEW = [K3 * Math.cos(A3), K3 * Math.sin(A3), 1];
+const proj = p => [p[0] - K3 * p[2] * Math.cos(A3), p[1] - K3 * p[2] * Math.sin(A3)];
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const matmul = (A, B) => A.map((r, i) => B[0].map((_, j) => r.reduce((s, _, k) => s + A[i][k] * B[k][j], 0)));
+const transpose = A => A[0].map((_, j) => A.map(r => r[j]));
+const col = (A, j) => A.map(r => r[j]);
+function rot3(axis, th) { const c = Math.cos(th), s = Math.sin(th); return { x: [[1, 0, 0], [0, c, -s], [0, s, c]], y: [[c, 0, s], [0, 1, 0], [-s, 0, c]], z: [[c, -s, 0], [s, c, 0], [0, 0, 1]] }[axis]; }
+function eig3(S) {   // Jacobi for symmetric 3x3 -> sorted descending eigenvalues
+  let A = S.map(r => r.slice());
+  for (let it = 0; it < 60; it++) {
+    let p = 0, q = 1, mx = 0;
+    for (let i = 0; i < 3; i++) for (let j = i + 1; j < 3; j++) if (Math.abs(A[i][j]) > mx) { mx = Math.abs(A[i][j]); p = i; q = j; }
+    if (mx < 1e-12) break;
+    const th = 0.5 * Math.atan2(2 * A[p][q], A[q][q] - A[p][p]), c = Math.cos(th), s = Math.sin(th);
+    const R = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]; R[p][p] = c; R[q][q] = c; R[p][q] = s; R[q][p] = -s;
+    A = matmul(transpose(R), matmul(A, R));
+  }
+  return [A[0][0], A[1][1], A[2][2]].sort((a, b) => b - a);
+}
+function cube3D(svg, Rm, Sp, units, scale, names, labelsOn = true) {
+  // draws cube with rotated axes and stresses on the visible faces; U px per unit, center (cx, cy)
+  const W = +svg.getAttribute("width"), H = +svg.getAttribute("height"), cx = W / 2, cy = H / 2 + 10, U = Math.min(W, H) / 6.6, h = 1.15;
+  const P = p => { const q = proj(p); return [cx + q[0] * U, cy - q[1] * U]; };
+  const cols = ["#d1495b", "#1f77b4", "#6a4c93"];
+  arrowDef(svg, "c0", cols[0]); arrowDef(svg, "c1", cols[1]); arrowDef(svg, "c2", cols[2]); arrowDef(svg, "cs", "#2a9d8f"); arrowDef(svg, "cg", "#999");
+  // fixed reference axes
+  const o = [-2.6, -2.6, -0.6];
+  for (const [v, nm] of [[[1, 0, 0], "x"], [[0, 1, 0], "y"], [[0, 0, 1], "z"]]) { const tip = [o[0] + v[0] * 1.2, o[1] + v[1] * 1.2, o[2] + v[2] * 1.2]; arrow(svg, ...P(o), ...P(tip), "#999", 1.2, "cg"); const t2 = [o[0] + v[0] * 1.5, o[1] + v[1] * 1.5, o[2] + v[2] * 1.5]; text(svg, ...P(t2), nm, { fill: "#888", "font-style": "italic" }); }
+  const local = [[1, 1, 1], [-1, 1, 1], [-1, -1, 1], [1, -1, 1], [1, 1, -1], [-1, 1, -1], [-1, -1, -1], [1, -1, -1]].map(p => p.map(v => v * h));
+  const faces = [[0, 1, 2, 3], [4, 5, 6, 7], [0, 3, 7, 4], [1, 2, 6, 5], [0, 1, 5, 4], [3, 2, 6, 7]], normals = [[0, 0, 1], [0, 0, -1], [1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0]];
+  const world = local.map(p => [0, 1, 2].map(i => Rm[i][0] * p[0] + Rm[i][1] * p[1] + Rm[i][2] * p[2]));
+  const nW = normals.map(n => [0, 1, 2].map(i => Rm[i][0] * n[0] + Rm[i][1] * n[1] + Rm[i][2] * n[2]));
+  const order = [0, 1, 2, 3, 4, 5].sort((a, b) => dot(nW[a], VIEW) - dot(nW[b], VIEW));
+  for (const k of order) { const vis = dot(nW[k], VIEW) > 0; const sh = Math.round(255 * Math.min(0.80 + 0.17 * Math.max(dot(nW[k], VIEW), 0) / Math.hypot(...VIEW), 0.97)); el("polygon", { points: faces[k].map(j => P(world[j]).join(",")).join(" "), fill: vis ? `rgb(${sh},${sh},${sh})` : "#e8e8e8", stroke: "#333", "stroke-width": vis ? 1.4 : 0.8, "stroke-dasharray": vis ? "" : "4,3" }, svg); }
+  for (let i = 0; i < 3; i++) { const e = col(Rm, i); arrow(svg, ...P([0, 0, 0]), ...P(e.map(v => 0.85 * h * v)), cols[i], 1.5, "c" + i); const sd = [e[1] * VIEW[2] - e[2] * VIEW[1], e[2] * VIEW[0] - e[0] * VIEW[2], e[0] * VIEW[1] - e[1] * VIEW[0]]; const nn = Math.hypot(...sd) + 1e-12; labelBox(svg, ...P(e.map((v, j) => 0.65 * h * v + 0.18 * sd[j] / nn)), names[i], cols[i], 13); }
+  const ln = v => 1.1 * h * (0.4 + 0.6 * Math.min(Math.abs(v) / scale, 1));
+  for (let i = 0; i < 3; i++) for (const sg of [1, -1]) {
+    const n = col(Rm, i).map(v => sg * v); if (dot(n, VIEW) <= 0.05) continue;
+    const base = n.map(v => (h + 0.08) * v), v = Sp[i][i];
+    if (Math.abs(v) > 1e-9) { const L = ln(v); const tip = base.map((b, j) => b + L * n[j]); if (v > 0) arrow(svg, ...P(base), ...P(tip), cols[i], 3.2, "c" + i); else arrow(svg, ...P(tip), ...P(base), cols[i], 3.2, "c" + i); if (labelsOn) labelBox(svg, ...P(base.map((b, j) => b + (L + 0.45 * h) * n[j])), `σ_{${names[i]}} = ${v.toFixed(1)} ${units}`, cols[i], 12); }
+    for (let j = 0; j < 3; j++) { if (j === i || Math.abs(Sp[i][j]) < 1e-6 * scale) continue; const d = col(Rm, j).map(w => sg * Math.sign(Sp[i][j]) * w), L = ln(Sp[i][j]); const a = base.map((b, q) => b - 0.5 * L * d[q]), b2 = base.map((b, q) => b + 0.5 * L * d[q]); arrow(svg, ...P(a), ...P(b2), "#2a9d8f", 2.6, "cs"); if (labelsOn) labelBox(svg, ...P(base.map((b, q) => b + (0.5 * L + 0.3 * h) * d[q])), `τ_{${names[i]}${names[j]}}`, "#2a9d8f", 12); }
+  }
+}
+function threeCircles(ax, s1, s2, s3, bold = null, region = true, units = "", fade = false) {
+  threeCircles.units = units;
+  const pl = ax.plot;
+  if (region) { // admissible region: big circle minus the two small ones (upper + lower)
+    const d = (cx, r, sweep) => `A${r * ax.s},${r * ax.s} 0 0 ${sweep} `;
+    const c13 = 0.5 * (s1 + s3), r13 = 0.5 * (s1 - s3), c12 = 0.5 * (s1 + s2), r12 = 0.5 * (s1 - s2), c23 = 0.5 * (s2 + s3), r23 = 0.5 * (s2 - s3);
+    for (const up of [1, 0]) {
+      const path = `M${ax.X(s3)},${ax.Y(0)} ${d(c13, r13, up)}${ax.X(s1)},${ax.Y(0)} ${d(c12, r12, 1 - up)}${ax.X(s2)},${ax.Y(0)} ${d(c23, r23, 1 - up)}${ax.X(s3)},${ax.Y(0)} Z`;
+      el("path", { d: path, fill: "#f3e8ff", opacity: 0.8, stroke: "none" }, pl);
+    }
+  }
+  const sets = [[s1, s2, "#e07a1f"], [s2, s3, "#2a9d8f"], [s1, s3, "#7a5195"]];
+  sets.forEach(([a, b, c], k) => { const ccl = circlePath(ax, 0.5 * (a + b), 0.5 * Math.abs(a - b)); ccl.setAttribute("stroke", c); ccl.setAttribute("stroke-width", bold === k ? 3.4 : 2); });
+  if (fade) fadeLowerHalf(ax);
+  [[s1, "σ₁"], [s2, "σ₂"], [s3, "σ₃"]].forEach(([v, nm], i) => { el("circle", { cx: ax.X(v), cy: ax.Y(0), r: 4.5, fill: "#fff", stroke: "#222" }, pl); labelBox(pl, ax.X(v), ax.Y(0) + 20 + 18 * (i % 2), `${nm} = ${fmt(v, 1)}${threeCircles.units ? " " + threeCircles.units : ""}`, "#222", 13); });
+  return sets;
+}
+function fadeLowerHalf(ax) {   // |tau| diagram: the lower half-plane carries no information -> wash it out
+  const y0 = ax.Y(0), bottom = ax.m.t + ax.ph;
+  if (bottom > y0) { el("rect", { x: ax.m.l, y: y0, width: ax.pw, height: bottom - y0, fill: "#fff", opacity: 0.82 }, ax.plot);
+    text(ax.plot, ax.m.l + ax.pw - 8, bottom - 14, "lower half: not used with |τ| (mirror image only)", { "text-anchor": "end", "font-size": 12, fill: "#999", "font-style": "italic" }); }
+}
+function signedNotice(ax) {   // banner inside the plot when signed tau is used off a principal axis
+  const y = ax.m.t + 14;
+  el("rect", { x: ax.m.l + 4, y: y - 11, width: ax.pw - 8, height: 40, fill: "#fff3f3", stroke: "#c1121f", rx: 5, opacity: 0.95 }, ax.plot);
+  text(ax.plot, ax.m.l + ax.pw / 2, y, "⚠ signed τ not defined: rotation axis is not principal", { "font-size": 13, fill: "#c1121f", "font-weight": 700 });
+  text(ax.plot, ax.m.l + ax.pw / 2, y + 17, "points may jump across the σ axis (sign of the in-plane component) — use |τ| for a continuous path", { "font-size": 11, fill: "#c1121f" });
+}
+function legend3(svg, ax, items) { // items: [[color, label, kind]]; drawn BELOW the axes in two columns
+  const lg = el("g", {}, svg); const x0 = ax.m.l + 4, y0 = ax.m.t + ax.ph + 66, colw = ax.pw / 2;
+  items.forEach(([c, lab, kind], i) => { const x = x0 + (i % 2) * colw, y = y0 + Math.floor(i / 2) * 20;
+    if (kind === "dot") el("circle", { cx: x + 12, cy: y, r: 6, fill: c }, lg); else if (kind === "fill") el("rect", { x: x + 4, y: y - 6, width: 16, height: 12, fill: c, opacity: 0.8 }, lg); else el("rect", { x: x + 4, y: y - 6, width: 16, height: 12, fill: "none", stroke: c, "stroke-width": 2 }, lg);
+    text(lg, x + 28, y, lab, { "text-anchor": "start", "font-size": 12 }); });
+}
+
+/* ===================================================================== 3-D sigma_z sweep */
+function module3D() {
+  const g = id => document.getElementById("d_" + id); const slider = g("sz");
+  let S = {};
+  function inputs() { S = { sx: num("d_sx"), sy: num("d_sy"), txy: num("d_txy"), units: val("d_units"), zmin: num("d_zmin"), zmax: num("d_zmax") }; S.avg = 0.5 * (S.sx + S.sy); S.R = Math.hypot(0.5 * (S.sx - S.sy), S.txy); S.pa = S.avg + S.R; S.pb = S.avg - S.R; slider.min = Math.min(S.zmin, S.zmax); slider.max = Math.max(S.zmin, S.zmax); }
+  function draw() {
+    const sz = +slider.value; g("szv").innerHTML = `σ<sub>z</sub> = ${sz.toFixed(1)} ${S.units}`;
+    const [s1, s2, s3] = [S.pa, S.pb, sz].sort((a, b) => b - a), tabs = 0.5 * (s1 - s3);
+    const smax = Math.max(S.pa, S.zmax, S.zmin), smin = Math.min(S.pb, S.zmin, S.zmax), tmax = 0.5 * (smax - smin), scale = Math.max(Math.abs(smax), Math.abs(smin), 1e-9), pad = 0.25 * scale;
+    const gm = niceStep(smax - smin + 2 * pad);
+    const ax = mohrAxes(g("mc"), Math.min(smin, 0) - pad, Math.max(smax, 0) + pad, -tmax - pad, tmax + pad, gm, gm / 5, `σ [${S.units}]  (tension +)`, `τ [${S.units}]`, `3-D Mohr's circles   (σ_{z} = ${sz.toFixed(1)} ${S.units}, τ_{xz} = τ_{yz} = 0)`, 150);
+    const pl = ax.plot;
+    const sets = [[s1, s2], [s2, s3], [s1, s3]]; let bold = null; sets.forEach(([a, b], k) => { if (Math.abs(0.5 * (a + b) - S.avg) < 1e-9 * scale + 1e-9 && Math.abs(0.5 * Math.abs(a - b) - S.R) < 1e-9 * scale + 1e-9) bold = k; });
+    const sts = threeCircles(ax, s1, s2, s3, bold, false, S.units);
+    el("circle", { cx: ax.X(S.sx), cy: ax.Y(-S.txy), r: 7, fill: "#d1495b" }, pl); labelBox(pl, ax.X(S.sx) + 14, ax.Y(-S.txy) - 12, "X", "#d1495b");
+    el("circle", { cx: ax.X(S.sy), cy: ax.Y(S.txy), r: 7, fill: "#1f77b4" }, pl); labelBox(pl, ax.X(S.sy) + 14, ax.Y(S.txy) - 12, "Y", "#1f77b4");
+    line(pl, ax.X(S.sx), ax.Y(-S.txy), ax.X(S.sy), ax.Y(S.txy), "#333", 1.3);
+    el("rect", { x: ax.X(sz) - 6, y: ax.Y(0) - 6, width: 12, height: 12, fill: "#222" }, pl); labelBox(pl, ax.X(sz), ax.Y(0) - 18, "σ_{z}", "#222", 13);
+    const st = el("polygon", { points: starPts(ax.X(0.5 * (s1 + s3)), ax.Y(tabs), 11), fill: "#c1121f" }, pl);
+    labelBox(pl, ax.X(0.5 * (s1 + s3)), ax.Y(tabs) - 20, `τ_{max,abs} = ${tabs.toFixed(1)} ${S.units}`, "#c1121f", 13);
+    legend3(g("mc"), ax, sts.map(([a, b, c], k) => [c, `${["σ₁–σ₂", "σ₂–σ₃", "σ₁–σ₃"][k]}:  C = ${(0.5 * (a + b)).toFixed(1)},  R = ${(0.5 * Math.abs(a - b)).toFixed(1)} ${S.units}${bold === k ? "  ← x–y plane" : ""}`, "line"]).concat([["#d1495b", `X = (σ_{x}, −τ_{xy})  [${S.units}]`, "dot"], ["#1f77b4", `Y = (σ_{y}, +τ_{xy})  [${S.units}]`, "dot"]]));
+    // element: cube with sigma_z updating
+    const svg = g("el"); clear(svg); text(svg, +svg.getAttribute("width") / 2, 18, "3-D stress element  (τ_{xz} = τ_{yz} = 0)", { "font-size": 15, "font-weight": 600 });
+    const Sp = [[S.sx, S.txy, 0], [S.txy, S.sy, 0], [0, 0, sz]];
+    cube3D(svg, [[1, 0, 0], [0, 1, 0], [0, 0, 1]], Sp, S.units, Math.max(scale, Math.abs(S.txy)), ["x", "y", "z"], true);
+    setRich(g("read"), `σ_{z} = ${sz.toFixed(1)} ${S.units}\nσ₁, σ₂, σ₃ = ${s1.toFixed(2)}, ${s2.toFixed(2)}, ${s3.toFixed(2)}\nin-plane τ_{max} = R_{xy} = ${S.R.toFixed(2)} ${S.units}\nabsolute τ_{max} = (σ₁−σ₃)/2 = ${tabs.toFixed(2)} ${S.units}\n` + (tabs > S.R + 1e-9 ? "absolute max shear is OUT of the x–y plane" : "absolute max shear lies IN the x–y plane"));
+  }
+  const player = makePlayer(g("play"), slider, draw, null);
+  slider.oninput = () => { player.stop(); draw(); };
+  g("zero").onclick = () => { player.stop(); slider.value = 0; draw(); };
+  document.querySelectorAll("#t3d .inputs input").forEach(i => i.oninput = () => { inputs(); draw(); });
+  inputs(); draw();
+}
+function starPts(cx, cy, r) { let s = ""; for (let i = 0; i < 10; i++) { const rr = i % 2 ? r * 0.45 : r, a = -Math.PI / 2 + i * Math.PI / 5; s += `${cx + rr * Math.cos(a)},${cy + rr * Math.sin(a)} `; } return s.trim(); }
+
+/* ===================================================================== 3-D body-axis rotations */
+function moduleRot() {
+  const g = id => document.getElementById("r_" + id);
+  let S, R, last = { x: 0, y: 0, z: 0 }, stage = null, sig = { k: 2, axisSign: 1 }, hist = [];
+  const I3 = () => [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+  function inputs() { S = [[num("r_sx"), num("r_txy"), num("r_txz")], [num("r_txy"), num("r_sy"), num("r_tyz")], [num("r_txz"), num("r_tyz"), num("r_sz")]]; resetAll(); }
+  function setStage(a) { const k = "xyz".indexOf(a), ia = (k + 1) % 3, ja = (k + 2) % 3; const Sp = matmul(transpose(R), matmul(S, R)); sig = { k, axisSign: Math.sign(-Sp[k][ia] + Sp[k][ja]) || sig.axisSign || 1 }; }
+  function faceState(Sp, m) { const k = sig.k, ia = (k + 1) % 3, ja = (k + 2) % 3; const t = col(Sp, m), sn = t[m], mag = Math.sqrt(Math.max(dot(t, t) - sn * sn, 0)); if (!g("signed").checked) return [sn, mag]; let sg = m === ia ? -Math.sign(Sp[ia][ja]) : m === ja ? Math.sign(Sp[ia][ja]) : sig.axisSign; return [sn, (sg || 1) * mag]; }
+  function signDefined(Sp) { const k = sig.k, ia = (k + 1) % 3, ja = (k + 2) % 3; const sc = Math.max(Math.abs(Sp[0][0]), Math.abs(Sp[1][1]), Math.abs(Sp[2][2]), 1e-9); return Math.abs(Sp[k][ia]) < 1e-6 * sc && Math.abs(Sp[k][ja]) < 1e-6 * sc; }
+  function apply(a, d) { if (Math.abs(d) < 1e-12) return; if (stage !== a) { stage = a; setStage(a); } R = matmul(R, rot3(a, d2r(d))); last[a] += d; }
+  function draw() {
+    const units = val("r_units"), Sp = matmul(transpose(R), matmul(S, R)), [s1, s2, s3] = eig3(S), tabs = 0.5 * (s1 - s3), scale = Math.max(Math.abs(s1), Math.abs(s3), 1e-9), pad = 0.25 * scale;
+    for (const a of "xyz") g("t" + a + "v").textContent = `${last[a].toFixed(1)}°`;
+    const gm = niceStep(s1 - s3 + 2 * pad), signed = g("signed").checked;
+    const signOK = !signed || signDefined(Sp);
+    g("signwarn").textContent = signOK ? "" : `⚠ signed τ is not defined for this rotation: ${stage || "z"}′ is not a principal axis (the ${stage || "z"}′ face carries shear). The sign is taken from the in-plane component only, so a point will JUMP across the σ axis when that component changes sign — this is a limitation of signed τ, not a change of stress. Use |τ| (untick) for a continuous picture.`;
+    const ax = mohrAxes(g("mc"), Math.min(s3, 0) - pad, Math.max(s1, 0) + pad, -tabs - pad, tabs + pad, gm, gm / 5, `σ [${units}]  (tension +)`, signed ? `τ [${units}]  (CW rule in the plane of the current rotation)` : `|τ| [${units}]  (resultant shear on the face; lower half not used)`, `3-D Mohr's circles   (σ₁, σ₂, σ₃ = ${fmt(s1, 1)}, ${fmt(s2, 1)}, ${fmt(s3, 1)} ${units})`, 160);
+    const pl = ax.plot; const sts = threeCircles(ax, s1, s2, s3, null, true, units, !signed);
+    if (!signOK) signedNotice(ax);
+    el("polygon", { points: starPts(ax.X(0.5 * (s1 + s3)), ax.Y(tabs), 10), fill: "#c1121f" }, pl); if (signed) el("polygon", { points: starPts(ax.X(0.5 * (s1 + s3)), ax.Y(-tabs), 10), fill: "#c1121f" }, pl);
+    labelBox(pl, ax.X(0.5 * (s1 + s3)), ax.Y(tabs) - 18, `τ_{max,abs} = ${tabs.toFixed(1)} ${units}`, "#c1121f", 13);
+    const states = [0, 1, 2].map(m => faceState(Sp, m)); const cols = ["#d1495b", "#1f77b4", "#6a4c93"], names = ["X′", "Y′", "Z′"];
+    if (g("trail").checked) { if (!hist.length || hist[hist.length - 1].some((p, i) => Math.abs(p[0] - states[i][0]) + Math.abs(p[1] - states[i][1]) > 1e-9)) hist.push(states); for (let i = 0; i < 3; i++) for (const h of hist) el("circle", { cx: ax.X(h[i][0]), cy: ax.Y(h[i][1]), r: 2.5, fill: cols[i], opacity: 0.5 }, pl); } else hist = [];
+    for (let i = 0; i < 3; i++) { el("circle", { cx: ax.X(states[i][0]), cy: ax.Y(states[i][1]), r: 7, fill: cols[i] }, pl); labelBox(pl, ax.X(states[i][0]) + 15, ax.Y(states[i][1]) - 12, names[i], cols[i]); }
+    legend3(g("mc"), ax, [["#f3e8ff", "admissible states (between the circles)", "fill"]].concat(sts.map(([a, b, c], k) => [c, `${["σ₁–σ₂", "σ₂–σ₃", "σ₁–σ₃"][k]}:  C = ${(0.5 * (a + b)).toFixed(1)},  R = ${(0.5 * Math.abs(a - b)).toFixed(1)} ${units}`, "line"])).concat([["#d1495b", `x′ face: (σ_{x′}, ${signed ? "τ" : "|τ|"} on face)  [${units}]`, "dot"], ["#1f77b4", `y′ face: (σ_{y′}, ${signed ? "τ" : "|τ|"} on face)  [${units}]`, "dot"], ["#6a4c93", `z′ face: (σ_{z′}, ${signed ? "τ" : "|τ|"} on face)  [${units}]`, "dot"]]));
+    const svg = g("el"); clear(svg); text(svg, +svg.getAttribute("width") / 2, 18, `θ_{x′} = ${last.x.toFixed(1)}°,  θ_{y′} = ${last.y.toFixed(1)}°,  θ_{z′} = ${last.z.toFixed(1)}°` + (stage ? `   (stage: about ${stage}′)` : ""), { "font-size": 14, "font-weight": 600 });
+    cube3D(svg, R, Sp, units, scale, ["x′", "y′", "z′"], true);
+    const shearFree = [0, 1, 2].filter(m => Math.sqrt(Math.max(dot(col(Sp, m), col(Sp, m)) - Sp[m][m] ** 2, 0)) < 1e-6 * scale).map(m => names[m].toLowerCase());
+    setRich(g("read"), `[σ′] in the x′,y′,z′ frame (${units}):\n` + Sp.map(r => r.map(v => fmt(v).padStart(9)).join("")).join("\n") + (shearFree.length ? `\nshear-free (principal) face(s): ${shearFree.join(", ")}` : "") + `\nσ₁,σ₂,σ₃ = ${s1.toFixed(2)}, ${s2.toFixed(2)}, ${s3.toFixed(2)} ${units}   τ_{max,abs} = ${tabs.toFixed(2)} ${units}`);
+  }
+  function resetAll() { R = I3(); last = { x: 0, y: 0, z: 0 }; stage = null; sig = { k: 2, axisSign: Math.sign(-S[2][0] + S[2][1]) || 1 }; hist = []; for (const a of "xyz") g("t" + a).value = 0; }
+  for (const a of "xyz") {
+    g("t" + a).oninput = () => { apply(a, +g("t" + a).value - last[a]); draw(); };
+    g("p" + a).onclick = () => { const k = "xyz".indexOf(a), ia = (k + 1) % 3, ja = (k + 2) % 3; const Sp = matmul(transpose(R), matmul(S, R)); const tp = 0.5 * r2d(Math.atan2(2 * Sp[ia][ja], Sp[ia][ia] - Sp[ja][ja])); apply(a, tp); g("t" + a).value = Math.max(-180, Math.min(180, last[a])); draw(); };
+  }
+  g("clear").onclick = () => { hist = []; draw(); };
+  g("trail").onchange = () => { hist = []; draw(); };
+  g("signed").onchange = () => { hist = []; draw(); };
+  g("reset").onclick = () => { resetAll(); draw(); };
+  document.querySelectorAll("#trot .inputs input").forEach(i => i.oninput = () => { inputs(); draw(); });
+  inputs(); draw();
+}
+
+/* ===================================================================== member under combined loading */
+function moduleMember() {
+  const g = id => document.getElementById("m_" + id);
+  let M = {}, R, last = { x: 0, y: 0, z: 0 }, stage = null, sig = { k: 2, axisSign: 1 }, hist = [];
+  const I3 = () => [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+  function inputs() { const N = num("m_N") * 1e3, P = num("m_P") * 1e3, T = num("m_T"), r = num("m_r") * 1e-3, L = num("m_L"); const A = Math.PI * r * r, I = Math.PI * r ** 4 / 4, J = 2 * I; M = { N, P, T, r, L, A, I, J }; }
+  function position() {   // returns {x, y, z, rho, phi} in metres / degrees
+    const xf = +g("xf").value; let y, z;
+    if (g("mode").value === "cyl") { const rf = +g("rf").value, phi = +g("phi").value; y = rf * M.r * Math.sin(d2r(phi)); z = rf * M.r * Math.cos(d2r(phi)); }
+    else { y = +g("yf").value * M.r; z = +g("zf").value * M.r; const rr = Math.hypot(y, z); if (rr > M.r) { y *= M.r / rr; z *= M.r / rr; g("warn").textContent = "point outside the shaft → moved to the surface"; } else g("warn").textContent = ""; }
+    const rho = Math.hypot(y, z), phi = r2d(Math.atan2(y, z)); return { x: xf * M.L, y, z, rho, phi: ((phi % 360) + 360) % 360 };
+  }
+  function tensor(pos) {   // global x,y,z stress tensor [MPa] at the point, and the internal resultants
+    const { x, y, z } = pos, V = M.P, Mz = -M.P * (M.L - x);
+    const sx = M.N / M.A - Mz * y / M.I;
+    const txyT = -M.T * z / M.J, txzT = M.T * y / M.J;
+    const txyV = -V * (M.r * M.r - y * y) / (3 * M.I), txzV = V * y * z / (3 * M.I);
+    const txy = txyT + txyV, txz = txzT + txzV;
+    return { S: [[sx, txy, txz], [txy, 0, 0], [txz, 0, 0]].map(r => r.map(v => v * 1e-6)), V, Mz, parts: { ax: M.N / M.A * 1e-6, bend: -Mz * y / M.I * 1e-6, txyT: txyT * 1e-6, txzT: txzT * 1e-6, txyV: txyV * 1e-6, txzV: txzV * 1e-6 } };
+  }
+  function setStage(a, S) { const k = "xyz".indexOf(a), ia = (k + 1) % 3, ja = (k + 2) % 3; const Sp = matmul(transpose(R), matmul(S, R)); sig = { k, axisSign: Math.sign(-Sp[k][ia] + Sp[k][ja]) || sig.axisSign || 1 }; }
+  function faceState(Sp, m) { const k = sig.k, ia = (k + 1) % 3, ja = (k + 2) % 3; const t = col(Sp, m), sn = t[m], mag = Math.sqrt(Math.max(dot(t, t) - sn * sn, 0)); if (!g("signed").checked) return [sn, mag]; let sg = m === ia ? -Math.sign(Sp[ia][ja]) : m === ja ? Math.sign(Sp[ia][ja]) : sig.axisSign; return [sn, (sg || 1) * mag]; }
+  function signDefined(Sp) { const k = sig.k, ia = (k + 1) % 3, ja = (k + 2) % 3; const sc = Math.max(Math.abs(Sp[0][0]), Math.abs(Sp[1][1]), Math.abs(Sp[2][2]), 1e-9); return Math.abs(Sp[k][ia]) < 1e-6 * sc && Math.abs(Sp[k][ja]) < 1e-6 * sc; }
+  function apply(a, d, S) { if (Math.abs(d) < 1e-12) return; if (stage !== a) { stage = a; setStage(a, S); } R = matmul(R, rot3(a, d2r(d))); last[a] += d; }
+  function draw() {
+    const pos = position(), { S, V, Mz, parts } = tensor(pos), Sp = matmul(transpose(R), matmul(S, R));
+    const [s1, s2, s3] = eig3(S), tabs = 0.5 * (s1 - s3);
+    for (const a of "xyz") g("t" + a + "v").textContent = `${last[a].toFixed(1)}°`;
+    g("xfv").textContent = `x = ${pos.x.toFixed(3)} m${pos.x === 0 ? " (wall)" : Math.abs(pos.x - M.L) < 1e-9 ? " (free end)" : ""}`;
+    g("rfv").textContent = `ρ = ${(pos.rho * 1e3).toFixed(1)} mm${pos.rho >= M.r - 1e-12 ? " (surface)" : ""}`; g("phiv").textContent = `φ = ${pos.phi.toFixed(0)}°`;
+    g("yfv").textContent = `y = ${(pos.y * 1e3).toFixed(1)} mm`; g("zfv").textContent = `z = ${(pos.z * 1e3).toFixed(1)} mm`;
+    // range for the Mohr axes: worst case over the wall-section surface
+    let ext = 1e-9; for (let q = 0; q < 360; q += 5) { const t = tensor({ x: 0, y: M.r * Math.sin(d2r(q)), z: M.r * Math.cos(d2r(q)) }); const e = eig3(t.S); ext = Math.max(ext, Math.abs(e[0]), Math.abs(e[2])); }
+    const pad = 0.25 * ext;
+    // ---- member drawing
+    const svg = g("mem"); clear(svg); arrowDef(svg, "mP", "#d1495b"); arrowDef(svg, "mF", "#1f77b4"); arrowDef(svg, "mT", "#6a4c93"); arrowDef(svg, "mg", "#999");
+    const W = +svg.getAttribute("width"), H = +svg.getAttribute("height"), U = 75, cx0 = 110, cy0 = H / 2 + 10;
+    const PP = pt => { const q = proj(pt); return [cx0 + q[0] * U, cy0 - q[1] * U]; };
+    const LL = 3.4, rr = 0.6;
+    el("polygon", { points: [[0, 1.7 * rr, 1.7 * rr], [0, -1.7 * rr, 1.7 * rr], [0, -1.7 * rr, -1.7 * rr], [0, 1.7 * rr, -1.7 * rr]].map(q => PP(q).join(",")).join(" "), fill: "#e4e4e4", stroke: "#666" }, svg);
+    const circ = (x, rad = rr, n = 48) => { const a = []; for (let i = 0; i < n; i++) { const t = 2 * Math.PI * i / n; a.push(PP([x, rad * Math.sin(t), rad * Math.cos(t)])); } return a; };
+    el("polygon", { points: convexHull(circ(0).concat(circ(LL))).map(q => q.join(",")).join(" "), fill: "#f6dcdc", stroke: "#444", "stroke-width": 1.3 }, svg);
+    el("polygon", { points: circ(0).map(q => q.join(",")).join(" "), fill: "none", stroke: "#888", "stroke-dasharray": "4,3" }, svg);
+    el("polygon", { points: circ(LL).map(q => q.join(",")).join(" "), fill: "#f0c9c9", stroke: "#444", "stroke-width": 1.3 }, svg);
+    line(svg, ...PP([-0.5, 0, 0]), ...PP([LL + 1.3, 0, 0]), "#999", 1, { "stroke-dasharray": "6,3" }); text(svg, ...PP([LL + 1.45, -0.1, 0]), "x", { fill: "#888", "font-style": "italic" });
+    arrow(svg, ...PP([0, 1.9 * rr + 0.1, 0]), ...PP([0, 1.9 * rr + 0.6, 0]), "#999", 1, "mg"); text(svg, ...PP([0.15, 1.9 * rr + 0.7, 0]), "y", { fill: "#888", "font-style": "italic" });
+    arrow(svg, ...PP([0, -1.9 * rr - 0.1, 0]), ...PP([0, -1.9 * rr - 0.1, 0.9]), "#999", 1, "mg"); text(svg, ...PP([0.15, -1.9 * rr - 0.25, 1.0]), "z", { fill: "#888", "font-style": "italic" });
+    const end = [LL, 0, 0];
+    if (Math.abs(M.N) > 0) { arrow(svg, ...PP([LL + 0.05 * Math.sign(M.N), 0, 0]), ...PP([LL + 0.95 * Math.sign(M.N), 0, 0]), "#d1495b", 3.5, "mP"); labelBox(svg, ...PP([LL + 1.0, 0.3, 0]), `N = ${(M.N / 1e3).toFixed(1)} kN`, "#d1495b", 13); }
+    if (Math.abs(M.P) > 0) { arrow(svg, ...PP(end), ...PP([LL, -0.95 * Math.sign(M.P), 0]), "#1f77b4", 3.5, "mF"); labelBox(svg, ...PP([LL + 0.45, -1.05 * Math.sign(M.P), 0]), `P = ${(M.P / 1e3).toFixed(1)} kN`, "#1f77b4", 13); }
+    if (Math.abs(M.T) > 0) { const pts = []; const n = 22; for (let i = 0; i <= n; i++) { const t = M.T > 0 ? 0.7 + i / n * 3.0 : 3.7 - i / n * 3.0; pts.push(PP([LL + 0.35, 1.45 * rr * Math.sin(t), 1.45 * rr * Math.cos(t)])); } el("path", { d: "M" + pts.map(q => q.join(",")).join(" L"), fill: "none", stroke: "#6a4c93", "stroke-width": 2.5, "marker-end": "url(#m_mem_mT)" }, svg); labelBox(svg, ...PP([LL + 0.4, 1.8 * rr, 0]), `T = ${M.T.toFixed(0)} N·m`, "#6a4c93", 13); }
+    const xe = Math.min(Math.max(pos.x / M.L * LL, 0.06 * LL), LL - 0.06 * LL), sc = rr / M.r;
+    el("polygon", { points: circ(xe).map(q => q.join(",")).join(" "), fill: "none", stroke: "#b3541e", "stroke-width": 1.2, "stroke-dasharray": "4,3" }, svg);   // the cut section
+    if (pos.rho < M.r - 1e-9 && pos.rho > 1e-9) el("polygon", { points: circ(xe, pos.rho * sc).map(q => q.join(",")).join(" "), fill: "none", stroke: "#b3541e", "stroke-width": 0.8, "stroke-dasharray": "2,3" }, svg);  // radius of the point
+    { const o = PP([xe, 0, 0]), q = PP([xe, pos.y * sc, pos.z * sc]); line(svg, o[0], o[1], q[0], q[1], "#b3541e", 0.8, { "stroke-dasharray": "2,3" }); }
+    const c = [xe, pos.y * sc, pos.z * sc], d = 0.032 * LL;      // small cube at the point, oriented with x',y',z'
+    const corners = [[1, 1, 1], [-1, 1, 1], [-1, -1, 1], [1, -1, 1], [1, 1, -1], [-1, 1, -1], [-1, -1, -1], [1, -1, -1]].map(q => { const w = [0, 1, 2].map(i => d * (R[i][0] * q[0] + R[i][1] * q[1] + R[i][2] * q[2])); return [c[0] + w[0], c[1] + w[1], c[2] + w[2]]; });
+    const faces = [[0, 1, 2, 3], [0, 3, 7, 4], [0, 1, 5, 4], [4, 5, 6, 7], [1, 2, 6, 5], [3, 2, 6, 7]];
+    for (const f of faces) el("polygon", { points: f.map(j => PP(corners[j]).join(",")).join(" "), fill: "#ffd166", stroke: "#b3541e", "stroke-width": 1, opacity: (pos.rho < M.r - 1e-9 || pos.z < -0.2 * M.r) ? 0.5 : 0.95 }, svg);
+    { const q = PP(c); el("circle", { cx: q[0], cy: q[1], r: 2.5, fill: "#b3541e" }, svg); }
+    text(svg, W / 2, 16, "Cantilever shaft, combined loading (not to scale); element at the chosen point", { "font-size": 13, "font-weight": 600 });
+    // ---- element (3-D cube with rotated axes and all components)
+    const se = g("el"); clear(se);
+    text(se, +se.getAttribute("width") / 2, 16, `element axes: θ_{x′} = ${last.x.toFixed(1)}°, θ_{y′} = ${last.y.toFixed(1)}°, θ_{z′} = ${last.z.toFixed(1)}°` + (stage ? `  (stage: about ${stage}′)` : ""), { "font-size": 13, "font-weight": 600 });
+    cube3D(se, R, Sp, "MPa", Math.max(ext, 1e-9), ["x′", "y′", "z′"], true);
+    // ---- Mohr
+    const gm = niceStep(2 * ext + 2 * pad), signed = g("signed").checked;
+    const signOK = !signed || signDefined(Sp);
+    g("signwarn").textContent = signOK ? "" : `⚠ signed τ is not defined for this rotation: ${stage || "z"}′ is not a principal axis. The sign is taken from the in-plane component only, so a point will JUMP across the σ axis when that component changes sign — a limitation of signed τ, not a change of stress. Use |τ| (untick) for a continuous picture.`;
+    const ax = mohrAxes(g("mc"), -ext - pad, ext + pad, -ext - pad, ext + pad, gm, gm / 5, `σ [MPa]  (tension +)`, signed ? `τ [MPa]  (CW rule in the plane of the current rotation)` : `|τ| [MPa]  (resultant shear on the face; lower half not used)`, `Mohr's circles at the point   (σ₁, σ₂, σ₃ = ${fmt(s1, 1)}, ${fmt(s2, 1)}, ${fmt(s3, 1)} MPa)`, 150);
+    const pl = ax.plot, sts = threeCircles(ax, s1, s2, s3, null, true, "MPa", !signed);
+    if (!signOK) signedNotice(ax);
+    el("polygon", { points: starPts(ax.X(0.5 * (s1 + s3)), ax.Y(tabs), 10), fill: "#c1121f" }, pl); if (signed) el("polygon", { points: starPts(ax.X(0.5 * (s1 + s3)), ax.Y(-tabs), 10), fill: "#c1121f" }, pl);
+    labelBox(pl, ax.X(0.5 * (s1 + s3)), ax.Y(tabs) - 18, `τ_{max,abs} = ${tabs.toFixed(1)} MPa`, "#c1121f", 13);
+    const states = [0, 1, 2].map(m => faceState(Sp, m)); const cols = ["#d1495b", "#1f77b4", "#6a4c93"], names = ["X′", "Y′", "Z′"];
+    if (g("trail").checked) { if (!hist.length || hist[hist.length - 1].some((q, i) => Math.abs(q[0] - states[i][0]) + Math.abs(q[1] - states[i][1]) > 1e-9)) hist.push(states); for (let i = 0; i < 3; i++) for (const h of hist) el("circle", { cx: ax.X(h[i][0]), cy: ax.Y(h[i][1]), r: 2.5, fill: cols[i], opacity: 0.5 }, pl); } else hist = [];
+    for (let i = 0; i < 3; i++) { el("circle", { cx: ax.X(states[i][0]), cy: ax.Y(states[i][1]), r: 7, fill: cols[i] }, pl); labelBox(pl, ax.X(states[i][0]) + 15, ax.Y(states[i][1]) - 12, names[i], cols[i]); }
+    legend3(g("mc"), ax, [["#f3e8ff", "admissible states (between the circles)", "fill"]].concat(sts.map(([a, b, c], k) => [c, `${["σ₁–σ₂", "σ₂–σ₃", "σ₁–σ₃"][k]}:  C = ${(0.5 * (a + b)).toFixed(1)},  R = ${(0.5 * Math.abs(a - b)).toFixed(1)} MPa`, "line"])).concat([["#d1495b", `x′ face: (σ_{x′}, ${signed ? "τ" : "|τ|"} on face)  [MPa]`, "dot"], ["#1f77b4", `y′ face: (σ_{y′}, ${signed ? "τ" : "|τ|"} on face)  [MPa]`, "dot"], ["#6a4c93", `z′ face: (σ_{z′}, ${signed ? "τ" : "|τ|"} on face)  [MPa]`, "dot"]]));
+    // ---- readout
+    const shearFree = [0, 1, 2].filter(m => Math.sqrt(Math.max(dot(col(Sp, m), col(Sp, m)) - Sp[m][m] ** 2, 0)) < 1e-6 * ext).map(m => names[m].toLowerCase());
+    const Q = (2 / 3) * Math.pow(Math.max(M.r * M.r - pos.y * pos.y, 0), 1.5), tw = 2 * Math.sqrt(Math.max(M.r * M.r - pos.y * pos.y, 0));
+    setRich(g("read"),
+      `section properties:  A = ${(M.A * 1e6).toFixed(1)} mm²   I = ${(M.I * 1e12).toExponential(3)} mm⁴   J = ${(M.J * 1e12).toExponential(3)} mm⁴\n` +
+      `point:  x = ${pos.x.toFixed(3)} m,  y = ${(pos.y * 1e3).toFixed(1)} mm,  z = ${(pos.z * 1e3).toFixed(1)} mm   (ρ = ${(pos.rho * 1e3).toFixed(1)} mm, φ = ${pos.phi.toFixed(0)}°)\n` +
+      `internal resultants at x:  N = ${(M.N / 1e3).toFixed(2)} kN,  V = P = ${(V / 1e3).toFixed(2)} kN,  M = −P(L − x) = ${Mz.toFixed(1)} N·m,  T = ${M.T.toFixed(0)} N·m\n\n` +
+      `σ_{x} = N/A − My/I = ${parts.ax.toFixed(2)} + (${parts.bend.toFixed(2)}) = ${S[0][0].toFixed(2)} MPa\n` +
+      `τ_{xy} = (T/J)(−z) − VQ/(It) = ${parts.txyT.toFixed(2)} + (${parts.txyV.toFixed(2)}) = ${S[0][1].toFixed(2)} MPa      [Q = ${(Q * 1e9).toFixed(0)} mm³, t = ${(tw * 1e3).toFixed(1)} mm]\n` +
+      `τ_{xz} = (T/J)(y) + Vyz/(3I) = ${parts.txzT.toFixed(2)} + (${parts.txzV.toFixed(2)}) = ${S[0][2].toFixed(2)} MPa\n` +
+      `σ_{y} = σ_{z} = τ_{yz} = 0 (elementary theory)\n\n` +
+      `[σ′] in the x′,y′,z′ frame (MPa):\n` + Sp.map(r => r.map(v => fmt(v).padStart(9)).join("")).join("\n") +
+      (shearFree.length ? `\nshear-free (principal) face(s): ${shearFree.join(", ")}` : "") + `\nσ₁,σ₂,σ₃ = ${s1.toFixed(2)}, ${s2.toFixed(2)}, ${s3.toFixed(2)} MPa   τ_{max,abs} = ${tabs.toFixed(2)} MPa`);
+    if (typeof syncBoxes === "function") syncBoxes();
+  }
+  function resetOrient() { R = I3(); last = { x: 0, y: 0, z: 0 }; stage = null; sig = { k: 2, axisSign: 1 }; for (const a of "xyz") g("t" + a).value = 0; }
+  const player = makePlayer(g("play"), g("phi"), draw, null);
+  g("mode").onchange = () => { const cyl = g("mode").value === "cyl"; document.querySelector(".m_cyl").style.display = cyl ? "" : "none"; document.querySelector(".m_cart").style.display = cyl ? "none" : ""; if (!cyl) { const pos = position(); g("yf").value = pos.y / M.r; g("zf").value = pos.z / M.r; } else { const pos = position(); g("rf").value = Math.min(1, pos.rho / M.r); g("phi").value = pos.phi; } draw(); };
+  for (const id of ["xf", "rf", "phi", "yf", "zf"]) g(id).oninput = () => { if (id === "phi") player.stop(); draw(); };
+  // number boxes paired with the position sliders (value in physical units)
+  const posBox = [["xn", "xf", v => v / M.L, v => v * M.L], ["rn", "rf", v => v * 1e-3 / M.r, v => v * M.r * 1e3], ["phin", "phi", v => ((v % 360) + 360) % 360, v => v],
+                  ["yn", "yf", v => v * 1e-3 / M.r, v => v * M.r * 1e3], ["zn", "zf", v => v * 1e-3 / M.r, v => v * M.r * 1e3]];
+  for (const [nb, sl, toSlider] of posBox) g(nb).onchange = () => { player.stop(); const v = toSlider(parseFloat(g(nb).value) || 0); g(sl).value = Math.max(+g(sl).min, Math.min(+g(sl).max, v)); draw(); };
+  function syncBoxes() { const pos = position(); if (document.activeElement !== g("xn")) g("xn").value = pos.x.toFixed(3); if (document.activeElement !== g("rn")) g("rn").value = (pos.rho * 1e3).toFixed(1); if (document.activeElement !== g("phin")) g("phin").value = pos.phi.toFixed(1); if (document.activeElement !== g("yn")) g("yn").value = (pos.y * 1e3).toFixed(1); if (document.activeElement !== g("zn")) g("zn").value = (pos.z * 1e3).toFixed(1); for (const a of "xyz") if (document.activeElement !== g("t" + a + "n")) g("t" + a + "n").value = last[a].toFixed(1); }
+  for (const a of "xyz") g("t" + a + "n").onchange = () => { const target = parseFloat(g("t" + a + "n").value) || 0; apply(a, target - last[a], tensor(position()).S); g("t" + a).value = Math.max(-180, Math.min(180, last[a])); draw(); };
+  document.querySelectorAll(".m_jump").forEach(b => b.onclick = () => { player.stop(); g("phi").value = b.dataset.phi; draw(); });
+  for (const a of "xyz") g("t" + a).oninput = () => { apply(a, +g("t" + a).value - last[a], tensor(position()).S); draw(); };
+  g("align").onclick = () => { const pos = position(); const S = tensor(pos).S; resetOrient(); apply("x", -pos.phi, S); g("tx").value = Math.max(-180, Math.min(180, last.x)); stage = "z"; setStage("z", S); draw(); };
+  g("pz").onclick = () => { const S = tensor(position()).S; const Sp = matmul(transpose(R), matmul(S, R)); const tp = 0.5 * r2d(Math.atan2(2 * Sp[0][1], Sp[0][0] - Sp[1][1])); apply("z", tp, S); g("tz").value = Math.max(-180, Math.min(180, last.z)); draw(); };
+  g("reset").onclick = () => { resetOrient(); draw(); };
+  g("clear").onclick = () => { hist = []; draw(); };
+  g("trail").onchange = () => { hist = []; draw(); };
+  g("signed").onchange = () => { hist = []; draw(); };
+  document.querySelectorAll("#tmem .inputs input[type=number]").forEach(i => i.oninput = () => { inputs(); draw(); });
+  inputs(); resetOrient(); draw();
+}
+function convexHull(pts) {
+  pts = pts.map(p => [+p[0].toFixed(6), +p[1].toFixed(6)]).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lower = [], upper = [];
+  for (const p of pts) { while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop(); lower.push(p); }
+  for (const p of pts.slice().reverse()) { while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop(); upper.push(p); }
+  return lower.slice(0, -1).concat(upper.slice(0, -1));
+}
+
+/* ===================================================================== failure */
+function moduleFail() {
+  const g = id => document.getElementById("f_" + id); const slider = g("lam");
+  let F = {};
+  function inputs() {
+    const sx = num("f_sx"), sy = num("f_sy"), txy = num("f_txy"), st = num("f_st"), sc = num("f_sc"), ta = num("f_ta");
+    const avg = 0.5 * (sx + sy), R = Math.hypot(0.5 * (sx - sy), txy), s1 = avg + R, s2 = avg - R, tp = 0.5 * r2d(Math.atan2(2 * txy, sx - sy));
+    const c = [];
+    if (s1 > 1e-12) c.push([st / s1, "tension", wrap90(tp), "#c1121f"]);
+    if (s2 < -1e-12) c.push([sc / -s2, "compression", wrap90(tp + 90), "#1d3557"]);
+    if (R > 1e-12) c.push([ta / R, "shear", wrap90(tp + 45), "#e07a1f"]);
+    c.sort((a, b) => a[0] - b[0]);
+    const [lam, mode, thf, colf] = c[0] || [1, "none", 0, "#888"];
+    F = { sx, sy, txy, st, sc, ta, avg, R, s1, s2, tp, lam, mode, thf, colf, units: val("f_units") };
+    slider.max = (1.3 * lam).toFixed(3); slider.step = (1.3 * lam / 400).toFixed(5);
+  }
+  function draw() {
+    const lam = +slider.value; g("lamv").textContent = `λ = ${lam.toFixed(2)}`;
+    const ext = Math.max(Math.abs(F.s1), Math.abs(F.s2), F.R) * 1.3 * F.lam, pad = 0.3 * ext;
+    const xmax = Math.max(F.st < 1.6 * ext ? F.st : 0, F.s1 * 1.3 * F.lam, 0) + pad, xmin = Math.min(F.sc < 1.6 * ext ? -F.sc : 0, F.s2 * 1.3 * F.lam, 0) - pad, ymax = Math.max(F.ta < 1.6 * ext ? F.ta : 0, F.R * 1.3 * F.lam) + pad;
+    const gm = niceStep(xmax - xmin, 8);
+    const ax = mohrAxes(g("mc"), xmin, xmax, -ymax, ymax, gm, gm / 5, `σ [${F.units}]  (tension +)`, `τ [${F.units}]`, `Mohr's circle grows with the load:  λ = ${lam.toFixed(2)}`, 140);
+    const pl = ax.plot;
+    // limits
+    const L0 = ax.m.l, R0 = ax.m.l + ax.pw, T0 = ax.m.t, B0 = ax.m.t + ax.ph, cl = (v, a, b) => Math.max(a, Math.min(b, v));
+    const xt = cl(ax.X(F.st), L0, R0), xc = cl(ax.X(-F.sc), L0, R0), yt = cl(ax.Y(F.ta), T0, B0), yb = cl(ax.Y(-F.ta), T0, B0);
+    if (R0 - xt > 0) el("rect", { x: xt, y: T0, width: R0 - xt, height: ax.ph, fill: "#c1121f", opacity: 0.07 }, pl);
+    if (xc - L0 > 0) el("rect", { x: L0, y: T0, width: xc - L0, height: ax.ph, fill: "#1d3557", opacity: 0.07 }, pl);
+    if (yt - T0 > 0) el("rect", { x: L0, y: T0, width: ax.pw, height: yt - T0, fill: "#e07a1f", opacity: 0.07 }, pl);
+    if (B0 - yb > 0) el("rect", { x: L0, y: yb, width: ax.pw, height: B0 - yb, fill: "#e07a1f", opacity: 0.07 }, pl);
+    line(pl, ax.X(F.st), ax.m.t, ax.X(F.st), ax.m.t + ax.ph, "#c1121f", 2, { "stroke-dasharray": "7,5" }); line(pl, ax.X(-F.sc), ax.m.t, ax.X(-F.sc), ax.m.t + ax.ph, "#1d3557", 2, { "stroke-dasharray": "7,5" });
+    line(pl, ax.m.l, ax.Y(F.ta), ax.m.l + ax.pw, ax.Y(F.ta), "#e07a1f", 2, { "stroke-dasharray": "7,5" }); line(pl, ax.m.l, ax.Y(-F.ta), ax.m.l + ax.pw, ax.Y(-F.ta), "#e07a1f", 2, { "stroke-dasharray": "7,5" });
+    const failed = lam >= F.lam - 1e-9;
+    if (failed && lam > F.lam + 1e-9) { circlePath(ax, F.lam * F.avg, F.lam * F.R).setAttribute("stroke", "#999"); pl.lastChild.setAttribute("stroke-dasharray", "2,4"); }
+    circlePath(ax, lam * F.avg, lam * F.R).setAttribute("stroke", "#7a5195"); pl.lastChild.setAttribute("stroke-width", 2.4);
+    line(pl, ax.X(lam * F.sx), ax.Y(-lam * F.txy), ax.X(lam * F.sy), ax.Y(lam * F.txy), "#333", 1.3);
+    el("circle", { cx: ax.X(lam * F.sx), cy: ax.Y(-lam * F.txy), r: 7, fill: "#d1495b" }, pl); el("circle", { cx: ax.X(lam * F.sy), cy: ax.Y(lam * F.txy), r: 7, fill: "#1f77b4" }, pl);
+    if (failed) { const px = F.mode === "tension" ? F.st : F.mode === "compression" ? -F.sc : F.lam * F.avg, py = F.mode === "shear" ? (F.txy <= 0 ? F.ta : -F.ta) : 0; el("polygon", { points: starPts(ax.X(px), ax.Y(py), 13), fill: F.colf }, pl); }
+    legend3(g("mc"), ax, [["#c1121f", `tensile limit  σ = ${F.st} ${F.units}`, "line"], ["#1d3557", `compressive limit  σ = −${F.sc} ${F.units}`, "line"], ["#e07a1f", `shear limit  |τ| = ${F.ta} ${F.units}`, "line"], ["#d1495b", `X = (σ_{x}, −τ_{xy})  [${F.units}]`, "dot"], ["#1f77b4", `Y = (σ_{y}, +τ_{xy})  [${F.units}]`, "dot"]]);
+    // element
+    const svg = g("el"); const scale0 = Math.max(Math.abs(F.s1), Math.abs(F.s2), F.R) * 1.3 * F.lam;
+    drawElement2D(svg, 0, lam * F.sx, lam * F.sy, lam * F.txy, Math.max(scale0, 1e-9), "stress", { nx: "σ_{x}", ny: "σ_{y}", s: "τ_{xy}" }, F.units, 0);
+    text(svg, 260, 18, `stress element: λ × input state   (λ = ${lam.toFixed(2)})`, { "font-size": 15, "font-weight": 600 });
+    if (failed) {
+      const cx = 260, cy = 250, U = 95, n = [Math.cos(d2r(F.thf)), Math.sin(d2r(F.thf))], t = [-n[1], n[0]], Lc = 1.35;
+      line(svg, cx - Lc * U * t[0], cy + Lc * U * t[1], cx + Lc * U * t[0], cy - Lc * U * t[1], F.colf, 4, { "stroke-dasharray": F.mode === "shear" ? "10,6" : "", "stroke-linecap": "round" });
+      text(svg, 260, 500, `FAILS in ${F.mode} on the plane with normal at θ = ${F.thf.toFixed(1)}°  (λ = ${F.lam.toFixed(2)})`, { fill: F.colf, "font-weight": 700, "font-size": 15 });
+    }
+    setRich(g("read"), `σ₁ = ${fmt(lam * F.s1, 1)}   σ₂ = ${fmt(lam * F.s2, 1)}   τ_{max} = ${fmt(lam * F.R, 1)} ${F.units}\nratios:  σ₁/σ_{t,all} = ${(lam * F.s1 / F.st).toFixed(2)}   |σ₂|/σ_{c,all} = ${(Math.abs(Math.min(lam * F.s2, 0)) / F.sc).toFixed(2)}   τ_{max}/τ_{all} = ${(lam * F.R / F.ta).toFixed(2)}\n` + (failed ? `first limit reached: ${F.mode} at λ = ${F.lam.toFixed(3)}\nfailure plane normal at θ = ${F.thf.toFixed(2)}°` : `safe  (λ < λfail = ${F.lam.toFixed(3)}, mode: ${F.mode})`) + `\n\nθ_{p} = ${wrap90(F.tp).toFixed(2)}°, θ_{s} = ${wrap90(F.tp + 45).toFixed(2)}°`);
+  }
+  const player = makePlayer(g("play"), slider, draw, { value: 0.5 });   // 0.5 lambda per second
+  slider.oninput = () => { player.stop(); draw(); };
+  g("tofail").onclick = () => { player.stop(); slider.value = F.lam; draw(); };
+  g("zero").onclick = () => { player.stop(); slider.value = 0; draw(); };
+  document.querySelectorAll("#tfail .inputs input").forEach(i => i.oninput = () => { inputs(); draw(); });
+  inputs(); draw();
+}
+
+/* unit tags next to the inputs follow the "units" boxes */
+for (const pre of ["s", "e", "d", "r", "f"]) { const box = document.getElementById(pre + "_units"); const upd = () => document.querySelectorAll("." + pre + "_u").forEach(u => u.textContent = box.value || "–"); box.addEventListener("input", upd); upd(); }
+/* ===================================================================== tabs + init */
+document.querySelectorAll("#nav button").forEach(b => b.onclick = () => { document.querySelectorAll("#nav button").forEach(x => x.classList.remove("active")); document.querySelectorAll("section.tab").forEach(x => x.classList.remove("active")); b.classList.add("active"); document.getElementById(b.dataset.tab).classList.add("active");
+  if (typeof gtag === "function") gtag("event", "tab_view", { module: "mohr-circle", tab: b.textContent.trim() });   // per-tab usage statistics
+  if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: location.pathname + "#" + b.dataset.tab, title: b.textContent.trim(), event: true }); });
+module2D("s_", "stress"); module2D("e_", "strain"); module3D(); moduleRot(); moduleMember(); moduleFail();
+</script>
+</body>
+</html>

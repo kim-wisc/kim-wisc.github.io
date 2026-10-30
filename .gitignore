@@ -41,3 +41,6 @@ validation-report.json
 # Folders to ignore
 node_modules
 bower_components
+
+# private source notebooks of the teaching modules (not committed)
+teaching/**/*.ipynb
