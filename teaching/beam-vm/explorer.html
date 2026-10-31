@@ -18,6 +18,10 @@
   nav { display:flex; gap:6px; padding:10px 22px 0; flex-wrap:wrap; }
   nav button { border:1px solid #ccc; background:#f2f2f2; padding:8px 14px; border-radius:8px 8px 0 0; cursor:pointer; font-size:15px; }
   nav button.active { background:#fff; border-bottom-color:#fff; font-weight:600; }
+  nav button { display:inline-flex; align-items:center; gap:8px; line-height:1.2; }
+  nav button .tabnum { display:inline-flex; align-items:center; justify-content:center; flex:0 0 20px; width:20px; height:20px; border-radius:50%; background:#8a8a8a; color:#fff; font-size:12px; font-weight:700; line-height:1; }
+  nav button.active .tabnum { background:var(--red, #ac4142); }
+
   section.tab { display:none; padding:12px 22px 24px; }
   section.tab.active { display:block; }
   .layout { display:flex; gap:18px; flex-wrap:wrap; align-items:flex-start; }
@@ -70,8 +74,8 @@
 </header>
 
 <nav id="nav">
-  <button class="active" data-tab="tdia">V–M diagrams</button>
-  <button data-tab="tcut">Section cut &amp; graphical approach</button>
+  <button class="active" data-tab="tdia"><span class="tabnum">1</span>V–M diagrams</button>
+  <button data-tab="tcut"><span class="tabnum">2</span>Section cut &amp; graphical approach</button>
 </nav>
 
 <!-- ============================================================ TAB 1 -->
@@ -137,6 +141,11 @@
       <div class="rowline">
         <label><input type="checkbox" id="showVals" checked> values on diagrams</label>
         <label><input type="checkbox" id="showPure" checked> highlight pure bending</label>
+      </div>
+      <div class="rowline">
+        <label><input type="checkbox" id="gauto" checked> auto grid</label>
+        <label>grid step <i>V</i> [<span class="uF">kN</span>] <input type="number" id="gV" value="10" step="any" disabled style="width:70px"></label>
+        <label>grid step <i>M</i> [<span class="uM">kN·m</span>] <input type="number" id="gM" value="10" step="any" disabled style="width:70px"></label>
       </div>
     </div>
   </div>
@@ -352,7 +361,8 @@ function drawBeamFigure(svg, st, R, opts = {}) {
 function drawDiagram(svg, st, R, which, opts = {}) {
   clear(svg); const W = 820, H = 230, L = st.L, X = xmap(L, W); const u = U();
   const vals = which === "V" ? [R.Vmin, R.Vmx] : [R.Mmin, R.Mmx]; let lo = Math.min(0, vals[0]), hi = Math.max(0, vals[1]); if (hi - lo < 1e-12) { lo = -1; hi = 1; }
-  const span = hi - lo; lo -= 0.12 * span; hi += 0.12 * span; const step = niceStep(hi - lo, 5);
+  const span = hi - lo; lo -= 0.12 * span; hi += 0.12 * span; let step = niceStep(hi - lo, 5);
+  { const a = document.getElementById("gauto"), box = document.getElementById(which === "V" ? "gV" : "gM"); if (a && box) { if (a.checked) box.value = +step.toPrecision(6); box.disabled = a.checked; if (!a.checked && parseFloat(box.value) > 0) step = parseFloat(box.value); } }
   const top = 26, bot = H - 34; const Y = v => bot - (bot - top) * (v - lo) / (hi - lo);
   const color = which === "V" ? "var(--blue)" : "var(--red)", fill = which === "V" ? "var(--vfill)" : "var(--mfill)";
   // grid
@@ -380,14 +390,14 @@ function drawDiagram(svg, st, R, which, opts = {}) {
 
 /* ===================================================================== UI: lists */
 function renderLists() {
-  const u = U(); document.querySelectorAll(".uL").forEach(e => e.textContent = u.L);
+  const u = U(); document.querySelectorAll(".uL").forEach(e => e.textContent = u.L); document.querySelectorAll(".uF").forEach(e => e.textContent = u.F); document.querySelectorAll(".uM").forEach(e => e.textContent = u.M);
   const sl = document.getElementById("supList"); sl.innerHTML = "";
-  S.supports.forEach((s, i) => { const d = document.createElement("div"); d.className = "rowline"; d.innerHTML = `<select data-si="${i}" data-k="type"><option value="pin"${s.type === "pin" ? " selected" : ""}>pin</option><option value="roller"${s.type === "roller" ? " selected" : ""}>roller</option><option value="fixed"${s.type === "fixed" ? " selected" : ""}>fixed</option></select> <label>at <i>x</i> = <input type="number" data-si="${i}" data-k="x" value="${s.x}" step="0.1" min="0" max="${S.L}"> ${u.L}</label> <button class="x" data-sdel="${i}" title="remove">×</button>`; sl.appendChild(d); });
+  S.supports.forEach((s, i) => { const d = document.createElement("div"); d.className = "rowline"; d.innerHTML = `<select data-si="${i}" data-k="type"><option value="pin"${s.type === "pin" ? " selected" : ""}>pin</option><option value="roller"${s.type === "roller" ? " selected" : ""}>roller</option><option value="fixed"${s.type === "fixed" ? " selected" : ""}>fixed</option></select> <label>at <i>x</i> [${u.L}] <input type="number" data-si="${i}" data-k="x" value="${s.x}" step="0.1" min="0" max="${S.L}"></label> <button class="x" data-sdel="${i}" title="remove">×</button>`; sl.appendChild(d); });
   const ll = document.getElementById("loadList"); ll.innerHTML = "";
   S.loads.forEach((l, i) => { const d = document.createElement("div"); d.className = "rowline"; let h = "";
-    if (l.type === "P") h = `<b><i>P</i></b> <label>= <input type="number" data-li="${i}" data-k="val" value="${l.val}" step="1"> ${u.F}</label> <label>at <i>x</i> = <input type="number" data-li="${i}" data-k="x" value="${l.x}" step="0.1" min="0" max="${S.L}"> ${u.L}</label>`;
-    if (l.type === "w") h = `<b><i>w</i></b> <label>from <i>x</i> = <input type="number" data-li="${i}" data-k="x1" value="${l.x1}" step="0.1" min="0" max="${S.L}"></label> <label>to <input type="number" data-li="${i}" data-k="x2" value="${l.x2}" step="0.1" min="0" max="${S.L}"> ${u.L}</label> <label><i>w</i><sub>1</sub> = <input type="number" data-li="${i}" data-k="w1" value="${l.w1}" step="0.5"></label> <label><i>w</i><sub>2</sub> = <input type="number" data-li="${i}" data-k="w2" value="${l.w2}" step="0.5"> ${u.w}</label>`;
-    if (l.type === "M") h = `<b><i>M</i><sub>0</sub></b> <label>= <input type="number" data-li="${i}" data-k="val" value="${l.val}" step="1"> ${u.M} (↺ +)</label> <label>at <i>x</i> = <input type="number" data-li="${i}" data-k="x" value="${l.x}" step="0.1" min="0" max="${S.L}"> ${u.L}</label>`;
+    if (l.type === "P") h = `<label><i>P</i> [${u.F}] <input type="number" data-li="${i}" data-k="val" value="${l.val}" step="1"></label> <label>at <i>x</i> [${u.L}] <input type="number" data-li="${i}" data-k="x" value="${l.x}" step="0.1" min="0" max="${S.L}"></label>`;
+    if (l.type === "w") h = `<label><i>w</i> from <i>x</i><sub>1</sub> [${u.L}] <input type="number" data-li="${i}" data-k="x1" value="${l.x1}" step="0.1" min="0" max="${S.L}"></label> <label>to <i>x</i><sub>2</sub> [${u.L}] <input type="number" data-li="${i}" data-k="x2" value="${l.x2}" step="0.1" min="0" max="${S.L}"></label> <label><i>w</i><sub>1</sub> [${u.w}] <input type="number" data-li="${i}" data-k="w1" value="${l.w1}" step="0.5"></label> <label><i>w</i><sub>2</sub> [${u.w}] <input type="number" data-li="${i}" data-k="w2" value="${l.w2}" step="0.5"></label>`;
+    if (l.type === "M") h = `<label><i>M</i><sub>0</sub> [${u.M}] (↺ +) <input type="number" data-li="${i}" data-k="val" value="${l.val}" step="1"></label> <label>at <i>x</i> [${u.L}] <input type="number" data-li="${i}" data-k="x" value="${l.x}" step="0.1" min="0" max="${S.L}"></label>`;
     d.innerHTML = h + ` <button class="x" data-ldel="${i}" title="remove">×</button>`; ll.appendChild(d); });
   document.getElementById("L").value = S.L; document.getElementById("units").value = S.units;
   if (typeof fixLabels === "function") fixLabels();
@@ -403,7 +413,7 @@ document.getElementById("L").addEventListener("input", e => { const v = parseFlo
 document.getElementById("units").addEventListener("change", e => { S.units = e.target.value; update(true); });
 document.getElementById("preset").addEventListener("change", e => { const p = PRESETS[e.target.value]; if (!p) return; S = JSON.parse(JSON.stringify(p)); update(true); });
 document.getElementById("resetAll").onclick = () => { S = JSON.parse(JSON.stringify(DEFAULT)); document.getElementById("preset").value = ""; ["showR", "showV", "showM", "showVals", "showPure"].forEach(id => document.getElementById(id).checked = true); update(true); };
-["showR", "showV", "showM", "showVals", "showPure"].forEach(id => document.getElementById(id).addEventListener("change", () => update(false)));
+["showR", "showV", "showM", "showVals", "showPure", "gauto", "gV", "gM"].forEach(id => document.getElementById(id).addEventListener("change", () => update(false)));
 document.getElementById("hideAll").onclick = () => { ["showR", "showV", "showM"].forEach(id => document.getElementById(id).checked = false); update(false); };
 document.querySelectorAll("[data-reveal]").forEach(b => b.onclick = () => { document.getElementById(b.dataset.reveal).checked = true; update(false); });
 

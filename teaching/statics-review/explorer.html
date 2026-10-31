@@ -18,6 +18,10 @@
   nav { display:flex; gap:6px; padding:10px 22px 0; flex-wrap:wrap; }
   nav button { border:1px solid #ccc; background:#f2f2f2; padding:7px 12px; border-radius:8px 8px 0 0; cursor:pointer; font-size:.92rem; }
   nav button.active { background:#fff; border-bottom-color:#fff; font-weight:600; }
+  nav button { display:inline-flex; align-items:center; gap:8px; line-height:1.2; }
+  nav button .tabnum { display:inline-flex; align-items:center; justify-content:center; flex:0 0 20px; width:20px; height:20px; border-radius:50%; background:#8a8a8a; color:#fff; font-size:12px; font-weight:700; line-height:1; }
+  nav button.active .tabnum { background:var(--red, #ac4142); }
+
   section.tab { display:none; padding:12px 22px 24px; }
   section.tab.active { display:block; }
   .intro { color:#444; font-size:.95rem; max-width:1100px; line-height:1.5; margin:0 0 10px; }
@@ -29,6 +33,9 @@
   .panel { background:var(--panel); border:1px solid #e3e3e3; border-radius:10px; padding:10px 12px; margin-bottom:10px; font-size:.92rem; }
   .panel h3 { margin:0 0 6px; font-size:.92rem; color:#444; display:flex; align-items:center; justify-content:space-between; gap:8px; }
   .panel h3 .hint { font-weight:400; color:var(--mut); font-size:.8rem; }
+  .fields { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:6px 18px; align-items:center; }
+  .fields label { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .fields label > span:first-child, .fields label > i:first-child { flex:1 1 auto; }
   .rowline { display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; margin:4px 0; }
   .rowline label { display:inline-flex; align-items:center; gap:4px; max-width:100%; }
   input[type=number] { width:80px; padding:4px 6px; font-size:.92rem; border:1px solid #bbb; border-radius:6px; }
@@ -65,13 +72,13 @@
 </header>
 
 <nav id="nav">
-  <button class="active" data-tab="t1">1 · Supports &amp; FBD</button>
-  <button data-tab="t2">2 · Rigid bars &amp; two-force members</button>
-  <button data-tab="t3">3 · Method of sections (N, T)</button>
-  <button data-tab="t4">4 · Distributed loads</button>
-  <button data-tab="t5">5 · Section properties</button>
-  <button data-tab="t6">6 · 3-D moments at a cut</button>
-  <button data-tab="t7">7 · Units</button>
+  <button class="active" data-tab="t1"><span class="tabnum">1</span>Supports &amp; FBD</button>
+  <button data-tab="t2"><span class="tabnum">2</span>Rigid bars &amp; two-force members</button>
+  <button data-tab="t3"><span class="tabnum">3</span>Method of sections (N, T)</button>
+  <button data-tab="t4"><span class="tabnum">4</span>Distributed loads</button>
+  <button data-tab="t5"><span class="tabnum">5</span>Section properties</button>
+  <button data-tab="t6"><span class="tabnum">6</span>3-D moments at a cut</button>
+  <button data-tab="t7"><span class="tabnum">7</span>Units</button>
 </nav>
 
 <!-- ================================================================ TAB 1 -->
@@ -103,7 +110,7 @@
 <div class="layout">
   <div class="side">
     <div class="panel"><h3>Bracket (M01) <span class="hint">bar AB pinned at A, link BC to the wall at C</span></h3>
-      <div class="rowline"><label><i>P</i> [kN] <input type="number" id="b2P" value="30" step="1"></label><label>bar <i>a</i> [m] <input type="number" id="b2a" value="0.8" step="0.1" min="0.1"></label><label>rise <i>h</i> [m] <input type="number" id="b2h" value="0.6" step="0.1" min="0.1"></label></div>
+      <div class="fields"><label><span>load <i>P</i> [kN]</span><input type="number" id="b2P" value="30" step="1"></label><label><span>bar length <i>a</i> [m]</span><input type="number" id="b2a" value="0.8" step="0.1" min="0.1"></label><label><span>rise of C above A, <i>h</i> [m]</span><input type="number" id="b2h" value="0.6" step="0.1" min="0.1"></label></div>
       <div class="rowline">Take moments about: <button class="sel" data-mc="A">A</button><button data-mc="B">B</button><button data-mc="C">C</button></div>
       <div class="rowline"><label><input type="checkbox" id="b2comp" checked> show components of <i>F</i><sub>BC</sub></label><label><input type="checkbox" id="b2dis"> dismember (FBD of bar AB)</label> <button id="b2reset">Reset</button></div>
     </div>
@@ -130,19 +137,19 @@
 <div class="layout">
   <div class="side">
     <div class="panel" id="s3axialPanel"><h3>Loads on the rod <span class="hint">positive = pointing right (+x)</span></h3>
-      <div class="rowline"><label>at A (x = 0): <input type="number" id="a3PA" value="-40" step="5"> kip</label></div>
-      <div class="rowline"><label>at B (x = <input type="number" id="a3xB" value="12" step="1" style="width:60px"> in): <input type="number" id="a3PB" value="60" step="5"> kip</label></div>
-      <div class="rowline"><label>wall at C, x = <input type="number" id="a3xC" value="28" step="1" style="width:60px"> in</label> <span>reaction <span id="a3PC" style="font-weight:600"></span> <span class="hint">(from Σ<i>F</i><sub>x</sub> = 0)</span></span></div>
+      <div class="rowline"><label>force at A (<i>x</i> = 0) [kip] <input type="number" id="a3PA" value="-40" step="5"></label></div>
+      <div class="rowline"><label>position of B, <i>x</i><sub>B</sub> [in] <input type="number" id="a3xB" value="12" step="1" style="width:60px"></label> <label>force at B [kip] <input type="number" id="a3PB" value="60" step="5"></label></div>
+      <div class="rowline"><label>wall at C, <i>x</i><sub>C</sub> [in] <input type="number" id="a3xC" value="28" step="1" style="width:60px"></label> <span>reaction <span id="a3PC" style="font-weight:600"></span> <span class="hint">(from Σ<i>F</i><sub>x</sub> = 0)</span></span></div>
       <div class="rowline"><label><input type="checkbox" id="a3fromRight"> keep the right piece instead</label><button id="a3reset">Reset</button></div>
     </div>
     <div class="panel" id="s3torquePanel" style="display:none"><h3>Torques on the shaft <span class="hint">positive = counter-clockwise seen from +x (right-hand rule, thumb along +x)</span></h3>
-      <div class="rowline"><label>at A (x = 0): <input type="number" id="t3TA" value="400" step="50"> N·m</label></div>
-      <div class="rowline"><label>at B (x = <input type="number" id="t3xB" value="0.5" step="0.1" style="width:60px"> m): <input type="number" id="t3TB" value="-1200" step="50"> N·m</label></div>
-      <div class="rowline"><label>wall at C, x = <input type="number" id="t3xC" value="1.0" step="0.1" style="width:60px"> m</label> <span>reaction <span id="t3TC" style="font-weight:600"></span> <span class="hint">(from Σ<i>T</i> = 0)</span></span></div>
+      <div class="rowline"><label>torque at A (<i>x</i> = 0) [N·m] <input type="number" id="t3TA" value="400" step="50"></label></div>
+      <div class="rowline"><label>position of B, <i>x</i><sub>B</sub> [m] <input type="number" id="t3xB" value="0.5" step="0.1" style="width:60px"></label> <label>torque at B [N·m] <input type="number" id="t3TB" value="-1200" step="50"></label></div>
+      <div class="rowline"><label>wall at C, <i>x</i><sub>C</sub> [m] <input type="number" id="t3xC" value="1.0" step="0.1" style="width:60px"></label> <span>reaction <span id="t3TC" style="font-weight:600"></span> <span class="hint">(from Σ<i>T</i> = 0)</span></span></div>
       <div class="rowline"><button id="t3reset">Reset</button></div>
     </div>
     <div class="panel"><h3>Cut position</h3>
-      <div class="rowline"><input type="range" id="s3x" min="0" max="28" step="0.1" value="6"><input type="number" id="s3xN" value="6" step="0.5" style="width:80px"><span id="s3xu">in</span></div>
+      <div class="rowline"><span>[<span id="s3xu">in</span>]</span><input type="range" id="s3x" min="0" max="28" step="0.1" value="6"><input type="number" id="s3xN" value="6" step="0.5" style="width:80px"></div>
     </div>
   </div>
   <div class="main">
@@ -161,9 +168,7 @@
 <div class="layout">
   <div class="side">
     <div class="panel"><h3>Load on a simply supported beam</h3>
-      <div class="rowline"><label><i>L</i> [m] <input type="number" id="d4L" value="6" step="0.5" min="0.5"></label></div>
-      <div class="rowline"><label>from <i>x</i> = <input type="number" id="d4a" value="1" step="0.25"></label><label>to <input type="number" id="d4b" value="5" step="0.25"> m</label></div>
-      <div class="rowline"><label><i>w</i><sub>1</sub> [kN/m] <input type="number" id="d4w1" value="2" step="0.5"></label><label><i>w</i><sub>2</sub> [kN/m] <input type="number" id="d4w2" value="8" step="0.5"></label></div>
+      <div class="fields"><label><span>span <i>L</i> [m]</span><input type="number" id="d4L" value="6" step="0.5" min="0.5"></label><label><span>load starts at <i>x</i> = <i>a</i> [m]</span><input type="number" id="d4a" value="1" step="0.25"></label><label><span>load ends at <i>x</i> = <i>b</i> [m]</span><input type="number" id="d4b" value="5" step="0.25"></label><label><span><i>w</i><sub>1</sub> at <i>a</i> [kN/m]</span><input type="number" id="d4w1" value="2" step="0.5"></label><label><span><i>w</i><sub>2</sub> at <i>b</i> [kN/m]</span><input type="number" id="d4w2" value="8" step="0.5"></label></div>
       <div class="rowline">Shape: <button data-shape="uni">uniform</button><button data-shape="tri">triangular</button><button data-shape="trap">trapezoidal</button> <button id="d4reset">Reset</button></div>
       <div class="rowline"><label><input type="checkbox" id="d4show" checked> show the resultant</label><label><input type="checkbox" id="d4M"> <span>compare <i>M</i>(<i>x</i>): real load vs. resultant</span></label></div>
     </div>
@@ -182,13 +187,14 @@
 <p class="intro"><b class="k">Why it matters:</b> bending stress <i>σ</i> = −<i>My</i>/<i>I</i> (M07), shear stress <i>τ</i> = <i>VQ</i>/(<i>It</i>) (M08), torsion <i>τ</i> = <i>Tρ</i>/<i>J</i> (M06) and buckling <i>P</i><sub>cr</sub> = π²<i>EI</i>/<i>L</i>² (M12) all need section properties: the centroid, the second moment of area <i>I</i> about the centroidal axis (parallel-axis theorem for composite shapes), the first moment <i>Q</i> of the area beyond a level, the polar moment <i>J</i>, and the radius of gyration <i>r</i> = √(<i>I</i>/<i>A</i>).</p>
 <div class="layout">
   <div class="side">
-    <div class="panel"><h3>Rectangles <span class="hint">b wide, h tall, bottom at y<sub>0</sub>, centered at x<sub>c</sub></span></h3>
+    <div class="panel"><h3>Rectangles <span class="hint"><i>b</i> wide, <i>h</i> tall, bottom at <i>y</i><sub>0</sub>, centred at <i>x</i><sub>c</sub></span></h3>
+      <div class="rowline"><label>units <select id="r5u"><option>in</option><option>mm</option></select></label></div>
       <div id="r5list"></div>
       <div class="rowline"><button id="r5add">+ rectangle</button> Presets: <select id="r5preset"><option value="">—</option><option value="tee">T-section (M08)</option><option value="ibeam">I-section (areas 60, 48, 40 as in M07)</option><option value="box">Box (hollow 4×4, t = 0.5 in; M08)</option><option value="rect">Solid rectangle</option></select> <button id="r5reset">Reset</button></div>
-      <div class="rowline"><label>units <select id="r5u"><option>in</option><option>mm</option></select></label><label>level for <i>Q</i>: <i>y</i> = <input type="range" id="r5q" min="0" max="10" step="0.05" value="2"><input type="number" id="r5qN" value="2" step="0.1" style="width:70px"></label></div>
+      <div class="rowline"><label>level for <i>Q</i>: <i>y</i> [<span id="r5uq">in</span>] <input type="range" id="r5q" min="0" max="10" step="0.05" value="2"><input type="number" id="r5qN" value="2" step="0.1" style="width:70px"></label></div>
     </div>
     <div class="panel"><h3>Circular sections <span class="hint">for torsion (M06) and columns (M12)</span></h3>
-      <div class="rowline"><label>outer radius <i>c</i> <input type="number" id="c5o" value="18" step="1" min="0.1"></label><label>inner radius <i>c</i><sub>i</sub> <input type="number" id="c5i" value="12" step="1" min="0"></label><label>units <select id="c5u"><option>mm</option><option>in</option></select></label></div>
+      <div class="fields"><label><span>units</span><select id="c5u"><option>mm</option><option>in</option></select></label><label><span>outer radius <i>c</i></span><input type="number" id="c5o" value="18" step="1" min="0.1"></label><label><span>inner radius <i>c</i><sub>i</sub> (0 = solid)</span><input type="number" id="c5i" value="12" step="1" min="0"></label></div>
       <div class="eq" id="s5circ"></div>
     </div>
   </div>
@@ -206,8 +212,7 @@
 <div class="layout">
   <div class="side">
     <div class="panel"><h3>Bent bar (M10) <span class="hint">wall at A; bar along +x to C, arm along +z to D; load at D</span></h3>
-      <div class="rowline"><label><i>L</i><sub>AC</sub> [in] <input type="number" id="m6L1" value="9" step="1" min="0"></label><label><i>L</i><sub>CD</sub> [in] <input type="number" id="m6L2" value="12" step="1" min="0"></label></div>
-      <div class="rowline"><label><i>F</i><sub>x</sub> [lb] <input type="number" id="m6Fx" value="0" step="50"></label><label><i>F</i><sub>y</sub> [lb] <input type="number" id="m6Fy" value="-250" step="50"></label><label><i>F</i><sub>z</sub> [lb] <input type="number" id="m6Fz" value="0" step="50"></label></div>
+      <div class="fields"><label><span>bar length <i>L</i><sub>AC</sub> [in]</span><input type="number" id="m6L1" value="9" step="1" min="0"></label><label><span>arm length <i>L</i><sub>CD</sub> [in]</span><input type="number" id="m6L2" value="12" step="1" min="0"></label><label><span><i>F</i><sub>x</sub> at D [lb]</span><input type="number" id="m6Fx" value="0" step="50"></label><label><span><i>F</i><sub>y</sub> at D [lb]</span><input type="number" id="m6Fy" value="-250" step="50"></label><label><span><i>F</i><sub>z</sub> at D [lb]</span><input type="number" id="m6Fz" value="0" step="50"></label></div>
       <div class="rowline">Quick sets: <button data-f6="x">F<sub>x</sub> only</button><button data-f6="y">F<sub>y</sub> only</button><button data-f6="z">F<sub>z</sub> only</button><button data-f6="all">all three</button> <button id="m6reset">Reset</button></div>
     </div>
     <div class="panel"><h3>At the section A (the wall) <span class="hint">equal and opposite to the resultant of the applied load about A</span></h3><div class="eq" id="s6tab"></div></div>
@@ -550,7 +555,7 @@ document.addEventListener("click", e => {
   $("r5reset").onclick = () => { rects = JSON.parse(JSON.stringify(PRE.tee.r)); $("r5u").value = "in"; $("r5preset").value = ""; renderList(); $("r5qN").value = 2; $("r5q").value = 2; draw(); };
   $("r5q").addEventListener("input", e => { $("r5qN").value = e.target.value; draw(); }); $("r5qN").addEventListener("input", e => { $("r5q").value = e.target.value; draw(); }); $("r5u").addEventListener("change", draw);
   function draw() {
-    const u = $("r5u").value; const svg = $("s5svg"); clear(svg);
+    const u = $("r5u").value; $("r5uq").textContent = u; const svg = $("s5svg"); clear(svg);
     if (!rects.length) { $("s5out").innerHTML = "<span class='c'>Add a rectangle.</span>"; return; }
     const A = rects.reduce((s, r) => s + r.b * r.h, 0); const Ay = rects.reduce((s, r) => s + r.b * r.h * (r.y0 + r.h / 2), 0); const ybar = Ay / A;
     const Ax = rects.reduce((s, r) => s + r.b * r.h * r.xc, 0); const xbar = Ax / A;
