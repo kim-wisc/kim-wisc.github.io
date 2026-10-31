@@ -20,7 +20,7 @@ plugins:
   - jekyll-paginate
 
 # Custom vars
-version: 2.0.0   # design version; previous looks are kept in _archive/ (see _archive/README.md)
+version: 1.1.0
 
 # ---- Teaching modules (interactive tools) ----
 collections:
