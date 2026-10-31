@@ -1,0 +1,63 @@
+/* ==========================================================================
+   Kim Group brand layer — loaded after poole/lanyon/teaching.
+   Colors: Badger Red #C5050C (accent) · Graphite #1B1E24 (ink) · Electrolyte Teal #3C7A89 (support)
+   Type:   Manrope (headings/wordmark) · IBM Plex Sans (body) · IBM Plex Mono (code/labels)
+   ========================================================================== */
+:root{
+  --kg-red:#C5050C; --kg-red-dark:#9E0409;
+  --kg-ink:#1B1E24; --kg-ink-2:#2A2E35;
+  --kg-teal:#3C7A89;
+  --kg-muted:#5E6673; --kg-line:#D9DDE3; --kg-fog:#F5F6F8;
+  --kg-display:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --kg-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --kg-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+
+/* ---- Type ---- */
+html{font-family:var(--kg-body);font-size:16px}
+@media (min-width:38em){html{font-size:17px}}
+body{color:var(--kg-ink-2)}
+h1,h2,h3,h4,h5,h6,.masthead-title,.sidebar-nav-item{font-family:var(--kg-display)}
+h1,h2,h3,h4,h5,h6{color:var(--kg-ink);font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:1.45rem;margin-top:2.2rem}
+h2:first-child{margin-top:0}
+code,pre{font-family:var(--kg-mono)}
+code{color:var(--kg-red-dark);background:var(--kg-fog)}
+strong{color:var(--kg-ink)}
+hr{border-top:1px solid var(--kg-line);border-bottom:0}
+
+/* ---- Links ---- */
+.container a,.theme-base-08 .container a{color:var(--kg-red)}
+.container a:hover,.container a:focus{color:var(--kg-red-dark)}
+
+/* ---- Masthead: mark + wordmark + tagline ---- */
+.masthead{border-bottom:1px solid var(--kg-line);padding-top:1.1rem;padding-bottom:1.1rem;margin-bottom:2.5rem}
+.masthead-title{display:flex;align-items:center;gap:.8rem;margin:0;line-height:1.1}
+.masthead-logo{width:44px;height:44px;flex:0 0 auto;display:block}
+.masthead .masthead-title a,.theme-base-08 .masthead .masthead-title a{color:var(--kg-ink);font-weight:800;letter-spacing:-.015em;font-size:1.45rem;text-decoration:none}
+.masthead .masthead-title a:hover{color:var(--kg-red)}
+.masthead-title small{display:block;font-family:var(--kg-body);font-size:.8rem;font-weight:400;letter-spacing:.02em;color:var(--kg-muted);opacity:1;margin-top:.2rem}
+.masthead-text{display:flex;flex-direction:column}
+@media (max-width:48em){.masthead-title small{display:block}}
+
+/* ---- Sidebar: graphite ground, red as the one accent ---- */
+.theme-base-08 .sidebar,.sidebar{background-color:var(--kg-ink);color:rgba(255,255,255,.72)}
+.sidebar a{color:#fff}
+.sidebar-item{font-family:var(--kg-body)}
+.sidebar-item p{font-size:.9rem;line-height:1.5}
+.sidebar-nav{border-top:1px solid rgba(255,255,255,.12)}
+.sidebar-nav-item{border-bottom:1px solid rgba(255,255,255,.12);border-left:3px solid transparent;font-weight:600;font-size:.95rem}
+.sidebar-nav-item:hover,.sidebar-nav-item:focus{background-color:rgba(255,255,255,.06);text-decoration:none}
+.sidebar-nav-item.active{background-color:rgba(255,255,255,.06);border-left-color:var(--kg-red)}
+.sidebar-brand,.sidebar-brand:hover,.sidebar-brand:focus{display:flex;align-items:center;gap:.7rem;padding:1.25rem 1rem .5rem;text-decoration:none}
+.sidebar-brand img{width:40px;height:40px}
+.sidebar-brand-name{font-family:var(--kg-display);font-weight:800;font-size:1.15rem;color:#fff;letter-spacing:-.01em;line-height:1.1}
+.sidebar-brand-sub{display:block;font-family:var(--kg-body);font-weight:400;font-size:.72rem;color:rgba(255,255,255,.6);margin-top:.15rem}
+
+/* ---- Sidebar toggle ---- */
+.theme-base-08 .sidebar-toggle,.sidebar-toggle{color:var(--kg-ink);background-color:#fff;border:1px solid var(--kg-line)}
+.theme-base-08 .sidebar-toggle:active,.theme-base-08 #sidebar-checkbox:checked ~ .sidebar-toggle,
+.sidebar-toggle:active,#sidebar-checkbox:checked ~ .sidebar-toggle{color:#fff;background-color:var(--kg-red);border-color:var(--kg-red)}
+
+/* ---- Page footer in sidebar ---- */
+.sidebar-item:last-child p{font-size:.75rem;color:rgba(255,255,255,.45)}
