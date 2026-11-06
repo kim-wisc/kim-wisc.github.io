@@ -1,0 +1,42 @@
+# Site
+title: Kim Group
+tagline: UW–Madison
+description: >
+  Department of Mechanical Engineering,
+  University of Wisconsin–Madison
+
+url: ""
+baseurl: ""
+
+permalink: pretty
+
+# About/contact
+author:
+  name: Kim Group
+  url: ""
+
+# Plugins
+plugins:
+  - jekyll-paginate
+
+# Custom vars
+version: 1.2.0   # design version; previous looks are kept in _archive/ (see _archive/README.md)
+
+# ---- Teaching modules (interactive tools) ----
+collections:
+  teaching:
+    output: true
+    permalink: /teaching/:name/
+defaults:
+  - scope: { path: "", type: teaching }
+    values: { layout: tool }
+
+# ---- Visit statistics (private; leave empty to disable) ----
+google_analytics_id: "G-5MZ1MTJD64"   # GA4 property "Teaching modules (kim-wisc.github.io)"; loaded on /teaching/ pages only
+goatcounter_code: ""         # GoatCounter site code, e.g. kim-wisc  (lightweight, no cookies, country-level)
+
+# ---- Private source files: kept in this folder but NOT published by Jekyll ----
+exclude:
+  - _archive
+  - teaching/mohr-circle/mohr_circle.ipynb
+  - _config.yml.bak

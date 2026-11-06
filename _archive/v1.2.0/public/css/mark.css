@@ -1,0 +1,4 @@
+/* Kim Group mark in the masthead (v1.2.0: original Lanyon look + logo) */
+.masthead-brand{display:inline-flex;align-items:center;gap:.4em}
+.masthead-logo{width:1.65em;height:1.65em;display:inline-block}
+.masthead-title small{margin-left:.35em}
