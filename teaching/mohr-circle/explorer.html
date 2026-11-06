@@ -55,10 +55,10 @@
 </head>
 <body>
 <header>
-  <h1>Mohr's Circle Explorer — stress &amp; strain transformations <span style="display:inline-block;vertical-align:middle;font-size:.55em;font-weight:600;letter-spacing:.04em;padding:2px 8px;border-radius:999px;background:#fff3cd;color:#7a5a00;border:1px solid #e6c860">ALPHA v0.1</span></h1>
+  <h1>Mohr's Circle Explorer — stress &amp; strain transformations <span style="display:inline-block;vertical-align:middle;font-size:.55em;font-weight:600;letter-spacing:.04em;padding:2px 8px;border-radius:999px;background:#fff3cd;color:#7a5a00;border:1px solid #e6c860">ALPHA v0.2</span></h1>
   <p style="margin:0 0 6px"><b>So Yeon KIM</b>, Assistant Professor, Department of Mechanical Engineering, University of Wisconsin–Madison — developed as part of the <i>Mechanics of Materials</i> course.
      Found an error or have a suggestion? <a id="reportLink" href="#" target="_blank" rel="noopener">Report it here</a>.</p>
-  <div class="alpha-banner"><span class="alpha-icon">&#9888;</span><div><b>Alpha version (v0.1, Oct 2026) — still being tested and may contain errors.</b> Please double-check results against your own hand calculations and the lecture notes, and <a id="reportLink2" href="#" target="_blank" rel="noopener">report anything that looks wrong</a>.</div></div>
+  <div class="alpha-banner"><span class="alpha-icon">&#9888;</span><div><b>Alpha version (v0.2, Nov 2026) — still being tested and may contain errors.</b> Please double-check results against your own hand calculations and the lecture notes, and <a id="reportLink2" href="#" target="_blank" rel="noopener">report anything that looks wrong</a>.</div></div>
   <p>Sign convention (Module 9): θ from x to x′, + CCW. On the circle the shear is plotted upward and a shear that tends to rotate the element <b>clockwise</b> is plotted <b>positive</b>: X′ = (σ<sub>x′</sub>, −τ<sub>x′y′</sub>), Y′ = (σ<sub>y′</sub>, +τ<sub>x′y′</sub>). A CCW rotation θ of the element is a CCW rotation 2θ of X′ about C.</p>
 </header>
 <nav id="nav">
@@ -66,8 +66,7 @@
   <button data-tab="tstrain"><span class="tabnum">2</span>2-D strain</button>
   <button data-tab="trot"><span class="tabnum">3</span>3-D Mohr's circle-1</button>
   <button data-tab="t3d"><span class="tabnum">4</span>3-D Mohr's circle-2</button>
-  <button data-tab="tmem"><span class="tabnum">5</span>Combined loading</button>
-  <button data-tab="tfail"><span class="tabnum">6</span>Failure on a plane</button>
+  <button data-tab="tfail"><span class="tabnum">5</span>Failure on a plane</button>
 </nav>
 
 <!-- ============================ 2-D STRESS ============================ -->
@@ -195,64 +194,6 @@
     <div class="readout" id="d_read"></div>
   </div>
   <p class="note">Plane stress still has a third principal stress σ<sub>z</sub> (τ<sub>xz</sub> = τ<sub>yz</sub> = 0). The three circles are drawn on (σ<sub>1</sub>,σ<sub>2</sub>), (σ<sub>2</sub>,σ<sub>3</sub>), (σ<sub>1</sub>,σ<sub>3</sub>); the in-plane x–y circle is bold. The absolute maximum shear is (σ<sub>1</sub>−σ<sub>3</sub>)/2 and leaves the x–y plane as soon as σ<sub>z</sub> moves outside the in-plane circle.</p>
-</section>
-
-<!-- ============================ MEMBER ============================ -->
-<section id="tmem" class="tab">
-  <div class="inputs">
-    <div class="banner-title">Member and loads (cantilever circular shaft)</div>
-    <label><span><i>N</i> [kN] <small>axial, + tension</small></span><input type="number" id="m_N" value="50" step="5"></label>
-    <label><span><i>P</i> [kN] <small>transverse, + downward</small></span><input type="number" id="m_P" value="1" step="0.5"></label>
-    <label><span><i>T</i> [N·m] <small>torque, + about +x</small></span><input type="number" id="m_T" value="600" step="50"></label>
-    <label><span><i>r</i> [mm] <small>shaft radius</small></span><input type="number" id="m_r" value="20" step="1"></label>
-    <label><span><i>L</i> [m] <small>shaft length</small></span><input type="number" id="m_L" value="0.5" step="0.1"></label>
-    <label><span>position</span><select id="m_mode"><option value="cyl">cylindrical (x, ρ, φ)</option><option value="cart">Cartesian (x, y, z)</option></select></label>
-    <label><input type="checkbox" id="m_gauto" checked> auto grid</label>
-    <label><span>grid major [MPa]</span><input type="number" id="m_gmaj" value="20" step="1" disabled></label>
-    <label><span>minor [MPa]</span><input type="number" id="m_gmin" value="4" step="1" disabled></label>
-  </div>
-  <div class="inputs pbox">
-    <div class="banner-title">Position of the element</div>
-    <div class="pgrid">
-      <span class="pl">axial position <i>x</i> [m]</span><input type="range" id="m_xf" min="0" max="1" step="0.001" value="0"><span class="val" id="m_xfv"></span><label><input type="number" id="m_xn" step="0.01"></label>
-    </div>
-    <div class="pgrid m_cyl">
-      <span class="pl">radius <i>ρ</i> [mm]</span><input type="range" id="m_rf" min="0" max="1" step="0.001" value="1"><span class="val" id="m_rfv"></span><label><input type="number" id="m_rn" step="0.5"></label>
-      <span class="pl">angle <i>φ</i> [deg] <small>(90° = top)</small></span><input type="range" id="m_phi" min="0" max="360" step="0.1" value="90"><span class="val" id="m_phiv"></span><label><input type="number" id="m_phin" step="1"></label>
-    </div>
-    <div class="pgrid m_cart" style="display:none">
-      <span class="pl"><i>y</i> [mm]</span><input type="range" id="m_yf" min="-1" max="1" step="0.001" value="1"><span class="val" id="m_yfv"></span><label><input type="number" id="m_yn" step="0.5"></label>
-      <span class="pl"><i>z</i> [mm]</span><input type="range" id="m_zf" min="-1" max="1" step="0.001" value="0"><span class="val" id="m_zfv"></span><label><input type="number" id="m_zn" step="0.5"></label>
-    </div>
-    <div class="pbtns m_cyl2"><button id="m_play">▶ sweep φ</button><span class="pl2">jump to:</span><button data-phi="90" class="m_jump">top</button><button data-phi="0" class="m_jump">side (+z)</button><button data-phi="270" class="m_jump">bottom</button></div>
-    <span id="m_warn" class="flag"></span>
-  </div>
-  <div class="inputs pbox">
-    <div class="banner-title">Orientation of the element <small>(rotations about its current axes, applied in the order you move them)</small></div>
-    <div class="pgrid">
-      <span class="pl">θ<sub>x′</sub> [deg]</span><input type="range" id="m_tx" min="-180" max="180" step="0.1" value="0"><span class="val" id="m_txv">0.0°</span><label><input type="number" id="m_txn" step="1" value="0"></label>
-      <span class="pl">θ<sub>y′</sub> [deg]</span><input type="range" id="m_ty" min="-180" max="180" step="0.1" value="0"><span class="val" id="m_tyv">0.0°</span><label><input type="number" id="m_tyn" step="1" value="0"></label>
-      <span class="pl">θ<sub>z′</sub> [deg]</span><input type="range" id="m_tz" min="-180" max="180" step="0.1" value="0"><span class="val" id="m_tzv">0.0°</span><label><input type="number" id="m_tzn" step="1" value="0"></label>
-    </div>
-    <div class="pbtns"><button id="m_align">align with (x, t, n): y′ → tangential, z′ → radial</button><button id="m_pz">principal about z′</button><button id="m_reset">reset orientation</button></div>
-    <div class="pbtns"><label><input type="checkbox" id="m_trail" checked> trail</label><button id="m_clear">clear trail</button>
-      <label title="textbook 3-D diagram uses |τ|; signed τ follows the 2-D CW rule in the plane of the current rotation and is only defined for rotation about a principal axis"><input type="checkbox" id="m_signed"> signed τ (2-D CW rule)</label>
-      <span id="m_signwarn" class="flag" style="flex-basis:100%; font-size:13px"></span></div>
-  </div>
-  <div class="row">
-    <div>
-      <svg id="m_mem" width="560" height="330" viewBox="0 0 560 330"></svg><br>
-      <svg id="m_el" width="560" height="330" viewBox="0 0 560 330" style="margin-top:8px"></svg>
-    </div>
-    <svg id="m_mc" width="640" height="680" viewBox="0 0 640 680"></svg>
-    <div class="readout" id="m_read"></div>
-  </div>
-  <p class="note">A cantilever solid circular shaft (fixed at x = 0, free end at x = L) carries at its free end an axial force N, a transverse force P (downward) and a torque T.
-  Internal resultants on a section at x (sign conventions of Modules 7–8: +N tension, +V rotates the element clockwise, +M makes the beam "smile"): N, V = P, M = −P(L − x), T.
-  Stresses at a point (x, y, z) of the section by superposition: σ<sub>x</sub> = N/A − My/I; torsion τ = Tρ/J acting tangentially, i.e. (τ<sub>xy</sub>, τ<sub>xz</sub>)<sub>T</sub> = (T/J)(−z, y);
-  transverse shear τ<sub>xy</sub> = VQ/(It) with Q = (2/3)(r² − y²)<sup>3/2</sup>, t = 2√(r² − y²) → τ<sub>xy</sub> = −V(r² − y²)/(3I) (F<sub>y</sub> = ∫τ<sub>xy</sub>dA = −V), and τ<sub>xz</sub> = Vyz/(3I) from the elementary circular-section assumption that the shear stresses on a chord point to the intersection of the boundary tangents.
-  Pick the point in cylindrical (x, ρ, φ) or Cartesian (x, y, z) coordinates, then rotate the element about its own x′, y′, z′ axes (each slider rotates about the <i>current</i> axis, on top of the previous rotations).
-  "Align with (x, t, n)" rotates the element about x by −φ so that y′ = t (tangential) and z′ = n (radial): on the surface this is the plane-stress element of the lecture (σ<sub>t</sub> = σ<sub>n</sub> = 0, τ<sub>xn</sub> = 0) and "principal about z′" then gives the principal planes of that element.</p>
 </section>
 
 <!-- ============================ FAILURE ============================ -->
@@ -696,129 +637,6 @@ function moduleRot() {
   inputs(); draw();
 }
 
-/* ===================================================================== member under combined loading */
-function moduleMember() {
-  const g = id => document.getElementById("m_" + id);
-  let M = {}, R, last = { x: 0, y: 0, z: 0 }, stage = null, sig = { k: 2, axisSign: 1 }, hist = [];
-  const I3 = () => [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
-  function inputs() { const N = num("m_N") * 1e3, P = num("m_P") * 1e3, T = num("m_T"), r = num("m_r") * 1e-3, L = num("m_L"); const A = Math.PI * r * r, I = Math.PI * r ** 4 / 4, J = 2 * I; M = { N, P, T, r, L, A, I, J }; }
-  function position() {   // returns {x, y, z, rho, phi} in metres / degrees
-    const xf = +g("xf").value; let y, z;
-    if (g("mode").value === "cyl") { const rf = +g("rf").value, phi = +g("phi").value; y = rf * M.r * Math.sin(d2r(phi)); z = rf * M.r * Math.cos(d2r(phi)); }
-    else { y = +g("yf").value * M.r; z = +g("zf").value * M.r; const rr = Math.hypot(y, z); if (rr > M.r) { y *= M.r / rr; z *= M.r / rr; g("warn").textContent = "point outside the shaft → moved to the surface"; } else g("warn").textContent = ""; }
-    const rho = Math.hypot(y, z), phi = r2d(Math.atan2(y, z)); return { x: xf * M.L, y, z, rho, phi: ((phi % 360) + 360) % 360 };
-  }
-  function tensor(pos) {   // global x,y,z stress tensor [MPa] at the point, and the internal resultants
-    const { x, y, z } = pos, V = M.P, Mz = -M.P * (M.L - x);
-    const sx = M.N / M.A - Mz * y / M.I;
-    const txyT = -M.T * z / M.J, txzT = M.T * y / M.J;
-    const txyV = -V * (M.r * M.r - y * y) / (3 * M.I), txzV = V * y * z / (3 * M.I);
-    const txy = txyT + txyV, txz = txzT + txzV;
-    return { S: [[sx, txy, txz], [txy, 0, 0], [txz, 0, 0]].map(r => r.map(v => v * 1e-6)), V, Mz, parts: { ax: M.N / M.A * 1e-6, bend: -Mz * y / M.I * 1e-6, txyT: txyT * 1e-6, txzT: txzT * 1e-6, txyV: txyV * 1e-6, txzV: txzV * 1e-6 } };
-  }
-  function setStage(a, S) { const k = "xyz".indexOf(a), ia = (k + 1) % 3, ja = (k + 2) % 3; const Sp = matmul(transpose(R), matmul(S, R)); sig = { k, axisSign: Math.sign(-Sp[k][ia] + Sp[k][ja]) || sig.axisSign || 1 }; }
-  function faceState(Sp, m) { const k = sig.k, ia = (k + 1) % 3, ja = (k + 2) % 3; const t = col(Sp, m), sn = t[m], mag = Math.sqrt(Math.max(dot(t, t) - sn * sn, 0)); if (!g("signed").checked) return [sn, mag]; let sg = m === ia ? -Math.sign(Sp[ia][ja]) : m === ja ? Math.sign(Sp[ia][ja]) : sig.axisSign; return [sn, (sg || 1) * mag]; }
-  function signDefined(Sp) { const k = sig.k, ia = (k + 1) % 3, ja = (k + 2) % 3; const sc = Math.max(Math.abs(Sp[0][0]), Math.abs(Sp[1][1]), Math.abs(Sp[2][2]), 1e-9); return Math.abs(Sp[k][ia]) < 1e-6 * sc && Math.abs(Sp[k][ja]) < 1e-6 * sc; }
-  function apply(a, d, S) { if (Math.abs(d) < 1e-12) return; if (stage !== a) { stage = a; setStage(a, S); } R = matmul(R, rot3(a, d2r(d))); last[a] += d; }
-  function draw() {
-    const pos = position(), { S, V, Mz, parts } = tensor(pos), Sp = matmul(transpose(R), matmul(S, R));
-    const [s1, s2, s3] = eig3(S), tabs = 0.5 * (s1 - s3);
-    for (const a of "xyz") g("t" + a + "v").textContent = `${last[a].toFixed(1)}°`;
-    g("xfv").textContent = `x = ${pos.x.toFixed(3)} m${pos.x === 0 ? " (wall)" : Math.abs(pos.x - M.L) < 1e-9 ? " (free end)" : ""}`;
-    g("rfv").textContent = `ρ = ${(pos.rho * 1e3).toFixed(1)} mm${pos.rho >= M.r - 1e-12 ? " (surface)" : ""}`; g("phiv").textContent = `φ = ${pos.phi.toFixed(0)}°`;
-    g("yfv").textContent = `y = ${(pos.y * 1e3).toFixed(1)} mm`; g("zfv").textContent = `z = ${(pos.z * 1e3).toFixed(1)} mm`;
-    // range for the Mohr axes: worst case over the wall-section surface
-    let ext = 1e-9; for (let q = 0; q < 360; q += 5) { const t = tensor({ x: 0, y: M.r * Math.sin(d2r(q)), z: M.r * Math.cos(d2r(q)) }); const e = eig3(t.S); ext = Math.max(ext, Math.abs(e[0]), Math.abs(e[2])); }
-    const pad = 0.25 * ext;
-    // ---- member drawing
-    const svg = g("mem"); clear(svg); arrowDef(svg, "mP", "#d1495b"); arrowDef(svg, "mF", "#1f77b4"); arrowDef(svg, "mT", "#6a4c93"); arrowDef(svg, "mg", "#999");
-    const W = +svg.getAttribute("width"), H = +svg.getAttribute("height"), U = 75, cx0 = 110, cy0 = H / 2 + 10;
-    const PP = pt => { const q = proj(pt); return [cx0 + q[0] * U, cy0 - q[1] * U]; };
-    const LL = 3.4, rr = 0.6;
-    el("polygon", { points: [[0, 1.7 * rr, 1.7 * rr], [0, -1.7 * rr, 1.7 * rr], [0, -1.7 * rr, -1.7 * rr], [0, 1.7 * rr, -1.7 * rr]].map(q => PP(q).join(",")).join(" "), fill: "#e4e4e4", stroke: "#666" }, svg);
-    const circ = (x, rad = rr, n = 48) => { const a = []; for (let i = 0; i < n; i++) { const t = 2 * Math.PI * i / n; a.push(PP([x, rad * Math.sin(t), rad * Math.cos(t)])); } return a; };
-    el("polygon", { points: convexHull(circ(0).concat(circ(LL))).map(q => q.join(",")).join(" "), fill: "#f6dcdc", stroke: "#444", "stroke-width": 1.3 }, svg);
-    el("polygon", { points: circ(0).map(q => q.join(",")).join(" "), fill: "none", stroke: "#888", "stroke-dasharray": "4,3" }, svg);
-    el("polygon", { points: circ(LL).map(q => q.join(",")).join(" "), fill: "#f0c9c9", stroke: "#444", "stroke-width": 1.3 }, svg);
-    line(svg, ...PP([-0.5, 0, 0]), ...PP([LL + 1.3, 0, 0]), "#999", 1, { "stroke-dasharray": "6,3" }); text(svg, ...PP([LL + 1.45, -0.1, 0]), "x", { fill: "#888", "font-style": "italic" });
-    arrow(svg, ...PP([0, 1.9 * rr + 0.1, 0]), ...PP([0, 1.9 * rr + 0.6, 0]), "#999", 1, "mg"); text(svg, ...PP([0.15, 1.9 * rr + 0.7, 0]), "y", { fill: "#888", "font-style": "italic" });
-    arrow(svg, ...PP([0, -1.9 * rr - 0.1, 0]), ...PP([0, -1.9 * rr - 0.1, 0.9]), "#999", 1, "mg"); text(svg, ...PP([0.15, -1.9 * rr - 0.25, 1.0]), "z", { fill: "#888", "font-style": "italic" });
-    const end = [LL, 0, 0];
-    if (Math.abs(M.N) > 0) { arrow(svg, ...PP([LL + 0.05 * Math.sign(M.N), 0, 0]), ...PP([LL + 0.95 * Math.sign(M.N), 0, 0]), "#d1495b", 3.5, "mP"); labelBox(svg, ...PP([LL + 1.0, 0.3, 0]), `N = ${(M.N / 1e3).toFixed(1)} kN`, "#d1495b", 13); }
-    if (Math.abs(M.P) > 0) { arrow(svg, ...PP(end), ...PP([LL, -0.95 * Math.sign(M.P), 0]), "#1f77b4", 3.5, "mF"); labelBox(svg, ...PP([LL + 0.45, -1.05 * Math.sign(M.P), 0]), `P = ${(M.P / 1e3).toFixed(1)} kN`, "#1f77b4", 13); }
-    if (Math.abs(M.T) > 0) { const pts = []; const n = 22; for (let i = 0; i <= n; i++) { const t = M.T > 0 ? 0.7 + i / n * 3.0 : 3.7 - i / n * 3.0; pts.push(PP([LL + 0.35, 1.45 * rr * Math.sin(t), 1.45 * rr * Math.cos(t)])); } el("path", { d: "M" + pts.map(q => q.join(",")).join(" L"), fill: "none", stroke: "#6a4c93", "stroke-width": 2.5, "marker-end": "url(#m_mem_mT)" }, svg); labelBox(svg, ...PP([LL + 0.4, 1.8 * rr, 0]), `T = ${M.T.toFixed(0)} N·m`, "#6a4c93", 13); }
-    const xe = Math.min(Math.max(pos.x / M.L * LL, 0.06 * LL), LL - 0.06 * LL), sc = rr / M.r;
-    el("polygon", { points: circ(xe).map(q => q.join(",")).join(" "), fill: "none", stroke: "#b3541e", "stroke-width": 1.2, "stroke-dasharray": "4,3" }, svg);   // the cut section
-    if (pos.rho < M.r - 1e-9 && pos.rho > 1e-9) el("polygon", { points: circ(xe, pos.rho * sc).map(q => q.join(",")).join(" "), fill: "none", stroke: "#b3541e", "stroke-width": 0.8, "stroke-dasharray": "2,3" }, svg);  // radius of the point
-    { const o = PP([xe, 0, 0]), q = PP([xe, pos.y * sc, pos.z * sc]); line(svg, o[0], o[1], q[0], q[1], "#b3541e", 0.8, { "stroke-dasharray": "2,3" }); }
-    const c = [xe, pos.y * sc, pos.z * sc], d = 0.032 * LL;      // small cube at the point, oriented with x',y',z'
-    const corners = [[1, 1, 1], [-1, 1, 1], [-1, -1, 1], [1, -1, 1], [1, 1, -1], [-1, 1, -1], [-1, -1, -1], [1, -1, -1]].map(q => { const w = [0, 1, 2].map(i => d * (R[i][0] * q[0] + R[i][1] * q[1] + R[i][2] * q[2])); return [c[0] + w[0], c[1] + w[1], c[2] + w[2]]; });
-    const faces = [[0, 1, 2, 3], [0, 3, 7, 4], [0, 1, 5, 4], [4, 5, 6, 7], [1, 2, 6, 5], [3, 2, 6, 7]];
-    for (const f of faces) el("polygon", { points: f.map(j => PP(corners[j]).join(",")).join(" "), fill: "#ffd166", stroke: "#b3541e", "stroke-width": 1, opacity: (pos.rho < M.r - 1e-9 || pos.z < -0.2 * M.r) ? 0.5 : 0.95 }, svg);
-    { const q = PP(c); el("circle", { cx: q[0], cy: q[1], r: 2.5, fill: "#b3541e" }, svg); }
-    text(svg, W / 2, 16, "Cantilever shaft, combined loading (not to scale); element at the chosen point", { "font-size": 13, "font-weight": 600 });
-    // ---- element (3-D cube with rotated axes and all components)
-    const se = g("el"); clear(se);
-    text(se, +se.getAttribute("width") / 2, 16, `element axes: θ_{x′} = ${last.x.toFixed(1)}°, θ_{y′} = ${last.y.toFixed(1)}°, θ_{z′} = ${last.z.toFixed(1)}°` + (stage ? `  (stage: about ${stage}′)` : ""), { "font-size": 13, "font-weight": 600 });
-    cube3D(se, R, Sp, "MPa", Math.max(ext, 1e-9), ["x′", "y′", "z′"], true);
-    // ---- Mohr
-    const [gm, gmn] = gridChoice("m_", niceStep(2 * ext + 2 * pad)), signed = g("signed").checked;
-    const signOK = !signed || signDefined(Sp);
-    g("signwarn").textContent = signOK ? "" : `⚠ signed τ is not defined for this rotation: ${stage || "z"}′ is not a principal axis. The sign is taken from the in-plane component only, so a point will JUMP across the σ axis when that component changes sign — a limitation of signed τ, not a change of stress. Use |τ| (untick) for a continuous picture.`;
-    const ax = mohrAxes(g("mc"), -ext - pad, ext + pad, -ext - pad, ext + pad, gm, gmn, `σ [MPa]  (tension +)`, signed ? `τ [MPa]  (CW rule in the plane of the current rotation)` : `|τ| [MPa]  (resultant shear on the face; lower half not used)`, `Mohr's circles at the point   (σ₁, σ₂, σ₃ = ${fmt(s1, 1)}, ${fmt(s2, 1)}, ${fmt(s3, 1)} MPa)`, 150);
-    const pl = ax.plot, sts = threeCircles(ax, s1, s2, s3, null, true, "MPa", !signed);
-    if (!signOK) signedNotice(ax);
-    el("polygon", { points: starPts(ax.X(0.5 * (s1 + s3)), ax.Y(tabs), 10), fill: "#c1121f" }, pl); if (signed) el("polygon", { points: starPts(ax.X(0.5 * (s1 + s3)), ax.Y(-tabs), 10), fill: "#c1121f" }, pl);
-    labelBox(pl, ax.X(0.5 * (s1 + s3)), ax.Y(tabs) - 18, `τ_{max,abs} = ${tabs.toFixed(1)} MPa`, "#c1121f", 13);
-    const states = [0, 1, 2].map(m => faceState(Sp, m)); const cols = ["#d1495b", "#1f77b4", "#6a4c93"], names = ["X′", "Y′", "Z′"];
-    if (g("trail").checked) { if (!hist.length || hist[hist.length - 1].some((q, i) => Math.abs(q[0] - states[i][0]) + Math.abs(q[1] - states[i][1]) > 1e-9)) hist.push(states); for (let i = 0; i < 3; i++) for (const h of hist) el("circle", { cx: ax.X(h[i][0]), cy: ax.Y(h[i][1]), r: 2.5, fill: cols[i], opacity: 0.5 }, pl); } else hist = [];
-    for (let i = 0; i < 3; i++) { el("circle", { cx: ax.X(states[i][0]), cy: ax.Y(states[i][1]), r: 7, fill: cols[i] }, pl); labelBox(pl, ax.X(states[i][0]) + 15, ax.Y(states[i][1]) - 12, names[i], cols[i]); }
-    legend3(g("mc"), ax, [["#f3e8ff", "admissible states (between the circles)", "fill"]].concat(sts.map(([a, b, c], k) => [c, `${["σ₁–σ₂", "σ₂–σ₃", "σ₁–σ₃"][k]}:  C = ${(0.5 * (a + b)).toFixed(1)},  R = ${(0.5 * Math.abs(a - b)).toFixed(1)} MPa`, "line"])).concat([["#d1495b", `x′ face: (σ_{x′}, ${signed ? "τ" : "|τ|"} on face)  [MPa]`, "dot"], ["#1f77b4", `y′ face: (σ_{y′}, ${signed ? "τ" : "|τ|"} on face)  [MPa]`, "dot"], ["#6a4c93", `z′ face: (σ_{z′}, ${signed ? "τ" : "|τ|"} on face)  [MPa]`, "dot"]]));
-    // ---- readout
-    const shearFree = [0, 1, 2].filter(m => Math.sqrt(Math.max(dot(col(Sp, m), col(Sp, m)) - Sp[m][m] ** 2, 0)) < 1e-6 * ext).map(m => names[m].toLowerCase());
-    const Q = (2 / 3) * Math.pow(Math.max(M.r * M.r - pos.y * pos.y, 0), 1.5), tw = 2 * Math.sqrt(Math.max(M.r * M.r - pos.y * pos.y, 0));
-    setRich(g("read"),
-      `section properties:  A = ${(M.A * 1e6).toFixed(1)} mm²   I = ${(M.I * 1e12).toExponential(3)} mm⁴   J = ${(M.J * 1e12).toExponential(3)} mm⁴\n` +
-      `point:  x = ${pos.x.toFixed(3)} m,  y = ${(pos.y * 1e3).toFixed(1)} mm,  z = ${(pos.z * 1e3).toFixed(1)} mm   (ρ = ${(pos.rho * 1e3).toFixed(1)} mm, φ = ${pos.phi.toFixed(0)}°)\n` +
-      `internal resultants at x:  N = ${(M.N / 1e3).toFixed(2)} kN,  V = P = ${(V / 1e3).toFixed(2)} kN,  M = −P(L − x) = ${Mz.toFixed(1)} N·m,  T = ${M.T.toFixed(0)} N·m\n\n` +
-      `σ_{x} = N/A − My/I = ${parts.ax.toFixed(2)} + (${parts.bend.toFixed(2)}) = ${S[0][0].toFixed(2)} MPa\n` +
-      `τ_{xy} = (T/J)(−z) − VQ/(It) = ${parts.txyT.toFixed(2)} + (${parts.txyV.toFixed(2)}) = ${S[0][1].toFixed(2)} MPa      [Q = ${(Q * 1e9).toFixed(0)} mm³, t = ${(tw * 1e3).toFixed(1)} mm]\n` +
-      `τ_{xz} = (T/J)(y) + Vyz/(3I) = ${parts.txzT.toFixed(2)} + (${parts.txzV.toFixed(2)}) = ${S[0][2].toFixed(2)} MPa\n` +
-      `σ_{y} = σ_{z} = τ_{yz} = 0 (elementary theory)\n\n` +
-      `[σ′] in the x′,y′,z′ frame (MPa):\n` + Sp.map(r => r.map(v => fmt(v).padStart(9)).join("")).join("\n") +
-      (shearFree.length ? `\nshear-free (principal) face(s): ${shearFree.join(", ")}` : "") + `\nσ₁,σ₂,σ₃ = ${s1.toFixed(2)}, ${s2.toFixed(2)}, ${s3.toFixed(2)} MPa   τ_{max,abs} = ${tabs.toFixed(2)} MPa`);
-    if (typeof syncBoxes === "function") syncBoxes();
-  }
-  function resetOrient() { R = I3(); last = { x: 0, y: 0, z: 0 }; stage = null; sig = { k: 2, axisSign: 1 }; for (const a of "xyz") g("t" + a).value = 0; }
-  const player = makePlayer(g("play"), g("phi"), draw, null);
-  g("mode").onchange = () => { const cyl = g("mode").value === "cyl"; document.querySelector(".m_cyl").style.display = cyl ? "" : "none"; document.querySelector(".m_cart").style.display = cyl ? "none" : ""; document.querySelector(".m_cyl2").style.display = cyl ? "" : "none"; if (!cyl) { const pos = position(); g("yf").value = pos.y / M.r; g("zf").value = pos.z / M.r; } else { const pos = position(); g("rf").value = Math.min(1, pos.rho / M.r); g("phi").value = pos.phi; } draw(); };
-  for (const id of ["xf", "rf", "phi", "yf", "zf"]) g(id).oninput = () => { if (id === "phi") player.stop(); draw(); };
-  // number boxes paired with the position sliders (value in physical units)
-  const posBox = [["xn", "xf", v => v / M.L, v => v * M.L], ["rn", "rf", v => v * 1e-3 / M.r, v => v * M.r * 1e3], ["phin", "phi", v => ((v % 360) + 360) % 360, v => v],
-                  ["yn", "yf", v => v * 1e-3 / M.r, v => v * M.r * 1e3], ["zn", "zf", v => v * 1e-3 / M.r, v => v * M.r * 1e3]];
-  for (const [nb, sl, toSlider] of posBox) g(nb).onchange = () => { player.stop(); const v = toSlider(parseFloat(g(nb).value) || 0); g(sl).value = Math.max(+g(sl).min, Math.min(+g(sl).max, v)); draw(); };
-  function syncBoxes() { const pos = position(); if (document.activeElement !== g("xn")) g("xn").value = pos.x.toFixed(3); if (document.activeElement !== g("rn")) g("rn").value = (pos.rho * 1e3).toFixed(1); if (document.activeElement !== g("phin")) g("phin").value = pos.phi.toFixed(1); if (document.activeElement !== g("yn")) g("yn").value = (pos.y * 1e3).toFixed(1); if (document.activeElement !== g("zn")) g("zn").value = (pos.z * 1e3).toFixed(1); for (const a of "xyz") if (document.activeElement !== g("t" + a + "n")) g("t" + a + "n").value = last[a].toFixed(1); }
-  for (const a of "xyz") g("t" + a + "n").onchange = () => { const target = parseFloat(g("t" + a + "n").value) || 0; apply(a, target - last[a], tensor(position()).S); g("t" + a).value = Math.max(-180, Math.min(180, last[a])); draw(); };
-  document.querySelectorAll(".m_jump").forEach(b => b.onclick = () => { player.stop(); g("phi").value = b.dataset.phi; draw(); });
-  for (const a of "xyz") g("t" + a).oninput = () => { apply(a, +g("t" + a).value - last[a], tensor(position()).S); draw(); };
-  g("align").onclick = () => { const pos = position(); const S = tensor(pos).S; resetOrient(); apply("x", -pos.phi, S); g("tx").value = Math.max(-180, Math.min(180, last.x)); stage = "z"; setStage("z", S); draw(); };
-  g("pz").onclick = () => { const S = tensor(position()).S; const Sp = matmul(transpose(R), matmul(S, R)); const tp = 0.5 * r2d(Math.atan2(2 * Sp[0][1], Sp[0][0] - Sp[1][1])); apply("z", tp, S); g("tz").value = Math.max(-180, Math.min(180, last.z)); draw(); };
-  g("reset").onclick = () => { resetOrient(); draw(); };
-  g("clear").onclick = () => { hist = []; draw(); };
-  g("trail").onchange = () => { hist = []; draw(); };
-  g("signed").onchange = () => { hist = []; draw(); };
-  document.querySelectorAll("#tmem .inputs input[type=number]").forEach(i => i.oninput = () => { inputs(); draw(); });
-  inputs(); resetOrient(); draw();
-}
-function convexHull(pts) {
-  pts = pts.map(p => [+p[0].toFixed(6), +p[1].toFixed(6)]).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
-  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
-  const lower = [], upper = [];
-  for (const p of pts) { while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop(); lower.push(p); }
-  for (const p of pts.slice().reverse()) { while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop(); upper.push(p); }
-  return lower.slice(0, -1).concat(upper.slice(0, -1));
-}
-
 /* ===================================================================== failure */
 function moduleFail() {
   const g = id => document.getElementById("f_" + id); const slider = g("lam");
@@ -878,13 +696,13 @@ function moduleFail() {
 }
 
 /* unit tags next to the inputs follow the "units" boxes */
-for (const [pre, poke] of [["d_", "d_units"], ["r_", "r_units"], ["f_", "f_units"], ["m_", "m_L"]]) { const a = document.getElementById(pre + "gauto"); a.onchange = () => document.getElementById(poke).dispatchEvent(new Event("input")); }
+for (const [pre, poke] of [["d_", "d_units"], ["r_", "r_units"], ["f_", "f_units"]]) { const a = document.getElementById(pre + "gauto"); a.onchange = () => document.getElementById(poke).dispatchEvent(new Event("input")); }
 for (const pre of ["s", "e", "d", "r", "f"]) { const box = document.getElementById(pre + "_units"); const upd = () => document.querySelectorAll("." + pre + "_u").forEach(u => u.textContent = box.value || "–"); box.addEventListener("input", upd); upd(); }
 /* ===================================================================== tabs + init */
 document.querySelectorAll("#nav button").forEach(b => b.onclick = () => { document.querySelectorAll("#nav button").forEach(x => x.classList.remove("active")); document.querySelectorAll("section.tab").forEach(x => x.classList.remove("active")); b.classList.add("active"); document.getElementById(b.dataset.tab).classList.add("active");
   if (typeof gtag === "function") gtag("event", "tab_view", { module: "mohr-circle", tab: b.textContent.trim() });   // per-tab usage statistics
   if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: location.pathname + "#" + b.dataset.tab, title: b.textContent.trim(), event: true }); });
-module2D("s_", "stress"); module2D("e_", "strain"); module3D(); moduleRot(); moduleMember(); moduleFail();
+module2D("s_", "stress"); module2D("e_", "strain"); module3D(); moduleRot(); moduleFail();
 </script>
 </body>
 </html>
