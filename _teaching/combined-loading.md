@@ -3,8 +3,8 @@ title: Combined Loading Explorer
 short: Combined loading
 course: EMA303/ME306 Mechanics of Materials
 course_short: Mechanics of Materials      # shown in the sidebar
-module: Module 8 — Combined loading
-order: 0.5
+module: Module 10 — Combined loading
+order: 2
 thumb: /public/img/teaching/combined-loading.png
 summary: Place a volume element anywhere on a cantilever circular shaft under <i>N</i>, <i>V</i>, <i>M</i> and <i>T</i>, or on a rectangular beam under <i>N</i>, <i>V</i> and <i>M</i>, see the stresses built up by superposition, rotate the element in 3-D and follow its faces on the three Mohr's circles; then check the state against the Tresca, von Mises and maximum-normal-stress criteria.
 tool: /teaching/combined-loading/explorer.html
