@@ -1,0 +1,47 @@
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    {% if page.title == "Home" %}
+      {{ site.title }} &middot; {{ site.tagline }}
+    {% else %}
+      {{ page.title }} &middot; {{ site.title }}
+    {% endif %}
+  </title>
+
+  {% if page.url and site.baseurl %}
+  <link rel="canonical" href="{{ page.url | absolute_url }}">
+  {% endif %}
+
+  <link rel="stylesheet" href="{{ '/public/css/poole.css' | absolute_url }}">
+  <link rel="stylesheet" href="{{ '/public/css/syntax.css' | absolute_url }}">
+  <link rel="stylesheet" href="{{ '/public/css/lanyon.css' | absolute_url }}">
+  <link rel="stylesheet" href="{{ '/public/css/teaching.css' | absolute_url }}">
+  <link rel="stylesheet" href="{{ '/public/css/mark.css' | absolute_url }}">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{{ '/public/apple-touch-icon-precomposed.png' | absolute_url }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ '/public/favicon-32.png' | absolute_url }}">
+  <link rel="shortcut icon" href="{{ '/public/favicon.ico' | absolute_url }}">
+
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="{{ '/atom.xml' | absolute_url }}">
+
+  {% comment %} Visit statistics for the TEACHING MODULES only (pages under /teaching/); the rest of the site is not
+     tracked. Private dashboards; nothing is shown on the site. Set google_analytics_id (GA4) and/or
+     goatcounter_code in _config.yml. {% endcomment %}
+  {% if site.google_analytics_id and page.url contains "/teaching/" %}
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ site.google_analytics_id }}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '{{ site.google_analytics_id }}');
+  </script>
+  {% endif %}
+  {% if site.goatcounter_code and page.url contains "/teaching/" %}
+  <script data-goatcounter="https://{{ site.goatcounter_code }}.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  {% endif %}
+</head>
